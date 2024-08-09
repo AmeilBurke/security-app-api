@@ -25,23 +25,23 @@ model Role {
   Accounts  Accounts[]
 }
 
-model BanInfo {
-  banInfo_id        Int            @id @default(autoincrement())
-  banInfo_reason    String
-  banInfo_startDate String
-  banInfo_endDate   String
-  BannedPerson      BannedPerson[]
+model BanDetail {
+  banDetail_id             Int           @id @default(autoincrement())
+  banDetail_reason         String
+  banDetail_startDate      String
+  banDetail_endDate        String
+  banDetail_bannedPersonId BannedPerson? @relation(fields: [bannedPerson_id], references: [bannedPerson_id])
+  bannedPerson_id        Int?
 }
 
 model BannedPerson {
-  bannedPerson_id            Int       @id @default(autoincrement())
+  bannedPerson_id            Int         @id @default(autoincrement())
   bannedPerson_image         String?
   bannedPerson_name          String
   bannedPerson_isAlertActive Boolean
   bannedPerson_isBanPending  Boolean
-  bannedPerson_banInfo       BanInfo   @relation(fields: [banInfo_id], references: [banInfo_id])
-  banInfo_id                 Int
   BanList                    BanList[]
+  BanDetail                  BanDetail[]
 }
 
 model BanList {

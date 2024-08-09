@@ -6,20 +6,18 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AppModule = void 0;
+exports.BanDetailsModule = void 0;
 const common_1 = require("@nestjs/common");
-const app_controller_1 = require("./app.controller");
-const app_service_1 = require("./app.service");
-const roles_module_1 = require("./roles/roles.module");
-const ban_details_module_1 = require("./ban-details/ban-details.module");
-let AppModule = class AppModule {
+const ban_details_service_1 = require("./ban-details.service");
+const ban_details_controller_1 = require("./ban-details.controller");
+const prisma_service_1 = require("../prisma.service");
+let BanDetailsModule = class BanDetailsModule {
 };
-exports.AppModule = AppModule;
-exports.AppModule = AppModule = __decorate([
+exports.BanDetailsModule = BanDetailsModule;
+exports.BanDetailsModule = BanDetailsModule = __decorate([
     (0, common_1.Module)({
-        imports: [roles_module_1.RolesModule, ban_details_module_1.BanDetailsModule],
-        controllers: [app_controller_1.AppController],
-        providers: [app_service_1.AppService],
+        controllers: [ban_details_controller_1.BanDetailsController],
+        providers: [ban_details_service_1.BanDetailsService, prisma_service_1.PrismaService],
     })
-], AppModule);
-//# sourceMappingURL=app.module.js.map
+], BanDetailsModule);
+//# sourceMappingURL=ban-details.module.js.map
