@@ -1,8 +1,13 @@
 import { RolesService } from './roles.service';
-import { Role } from '@prisma/client';
 export declare class RolesController {
     private readonly rolesService;
     constructor(rolesService: RolesService);
-    findAll(): Promise<Role[] | String>;
-    findOne(id: string): Promise<Role | String>;
+    findAll(): Promise<String | {
+        role_id: number;
+        role_name: string;
+    }[]>;
+    findOne(id: string): Promise<String | {
+        role_id: number;
+        role_name: string;
+    }>;
 }
