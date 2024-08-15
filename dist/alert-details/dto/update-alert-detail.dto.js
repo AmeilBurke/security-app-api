@@ -9,24 +9,19 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CreateBannedPersonDto = void 0;
+exports.UpdateAlertDetailDto = void 0;
 const class_validator_1 = require("class-validator");
-class CreateBannedPersonDto {
+class UpdateAlertDetailDto {
 }
-exports.CreateBannedPersonDto = CreateBannedPersonDto;
+exports.UpdateAlertDetailDto = UpdateAlertDetailDto;
 __decorate([
-    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNumber)(),
     (0, class_validator_1.IsOptional)(),
-    __metadata("design:type", String)
-], CreateBannedPersonDto.prototype, "bannedPersonImage", void 0);
+    __metadata("design:type", Number)
+], UpdateAlertDetailDto.prototype, "alertDetailsBannedPersonId", void 0);
 __decorate([
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.IsNotEmpty)(),
-    __metadata("design:type", String)
-], CreateBannedPersonDto.prototype, "bannedPersonName", void 0);
-__decorate([
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.IsNotEmpty)(),
-    __metadata("design:type", String)
-], CreateBannedPersonDto.prototype, "uploaderEmail", void 0);
-//# sourceMappingURL=create-banned-person.dto%20copy.js.map
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Number)
+], UpdateAlertDetailDto.prototype, "alertDetailsBusinessId", void 0);
+//# sourceMappingURL=update-alert-detail.dto.js.map

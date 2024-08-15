@@ -13,12 +13,13 @@ const app_service_1 = require("./app.service");
 const roles_module_1 = require("./roles/roles.module");
 const ban_details_module_1 = require("./ban-details/ban-details.module");
 const banned_persons_module_1 = require("./banned-persons/banned-persons.module");
+const alert_details_module_1 = require("./alert-details/alert-details.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
 exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
-        imports: [roles_module_1.RolesModule, ban_details_module_1.BanDetailsModule, banned_persons_module_1.BannedPersonsModule],
+        imports: [roles_module_1.RolesModule, ban_details_module_1.BanDetailsModule, banned_persons_module_1.BannedPersonsModule, alert_details_module_1.AlertDetailsModule],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],
     })

@@ -9,18 +9,17 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.BanDecisionDto = void 0;
+exports.CreateAlertDetailDto = void 0;
 const class_validator_1 = require("class-validator");
-class BanDecisionDto {
+class CreateAlertDetailDto {
 }
-exports.BanDecisionDto = BanDecisionDto;
+exports.CreateAlertDetailDto = CreateAlertDetailDto;
 __decorate([
-    (0, class_validator_1.IsBoolean)(),
-    __metadata("design:type", Boolean)
-], BanDecisionDto.prototype, "banDecision", void 0);
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], CreateAlertDetailDto.prototype, "alertDetailsBannedPersonId", void 0);
 __decorate([
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.IsNotEmpty)(),
-    __metadata("design:type", String)
-], BanDecisionDto.prototype, "uploaderEmail", void 0);
-//# sourceMappingURL=update-ban-detail.dto%20copy.js.map
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], CreateAlertDetailDto.prototype, "alertDetailsBusinessId", void 0);
+//# sourceMappingURL=create-alert-detail.dto.js.map
