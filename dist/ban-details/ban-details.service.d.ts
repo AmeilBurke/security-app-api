@@ -9,6 +9,7 @@ export declare class BanDetailsService {
         banDetail_reason: string;
         banDetail_startDate: string;
         banDetail_endDate: string;
+        banDetail_isBanPending: boolean;
         bannedPerson_id: number | null;
     }>;
     findAll(): Promise<string | {
@@ -16,6 +17,7 @@ export declare class BanDetailsService {
         banDetail_reason: string;
         banDetail_startDate: string;
         banDetail_endDate: string;
+        banDetail_isBanPending: boolean;
         bannedPerson_id: number | null;
     }[]>;
     findOne(id: number): Promise<{
@@ -23,6 +25,7 @@ export declare class BanDetailsService {
         banDetail_reason: string;
         banDetail_startDate: string;
         banDetail_endDate: string;
+        banDetail_isBanPending: boolean;
         bannedPerson_id: number | null;
     }>;
     update(id: number, updateBanDetailDto: UpdateBanDetailDto): Promise<string | {
@@ -30,6 +33,18 @@ export declare class BanDetailsService {
         banDetail_reason: string;
         banDetail_startDate: string;
         banDetail_endDate: string;
+        banDetail_isBanPending: boolean;
+        bannedPerson_id: number | null;
+    }>;
+    updateIsBanPending(id: number, banDecisionDto: {
+        banDecision: boolean;
+        uploaderEmail: string;
+    }): Promise<string | {
+        banDetail_id: number;
+        banDetail_reason: string;
+        banDetail_startDate: string;
+        banDetail_endDate: string;
+        banDetail_isBanPending: boolean;
         bannedPerson_id: number | null;
     }>;
     remove(id: number): Promise<string | {
@@ -37,6 +52,7 @@ export declare class BanDetailsService {
         banDetail_reason: string;
         banDetail_startDate: string;
         banDetail_endDate: string;
+        banDetail_isBanPending: boolean;
         bannedPerson_id: number | null;
     }>;
 }

@@ -31,7 +31,11 @@ __decorate([
 ], CreateBanDetailDto.prototype, "banDetailEndDate", void 0);
 __decorate([
     (0, class_validator_1.IsNumber)(),
-    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Number)
 ], CreateBanDetailDto.prototype, "bannedPersonId", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], CreateBanDetailDto.prototype, "uploaderEmail", void 0);
 //# sourceMappingURL=create-ban-detail.dto.js.map

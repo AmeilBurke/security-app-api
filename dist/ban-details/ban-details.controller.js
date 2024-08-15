@@ -17,6 +17,7 @@ const common_1 = require("@nestjs/common");
 const ban_details_service_1 = require("./ban-details.service");
 const create_ban_detail_dto_1 = require("./dto/create-ban-detail.dto");
 const update_ban_detail_dto_1 = require("./dto/update-ban-detail.dto");
+const update_ban_decision_detail_dto_1 = require("./dto/update-ban-decision-detail.dto");
 let BanDetailsController = class BanDetailsController {
     constructor(banDetailsService) {
         this.banDetailsService = banDetailsService;
@@ -31,10 +32,13 @@ let BanDetailsController = class BanDetailsController {
         return this.banDetailsService.findOne(Number(id));
     }
     update(id, updateBanDetailDto) {
-        return this.banDetailsService.update(+id, updateBanDetailDto);
+        return this.banDetailsService.update(Number(id), updateBanDetailDto);
+    }
+    updateIsBanDecision(id, banDecisionDto) {
+        return this.banDetailsService.updateIsBanPending(Number(id), banDecisionDto);
     }
     remove(id) {
-        return this.banDetailsService.remove(+id);
+        return this.banDetailsService.remove(Number(id));
     }
 };
 exports.BanDetailsController = BanDetailsController;
@@ -66,6 +70,14 @@ __decorate([
     __metadata("design:paramtypes", [String, update_ban_detail_dto_1.UpdateBanDetailDto]),
     __metadata("design:returntype", void 0)
 ], BanDetailsController.prototype, "update", null);
+__decorate([
+    (0, common_1.Patch)('/ban-decision/:id'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, update_ban_decision_detail_dto_1.BanDecisionDto]),
+    __metadata("design:returntype", void 0)
+], BanDetailsController.prototype, "updateIsBanDecision", null);
 __decorate([
     (0, common_1.Delete)(':id'),
     __param(0, (0, common_1.Param)('id')),

@@ -14,6 +14,9 @@ export class CreateBanDetailDto {
   banDetailEndDate: string;
   
   @IsNumber()
-  @IsOptional()
-  bannedPersonId?: number;
+  bannedPersonId: number;
+
+  @IsString()
+  @IsNotEmpty()
+  uploaderEmail: string
 }

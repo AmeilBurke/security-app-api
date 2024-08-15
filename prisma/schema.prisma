@@ -10,7 +10,7 @@ generator client {
   provider = "prisma-client-js"
 }
 
-model Accounts {
+model Account {
   account_id       Int    @id @unique @default(autoincrement())
   account_name     String
   account_email    String
@@ -20,9 +20,9 @@ model Accounts {
 }
 
 model Role {
-  role_id   Int        @id @default(autoincrement())
-  role_name String     @unique
-  Accounts  Accounts[]
+  role_id   Int       @id @default(autoincrement())
+  role_name String    @unique
+  Accounts  Account[]
 }
 
 model BanDetail {
@@ -30,18 +30,18 @@ model BanDetail {
   banDetail_reason         String
   banDetail_startDate      String
   banDetail_endDate        String
+  banDetail_isBanPending   Boolean
   banDetail_bannedPersonId BannedPerson? @relation(fields: [bannedPerson_id], references: [bannedPerson_id])
-  bannedPerson_id        Int?
+  bannedPerson_id          Int?
 }
 
 model BannedPerson {
-  bannedPerson_id            Int         @id @default(autoincrement())
-  bannedPerson_image         String?
-  bannedPerson_name          String
-  bannedPerson_isAlertActive Boolean
-  bannedPerson_isBanPending  Boolean
-  BanList                    BanList[]
-  BanDetail                  BanDetail[]
+  bannedPerson_id    Int         @id @default(autoincrement())
+  bannedPerson_image String?
+  bannedPerson_name  String
+  BanList            BanList[]
+  BanDetail          BanDetail[]
+  AlertInfo          AlertInfo[]
 }
 
 model BanList {
@@ -50,6 +50,14 @@ model BanList {
   bennedPerson_id        Int
   banList_venueId        Venue        @relation(fields: [venue_id], references: [venue_id])
   venue_id               Int
+}
+
+model AlertInfo {
+  alertInfo_id             Int          @id @unique @default(autoincrement())
+  bannedPersonId           BannedPerson @relation(fields: [alertInfo_bannedPersonId], references: [bannedPerson_id])
+  alertInfo_bannedPersonId Int
+  businessId               Business     @relation(fields: [alertInfo_businessId], references: [business_id])
+  alertInfo_businessId     Int
 }
 
 model Venue {
@@ -62,8 +70,9 @@ model Venue {
 }
 
 model Business {
-  business_id   Int     @id @unique @default(autoincrement())
+  business_id   Int         @id @unique @default(autoincrement())
   business_name String
   business_logo String?
   Venue         Venue[]
+  AlertInfo     AlertInfo[]
 }

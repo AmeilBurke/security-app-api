@@ -12,12 +12,19 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.BanDetailsService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma.service");
+const utils_1 = require("../utils/utils");
 let BanDetailsService = class BanDetailsService {
     constructor(prisma) {
         this.prisma = prisma;
     }
     async create(createBanDetailDto) {
         try {
+            let isBanPending = false;
+            const uploaderInfo = await (0, utils_1.getFullAccountInfoFromEmail)(this.prisma, createBanDetailDto.uploaderEmail);
+            const securityRole = await (0, utils_1.getSecurityRoleFromDB)(this.prisma);
+            if (uploaderInfo.role_id === securityRole.role_id) {
+                isBanPending = true;
+            }
             return await this.prisma.banDetail.create({
                 data: {
                     banDetail_reason: createBanDetailDto.banDetailReason
@@ -25,6 +32,7 @@ let BanDetailsService = class BanDetailsService {
                         .trim(),
                     banDetail_startDate: createBanDetailDto.banDetailStartDate,
                     banDetail_endDate: createBanDetailDto.banDetailEndDate,
+                    banDetail_isBanPending: isBanPending,
                     bannedPerson_id: createBanDetailDto.bannedPersonId,
                 },
             });
@@ -61,6 +69,35 @@ let BanDetailsService = class BanDetailsService {
                     bannedPerson_id: updateBanDetailDto.bannedPersonId,
                 },
             });
+        }
+        catch (error) {
+            return String(error);
+        }
+    }
+    async updateIsBanPending(id, banDecisionDto) {
+        try {
+            const uploaderInfo = await (0, utils_1.getFullAccountInfoFromEmail)(this.prisma, banDecisionDto.uploaderEmail);
+            const securityRole = await (0, utils_1.getSecurityRoleFromDB)(this.prisma);
+            if (uploaderInfo.role_id === securityRole.role_id) {
+                return String('you do not have permission to edit this');
+            }
+            if (banDecisionDto.banDecision === true) {
+                return await this.prisma.banDetail.update({
+                    where: {
+                        banDetail_id: id,
+                    },
+                    data: {
+                        banDetail_isBanPending: banDecisionDto.banDecision,
+                    },
+                });
+            }
+            else {
+                return await this.prisma.banDetail.delete({
+                    where: {
+                        banDetail_id: id,
+                    },
+                });
+            }
         }
         catch (error) {
             return String(error);
