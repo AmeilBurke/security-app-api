@@ -11,12 +11,21 @@ generator client {
 }
 
 model Account {
-  account_id       Int    @id @unique @default(autoincrement())
-  account_name     String
-  account_email    String
-  account_password String
-  account_roleId   Role   @relation(fields: [role_id], references: [role_id])
-  role_id          Int
+  account_id            Int                     @id @unique @default(autoincrement())
+  account_name          String
+  account_email         String
+  account_password      String
+  account_roleId        Role                    @relation(fields: [role_id], references: [role_id])
+  role_id               Int
+  AccountBusinessAccess AccountBusinessAccess[]
+}
+
+model AccountBusinessAccess {
+  accountBusinessAccess_id         Int      @id @unique @default(autoincrement())
+  accountBusinessAccess_accountId  Account  @relation(fields: [accountId], references: [account_id])
+  accountId                        Int
+  accountBusinessAccess_businessId Business @relation(fields: [business_id], references: [business_id])
+  business_id                      Int
 }
 
 model Role {
@@ -36,12 +45,12 @@ model BanDetail {
 }
 
 model BannedPerson {
-  bannedPerson_id    Int         @id @default(autoincrement())
+  bannedPerson_id    Int           @id @default(autoincrement())
   bannedPerson_image String?
   bannedPerson_name  String
   BanList            BanList[]
   BanDetail          BanDetail[]
-  AlertInfo          AlertInfo[]
+  AlertInfo          AlertDetail[]
 }
 
 model BanList {
@@ -52,12 +61,12 @@ model BanList {
   venue_id               Int
 }
 
-model AlertInfo {
-  alertInfo_id             Int          @id @unique @default(autoincrement())
-  bannedPersonId           BannedPerson @relation(fields: [alertInfo_bannedPersonId], references: [bannedPerson_id])
-  alertInfo_bannedPersonId Int
-  businessId               Business     @relation(fields: [alertInfo_businessId], references: [business_id])
-  alertInfo_businessId     Int
+model AlertDetail {
+  alertDetails_id             Int          @id @unique @default(autoincrement())
+  bannedPersonId              BannedPerson @relation(fields: [alertDetails_bannedPersonId], references: [bannedPerson_id])
+  alertDetails_bannedPersonId Int
+  businessId                  Business     @relation(fields: [alertDetails_businessId], references: [business_id])
+  alertDetails_businessId     Int
 }
 
 model Venue {
@@ -70,9 +79,10 @@ model Venue {
 }
 
 model Business {
-  business_id   Int         @id @unique @default(autoincrement())
-  business_name String
-  business_logo String?
-  Venue         Venue[]
-  AlertInfo     AlertInfo[]
+  business_id           Int                     @id @unique @default(autoincrement())
+  business_name         String
+  business_logo         String?
+  Venue                 Venue[]
+  AlertInfo             AlertDetail[]
+  AccountBusinessAccess AccountBusinessAccess[]
 }
