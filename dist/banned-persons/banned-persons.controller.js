@@ -32,6 +32,9 @@ let BannedPersonsController = class BannedPersonsController {
     findOne(id) {
         return this.bannedPersonsService.findOne(Number(id));
     }
+    findOneWithBanDetails(id) {
+        return this.bannedPersonsService.findOneWithBanDetails(Number(id));
+    }
     update(id, updateBannedPersonDto) {
         return this.bannedPersonsService.update(Number(id), updateBannedPersonDto);
     }
@@ -57,22 +60,29 @@ __decorate([
     (0, common_1.Get)(),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
-    __metadata("design:returntype", Promise)
+    __metadata("design:returntype", void 0)
 ], BannedPersonsController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)(':id'),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Promise)
+    __metadata("design:returntype", void 0)
 ], BannedPersonsController.prototype, "findOne", null);
+__decorate([
+    (0, common_1.Get)('/include-ban-details/:id'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], BannedPersonsController.prototype, "findOneWithBanDetails", null);
 __decorate([
     (0, common_1.Patch)(':id'),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, update_banned_person_dto_1.UpdateBannedPersonDto]),
-    __metadata("design:returntype", Promise)
+    __metadata("design:returntype", void 0)
 ], BannedPersonsController.prototype, "update", null);
 __decorate([
     (0, common_1.Delete)(':id'),
@@ -80,7 +90,7 @@ __decorate([
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, Object]),
-    __metadata("design:returntype", Promise)
+    __metadata("design:returntype", void 0)
 ], BannedPersonsController.prototype, "remove", null);
 exports.BannedPersonsController = BannedPersonsController = __decorate([
     (0, common_1.Controller)('banned-persons'),

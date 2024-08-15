@@ -7,6 +7,8 @@ import {
   getSecurityRoleFromDB,
 } from 'src/utils/utils';
 import { CreateBannedPersonWithBanDetailsDto } from './dto/create-banned-person-with-ban-details.dto';
+import { BanDetail, BannedPerson, Prisma } from '@prisma/client';
+import { TypeBannedPersonWithBanDetails } from 'src/types/types';
 
 @Injectable()
 export class BannedPersonsService {
@@ -15,7 +17,7 @@ export class BannedPersonsService {
   // need to figure out how to return an image, also might have to change name of file to uuid()
   // need to create banDetail when creating a new profile or updating to add a ban
 
-  async createBannedPersonWithBanDetails(createBannedPersonWithBanDetailsDto: CreateBannedPersonWithBanDetailsDto, file: Express.Multer.File) {
+  async createBannedPersonWithBanDetails(createBannedPersonWithBanDetailsDto: CreateBannedPersonWithBanDetailsDto, file: Express.Multer.File): Promise<[BannedPerson, BanDetail] | string> {
     let isBanPending = false;
 
     if (file === undefined) {
@@ -55,7 +57,7 @@ export class BannedPersonsService {
     }
   }
 
-  async findAll() {
+  async findAll(): Promise<BannedPerson[] | string> {
     try {
       return await this.prisma.bannedPerson.findMany();
     } catch (error: unknown) {
@@ -63,7 +65,7 @@ export class BannedPersonsService {
     }
   }
 
-  async findOne(id: number) {
+  async findOne(id: number): Promise<BannedPerson | string> {
     try {
       return await this.prisma.bannedPerson.findUniqueOrThrow({
         where: {
@@ -75,7 +77,22 @@ export class BannedPersonsService {
     }
   }
 
-  async update(id: number, updateBannedPersonDto: UpdateBannedPersonDto) {
+  async findOneWithBanDetails(id: number): Promise<TypeBannedPersonWithBanDetails | string> {
+    try {
+      return await this.prisma.bannedPerson.findUniqueOrThrow({
+        where: {
+          bannedPerson_id: id,
+        },
+        include: {
+          BanDetail: true
+        }
+      });
+    } catch (error: unknown) {
+      return String(error);
+    }
+  }
+
+  async update(id: number, updateBannedPersonDto: UpdateBannedPersonDto): Promise<BannedPerson | string> {
     try {
       return this.prisma.bannedPerson.update({
         where: {
@@ -91,7 +108,7 @@ export class BannedPersonsService {
     }
   }
 
-  async remove(id: number, uploaderEmail: string) {
+  async remove(id: number, uploaderEmail: string): Promise<BannedPerson | string> {
     try {
       const uploaderInfo = await this.prisma.account.findFirstOrThrow({
         where: {
@@ -119,16 +136,3 @@ export class BannedPersonsService {
     }
   }
 }
-
-// try {
-//   const uploaderInfo = await getFullAccountInfoFromEmail(this.prisma, createBannedPersonDto.uploaderEmail);
-
-//     return await this.prisma.bannedPerson.create({
-//       data: {
-//         bannedPerson_name: createBannedPersonDto.bannedPersonName,
-//         bannedPerson_image: createBannedPersonDto.bannedPersonImage,
-//       },
-//     });
-// } catch (error: unknown) {
-//   return String(error);
-// }

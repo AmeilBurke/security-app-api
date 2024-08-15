@@ -34,14 +34,18 @@ export class BannedPersonsController {
   )
   createBannedPersonWithBanDetails(
     @UploadedFile() file: Express.Multer.File,
-    @Body() createBannedPersonWithBanDetailsDto: CreateBannedPersonWithBanDetailsDto,
+    @Body()
+    createBannedPersonWithBanDetailsDto: CreateBannedPersonWithBanDetailsDto,
     // ): Promise<BannedPerson | string> {
   ) {
     // need to re check this if its working when frontend can display images
     // console.log(file);
     // const file1 = createReadStream('src/images/bannedPersons/1ebb2b5fb64b5869d3325c9341fd6f20');
     // return new StreamableFile(file1);
-    return this.bannedPersonsService.createBannedPersonWithBanDetails(createBannedPersonWithBanDetailsDto, file);
+    return this.bannedPersonsService.createBannedPersonWithBanDetails(
+      createBannedPersonWithBanDetailsDto,
+      file,
+    );
   }
 
   // come back to this when others are done
@@ -66,20 +70,25 @@ export class BannedPersonsController {
   // }
 
   @Get()
-  findAll(): Promise<BannedPerson[] | string> {
+  findAll() {
     return this.bannedPersonsService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string): Promise<BannedPerson | string> {
+  findOne(@Param('id') id: string) {
     return this.bannedPersonsService.findOne(Number(id));
+  }
+
+  @Get('/include-ban-details/:id')
+  findOneWithBanDetails(@Param('id') id: string) {
+    return this.bannedPersonsService.findOneWithBanDetails(Number(id));
   }
 
   @Patch(':id')
   update(
     @Param('id') id: string,
     @Body() updateBannedPersonDto: UpdateBannedPersonDto,
-  ): Promise<BannedPerson | string> {
+  ) {
     return this.bannedPersonsService.update(Number(id), updateBannedPersonDto);
   }
 
@@ -87,7 +96,7 @@ export class BannedPersonsController {
   remove(
     @Param('id') id: string,
     @Body() uploaderEmail: { uploaderEmail: string },
-  ): Promise<BannedPerson | string> {
+  ) {
     return this.bannedPersonsService.remove(
       Number(id),
       uploaderEmail.uploaderEmail,

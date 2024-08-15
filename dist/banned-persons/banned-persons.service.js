@@ -72,6 +72,21 @@ let BannedPersonsService = class BannedPersonsService {
             return String(error);
         }
     }
+    async findOneWithBanDetails(id) {
+        try {
+            return await this.prisma.bannedPerson.findUniqueOrThrow({
+                where: {
+                    bannedPerson_id: id,
+                },
+                include: {
+                    BanDetail: true
+                }
+            });
+        }
+        catch (error) {
+            return String(error);
+        }
+    }
     async update(id, updateBannedPersonDto) {
         try {
             return this.prisma.bannedPerson.update({
