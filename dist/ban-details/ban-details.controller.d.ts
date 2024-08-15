@@ -21,7 +21,7 @@ export declare class BanDetailsController {
         banDetail_isBanPending: boolean;
         bannedPerson_id: number | null;
     }[]>;
-    findOne(id: string): Promise<{
+    findOne(id: string): Promise<string | {
         banDetail_id: number;
         banDetail_reason: string;
         banDetail_startDate: string;

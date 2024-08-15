@@ -6,12 +6,13 @@ import {
   getFullAccountInfoFromEmail,
   getSecurityRoleFromDB,
 } from 'src/utils/utils';
+import { BanDetail } from '@prisma/client';
 
 @Injectable()
 export class BanDetailsService {
   constructor(private prisma: PrismaService) {}
 
-  async create(createBanDetailDto: CreateBanDetailDto) {
+  async create(createBanDetailDto: CreateBanDetailDto): Promise<BanDetail | string> {
     try {
       let isBanPending = false;
 
@@ -42,7 +43,7 @@ export class BanDetailsService {
     }
   }
 
-  async findAll() {
+  async findAll(): Promise<BanDetail[] | string> {
     try {
       return await this.prisma.banDetail.findMany();
     } catch (error: unknown) {
@@ -50,7 +51,7 @@ export class BanDetailsService {
     }
   }
 
-  async findOne(id: number) {
+  async findOne(id: number): Promise<BanDetail | string> {
     return await this.prisma.banDetail.findFirstOrThrow({
       where: {
         banDetail_id: id,
@@ -58,7 +59,7 @@ export class BanDetailsService {
     });
   }
 
-  async update(id: number, updateBanDetailDto: UpdateBanDetailDto) {
+  async update(id: number, updateBanDetailDto: UpdateBanDetailDto): Promise<BanDetail | string> {
     try {
       return await this.prisma.banDetail.update({
         where: {
@@ -76,10 +77,7 @@ export class BanDetailsService {
     }
   }
 
-  async updateIsBanPending(
-    id: number,
-    banDecisionDto: { banDecision: boolean; uploaderEmail: string },
-  ) {
+  async updateIsBanPending(id: number, banDecisionDto: { banDecision: boolean; uploaderEmail: string }): Promise<BanDetail | string> {
     try {
       const uploaderInfo = await getFullAccountInfoFromEmail(
         this.prisma,
@@ -113,7 +111,7 @@ export class BanDetailsService {
     }
   }
 
-  async remove(id: number) {
+  async remove(id: number): Promise<BanDetail | string> {
     try {
       return await this.prisma.banDetail.delete({
         where: {

@@ -1,58 +1,17 @@
 import { CreateBanDetailDto } from './dto/create-ban-detail.dto';
 import { UpdateBanDetailDto } from './dto/update-ban-detail.dto';
 import { PrismaService } from 'src/prisma.service';
+import { BanDetail } from '@prisma/client';
 export declare class BanDetailsService {
     private prisma;
     constructor(prisma: PrismaService);
-    create(createBanDetailDto: CreateBanDetailDto): Promise<string | {
-        banDetail_id: number;
-        banDetail_reason: string;
-        banDetail_startDate: string;
-        banDetail_endDate: string;
-        banDetail_isBanPending: boolean;
-        bannedPerson_id: number | null;
-    }>;
-    findAll(): Promise<string | {
-        banDetail_id: number;
-        banDetail_reason: string;
-        banDetail_startDate: string;
-        banDetail_endDate: string;
-        banDetail_isBanPending: boolean;
-        bannedPerson_id: number | null;
-    }[]>;
-    findOne(id: number): Promise<{
-        banDetail_id: number;
-        banDetail_reason: string;
-        banDetail_startDate: string;
-        banDetail_endDate: string;
-        banDetail_isBanPending: boolean;
-        bannedPerson_id: number | null;
-    }>;
-    update(id: number, updateBanDetailDto: UpdateBanDetailDto): Promise<string | {
-        banDetail_id: number;
-        banDetail_reason: string;
-        banDetail_startDate: string;
-        banDetail_endDate: string;
-        banDetail_isBanPending: boolean;
-        bannedPerson_id: number | null;
-    }>;
+    create(createBanDetailDto: CreateBanDetailDto): Promise<BanDetail | string>;
+    findAll(): Promise<BanDetail[] | string>;
+    findOne(id: number): Promise<BanDetail | string>;
+    update(id: number, updateBanDetailDto: UpdateBanDetailDto): Promise<BanDetail | string>;
     updateIsBanPending(id: number, banDecisionDto: {
         banDecision: boolean;
         uploaderEmail: string;
-    }): Promise<string | {
-        banDetail_id: number;
-        banDetail_reason: string;
-        banDetail_startDate: string;
-        banDetail_endDate: string;
-        banDetail_isBanPending: boolean;
-        bannedPerson_id: number | null;
-    }>;
-    remove(id: number): Promise<string | {
-        banDetail_id: number;
-        banDetail_reason: string;
-        banDetail_startDate: string;
-        banDetail_endDate: string;
-        banDetail_isBanPending: boolean;
-        bannedPerson_id: number | null;
-    }>;
+    }): Promise<BanDetail | string>;
+    remove(id: number): Promise<BanDetail | string>;
 }
