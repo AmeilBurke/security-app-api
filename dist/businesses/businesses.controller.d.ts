@@ -23,6 +23,18 @@ export declare class BusinessesController {
         business_name: string;
         business_logo: string | null;
     }[]>;
+    findOneWithVenues(id: string): Promise<string | ({
+        Venue: {
+            venue_id: number;
+            venue_name: string;
+            venue_logo: string | null;
+            business_id: number;
+        }[];
+    } & {
+        business_id: number;
+        business_name: string;
+        business_logo: string | null;
+    })>;
     findOne(id: string): Promise<string | {
         business_id: number;
         business_name: string;

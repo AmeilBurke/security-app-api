@@ -30,6 +30,11 @@ export class BusinessesController {
     return this.businessesService.findAllByIds(ids.ids);
   }
 
+  @Get('/with-venues/:id')
+  findOneWithVenues(@Param('id') id: string) {
+    return this.businessesService.findOneWithVenues(Number(id));
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.businessesService.findOne(+id);

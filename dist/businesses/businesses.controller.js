@@ -30,6 +30,9 @@ let BusinessesController = class BusinessesController {
     findAllByIds(ids) {
         return this.businessesService.findAllByIds(ids.ids);
     }
+    findOneWithVenues(id) {
+        return this.businessesService.findOneWithVenues(Number(id));
+    }
     findOne(id) {
         return this.businessesService.findOne(+id);
     }
@@ -62,6 +65,13 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], BusinessesController.prototype, "findAllByIds", null);
+__decorate([
+    (0, common_1.Get)('/with-venues/:id'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], BusinessesController.prototype, "findOneWithVenues", null);
 __decorate([
     (0, common_1.Get)(':id'),
     __param(0, (0, common_1.Param)('id')),

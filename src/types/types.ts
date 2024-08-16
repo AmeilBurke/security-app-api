@@ -5,3 +5,9 @@ export type TypeBannedPersonWithBanDetails = Prisma.BannedPersonGetPayload<{
     BanDetail: true;
   };
 }>;
+
+export type TypeBusinessWithVenues = Prisma.BusinessGetPayload<{
+  include: {
+    Venue: true;
+  };
+}>;

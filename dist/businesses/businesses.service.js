@@ -75,6 +75,21 @@ let BusinessesService = class BusinessesService {
             return String(error);
         }
     }
+    async findOneWithVenues(id) {
+        try {
+            return await this.prisma.business.findFirstOrThrow({
+                where: {
+                    business_id: id,
+                },
+                include: {
+                    Venue: true,
+                },
+            });
+        }
+        catch (error) {
+            return String(error);
+        }
+    }
     async update(id, updateBusinessDto) {
         try {
             const uploaderInfo = await (0, utils_1.getFullAccountInfoFromEmail)(this.prisma, updateBusinessDto.uploaderEmail);

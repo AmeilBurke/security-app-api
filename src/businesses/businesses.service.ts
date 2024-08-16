@@ -4,14 +4,13 @@ import { UpdateBusinessDto } from './dto/update-business.dto';
 import { PrismaService } from 'src/prisma.service';
 import { getFullAccountInfoFromEmail } from 'src/utils/utils';
 import { Business } from '@prisma/client';
+import { TypeBusinessWithVenues } from 'src/types/types';
 
 @Injectable()
 export class BusinessesService {
   constructor(private prisma: PrismaService) {}
 
-  async create(
-    createBusinessDto: CreateBusinessDto,
-  ): Promise<Business | string> {
+  async create(createBusinessDto: CreateBusinessDto): Promise<Business | string> {
     try {
       const uploaderInfo = await getFullAccountInfoFromEmail(
         this.prisma,
@@ -77,6 +76,22 @@ export class BusinessesService {
       return await this.prisma.business.findFirstOrThrow({
         where: {
           business_id: id,
+        },
+      });
+    } catch (error: unknown) {
+      return String(error);
+    }
+  }
+
+  // need to check for venue owners to see if they can access this
+  async findOneWithVenues(id: number): Promise<TypeBusinessWithVenues | string> {
+    try {
+      return await this.prisma.business.findFirstOrThrow({
+        where: {
+          business_id: id,
+        },
+        include: {
+          Venue: true,
         },
       });
     } catch (error: unknown) {

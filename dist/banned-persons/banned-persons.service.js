@@ -74,7 +74,7 @@ let BannedPersonsService = class BannedPersonsService {
     }
     async findOneWithBanDetails(id) {
         try {
-            return await this.prisma.bannedPerson.findUniqueOrThrow({
+            return await this.prisma.bannedPerson.findFirstOrThrow({
                 where: {
                     bannedPerson_id: id,
                 },

@@ -79,7 +79,7 @@ export class BannedPersonsService {
 
   async findOneWithBanDetails(id: number): Promise<TypeBannedPersonWithBanDetails | string> {
     try {
-      return await this.prisma.bannedPerson.findUniqueOrThrow({
+      return await this.prisma.bannedPerson.findFirstOrThrow({
         where: {
           bannedPerson_id: id,
         },
