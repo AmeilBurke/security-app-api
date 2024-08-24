@@ -11,21 +11,16 @@ generator client {
 }
 
 model Account {
-  account_id            Int                     @id @unique @default(autoincrement())
-  account_name          String
-  account_email         String
-  account_password      String
-  account_roleId        Role                    @relation(fields: [role_id], references: [role_id])
-  role_id               Int
-  AccountBusinessAccess AccountBusinessAccess[]
-}
-
-model AccountBusinessAccess {
-  accountBusinessAccess_id         Int      @id @unique @default(autoincrement())
-  accountBusinessAccess_accountId  Account  @relation(fields: [accountId], references: [account_id])
-  accountId                        Int
-  accountBusinessAccess_businessId Business @relation(fields: [business_id], references: [business_id])
-  business_id                      Int
+  account_id       Int               @id @unique @default(autoincrement())
+  account_name     String
+  account_email    String
+  account_password String
+  account_roleId   Int
+  roleId           Role              @relation(fields: [account_roleId], references: [role_id])
+  BusinessAccess   BusinessAccess[]
+  VenueAccess      VenueAccess[]
+  VenueManager     VenueManager[]
+  BusinessManager  BusinessManager[]
 }
 
 model Role {
@@ -34,55 +29,90 @@ model Role {
   Accounts  Account[]
 }
 
+model BannedPerson {
+  bannedPerson_id    Int           @id @default(autoincrement())
+  bannedPerson_image String?
+  bannedPerson_name  String
+  BanList            BanLocation[]
+  BanDetail          BanDetail[]
+  AlertInfo          AlertDetail[]
+}
+
 model BanDetail {
   banDetail_id             Int           @id @default(autoincrement())
   banDetail_reason         String
   banDetail_startDate      String
   banDetail_endDate        String
   banDetail_isBanPending   Boolean
-  banDetail_bannedPersonId BannedPerson? @relation(fields: [bannedPerson_id], references: [bannedPerson_id])
-  bannedPerson_id          Int?
-}
-
-model BannedPerson {
-  bannedPerson_id    Int           @id @default(autoincrement())
-  bannedPerson_image String?
-  bannedPerson_name  String
-  BanList            BanList[]
-  BanDetail          BanDetail[]
-  AlertInfo          AlertDetail[]
-}
-
-model BanList {
-  banList_id             Int          @id @unique @default(autoincrement())
-  banList_bannedPersonId BannedPerson @relation(fields: [banList_id], references: [bannedPerson_id])
-  bennedPerson_id        Int
-  banList_venueId        Venue        @relation(fields: [venue_id], references: [venue_id])
-  venue_id               Int
+  banDetail_bannedPersonId Int?
+  bannedPersonId           BannedPerson? @relation(fields: [banDetail_bannedPersonId], references: [bannedPerson_id])
 }
 
 model AlertDetail {
   alertDetails_id             Int          @id @unique @default(autoincrement())
-  bannedPersonId              BannedPerson @relation(fields: [alertDetails_bannedPersonId], references: [bannedPerson_id])
   alertDetails_bannedPersonId Int
-  businessId                  Business     @relation(fields: [alertDetails_businessId], references: [business_id])
   alertDetails_businessId     Int
+  bannedPersonId              BannedPerson @relation(fields: [alertDetails_bannedPersonId], references: [bannedPerson_id])
+  businessId                  Business     @relation(fields: [alertDetails_businessId], references: [business_id])
+}
+
+model BanLocation {
+  banLocation_id             Int          @id @unique @default(autoincrement())
+  banLocation_bannedPersonId Int
+  banLocation_venueId        Int
+  bannedPersonId             BannedPerson @relation(fields: [banLocation_bannedPersonId], references: [bannedPerson_id])
+  venueId                    Venue        @relation(fields: [banLocation_venueId], references: [venue_id])
 }
 
 model Venue {
-  venue_id         Int       @id @unique @default(autoincrement())
+  venue_id         Int            @id @unique @default(autoincrement())
   venue_name       String
   venue_logo       String?
-  venue_businessId Business  @relation(fields: [business_id], references: [business_id])
   business_id      Int
-  BanList          BanList[]
+  venue_businessId Business       @relation(fields: [business_id], references: [business_id])
+  VenueAccess      VenueAccess[]
+  VenueManager     VenueManager[]
+  BanList          BanLocation[]
 }
 
 model Business {
-  business_id           Int                     @id @unique @default(autoincrement())
-  business_name         String
-  business_logo         String?
-  Venue                 Venue[]
-  AlertInfo             AlertDetail[]
-  AccountBusinessAccess AccountBusinessAccess[]
+  business_id     Int               @id @unique @default(autoincrement())
+  business_name   String
+  business_logo   String?
+  Venue           Venue[]
+  AlertInfo       AlertDetail[]
+  BusinessAccess  BusinessAccess[]
+  BusinessManager BusinessManager[]
+}
+
+model BusinessAccess {
+  businessAccess_id         Int      @id @unique @default(autoincrement())
+  businessAccess_accountId  Int
+  businessAccess_businessId Int
+  accountId                 Account  @relation(fields: [businessAccess_accountId], references: [account_id])
+  businessId                Business @relation(fields: [businessAccess_businessId], references: [business_id])
+}
+
+model VenueAccess {
+  accountVenueAccess    Int     @id @unique @default(autoincrement())
+  venueAccess_accountId Int
+  venueAccess_venueId   Int
+  accountId             Account @relation(fields: [venueAccess_accountId], references: [account_id])
+  venueId               Venue   @relation(fields: [venueAccess_venueId], references: [venue_id])
+}
+
+model VenueManager {
+  venueManagerId         Int     @id @unique @default(autoincrement())
+  venueManager_accountId Int
+  venueManager_venueId   Int
+  accountId              Account @relation(fields: [venueManager_accountId], references: [account_id])
+  venueId                Venue   @relation(fields: [venueManager_venueId], references: [venue_id])
+}
+
+model BusinessManager {
+  businessManagerId          Int      @id @unique @default(autoincrement())
+  businessManager_accountId  Int
+  businessManager_businessId Int
+  accountId                  Account  @relation(fields: [businessManager_accountId], references: [account_id])
+  venueId                    Business @relation(fields: [businessManager_businessId], references: [business_id])
 }

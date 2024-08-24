@@ -6,9 +6,10 @@ import { BanDetailsModule } from './ban-details/ban-details.module';
 import { BannedPersonsModule } from './banned-persons/banned-persons.module';
 import { AlertDetailsModule } from './alert-details/alert-details.module';
 import { BusinessesModule } from './businesses/businesses.module';
+import { VenuesModule } from './venues/venues.module';
 
 @Module({
-  imports: [RolesModule, BanDetailsModule, BannedPersonsModule, AlertDetailsModule, BusinessesModule],
+  imports: [RolesModule, BanDetailsModule, BannedPersonsModule, AlertDetailsModule, BusinessesModule, VenuesModule],
   controllers: [AppController],
   providers: [AppService],
 })
