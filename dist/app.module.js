@@ -10,18 +10,23 @@ exports.AppModule = void 0;
 const common_1 = require("@nestjs/common");
 const app_controller_1 = require("./app.controller");
 const app_service_1 = require("./app.service");
-const roles_module_1 = require("./roles/roles.module");
-const ban_details_module_1 = require("./ban-details/ban-details.module");
-const banned_persons_module_1 = require("./banned-persons/banned-persons.module");
-const alert_details_module_1 = require("./alert-details/alert-details.module");
-const businesses_module_1 = require("./businesses/businesses.module");
-const venues_module_1 = require("./venues/venues.module");
+const accounts_module_1 = require("./accounts/accounts.module");
+const banned_people_module_1 = require("./banned-people/banned-people.module");
+const authentication_module_1 = require("./authentication/authentication.module");
+const config_1 = require("@nestjs/config");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
 exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
-        imports: [roles_module_1.RolesModule, ban_details_module_1.BanDetailsModule, banned_persons_module_1.BannedPersonsModule, alert_details_module_1.AlertDetailsModule, businesses_module_1.BusinessesModule, venues_module_1.VenuesModule],
+        imports: [
+            accounts_module_1.AccountsModule,
+            banned_people_module_1.BannedPeopleModule,
+            authentication_module_1.AuthenticationModule,
+            config_1.ConfigModule.forRoot({
+                isGlobal: true,
+            }),
+        ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],
     })

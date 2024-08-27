@@ -12,8 +12,8 @@ generator client {
 
 model Account {
   account_id       Int               @id @unique @default(autoincrement())
+  account_email    String            @unique
   account_name     String
-  account_email    String
   account_password String
   account_roleId   Int
   roleId           Role              @relation(fields: [account_roleId], references: [role_id])

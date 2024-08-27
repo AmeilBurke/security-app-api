@@ -1,15 +1,20 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { RolesModule } from './roles/roles.module';
-import { BanDetailsModule } from './ban-details/ban-details.module';
-import { BannedPersonsModule } from './banned-persons/banned-persons.module';
-import { AlertDetailsModule } from './alert-details/alert-details.module';
-import { BusinessesModule } from './businesses/businesses.module';
-import { VenuesModule } from './venues/venues.module';
+import { AccountsModule } from './accounts/accounts.module';
+import { BannedPeopleModule } from './banned-people/banned-people.module';
+import { AuthenticationModule } from './authentication/authentication.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [RolesModule, BanDetailsModule, BannedPersonsModule, AlertDetailsModule, BusinessesModule, VenuesModule],
+  imports: [
+    AccountsModule,
+    BannedPeopleModule,
+    AuthenticationModule,
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
