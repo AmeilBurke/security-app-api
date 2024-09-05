@@ -1,1 +1,1 @@
-{"version":3,"file":"update-banned-person.dto.js","sourceRoot":"","sources":["../../../src/banned-people/dto/update-banned-person.dto.ts"],"names":[],"mappings":";;;AAAA,MAAa,qBAAqB;CAAG;AAArC,sDAAqC"}
+{"version":3,"file":"update-banned-person.dto.js","sourceRoot":"","sources":["../../../src/banned-people/dto/update-banned-person.dto.ts"],"names":[],"mappings":";;;;;;;;;;;;AAAA,qDAAmE;AAEnE,MAAa,qBAAqB;CASjC;AATD,sDASC;AANC;IAFC,IAAA,0BAAQ,GAAE;IACV,IAAA,4BAAU,GAAE;;iEACe;AAK5B;IAHC,IAAA,0BAAQ,GAAE;IACV,IAAA,4BAAU,GAAE;IACZ,IAAA,4BAAU,GAAE;;gEACa"}

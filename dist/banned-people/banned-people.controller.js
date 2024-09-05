@@ -15,14 +15,17 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.BannedPeopleController = void 0;
 const common_1 = require("@nestjs/common");
 const banned_people_service_1 = require("./banned-people.service");
-const create_banned_person_dto_1 = require("./dto/create-banned-person.dto");
 const update_banned_person_dto_1 = require("./dto/update-banned-person.dto");
+const platform_express_1 = require("@nestjs/platform-express");
+const multer_1 = require("multer");
+const uuid_1 = require("uuid");
 let BannedPeopleController = class BannedPeopleController {
     constructor(bannedPeopleService) {
         this.bannedPeopleService = bannedPeopleService;
     }
-    create(createBannedPersonDto) {
-        return this.bannedPeopleService.create(createBannedPersonDto);
+    create(request, file, createBannedPersonWithBanDetailsDto) {
+        console.log(createBannedPersonWithBanDetailsDto);
+        return this.bannedPeopleService.create(request, file, createBannedPersonWithBanDetailsDto);
     }
     findAll() {
         return this.bannedPeopleService.findAll();
@@ -40,9 +43,20 @@ let BannedPeopleController = class BannedPeopleController {
 exports.BannedPeopleController = BannedPeopleController;
 __decorate([
     (0, common_1.Post)(),
-    __param(0, (0, common_1.Body)()),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file', {
+        storage: (0, multer_1.diskStorage)({
+            destination: 'src\\images\\people',
+            filename: (req, file, cb) => {
+                const fileType = file.mimetype.split('/')[1];
+                cb(null, `${(0, uuid_1.v4)()}.${fileType}`);
+            },
+        }),
+    })),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.UploadedFile)()),
+    __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [create_banned_person_dto_1.CreateBannedPersonDto]),
+    __metadata("design:paramtypes", [Object, Object, Object]),
     __metadata("design:returntype", void 0)
 ], BannedPeopleController.prototype, "create", null);
 __decorate([

@@ -133,9 +133,11 @@ export class AccountsService {
       const adminRole = await getRoleFromDB(this.prisma, 'admin');
 
       if (uploaderAccount.account_roleId === adminRole.role_id) {
-        updateAccountDto.account_password = await encryptPassword(
-          updateAccountDto.account_password,
-        );
+        if (updateAccountDto.account_password) {
+          updateAccountDto.account_password = await encryptPassword(
+            updateAccountDto.account_password,
+          );
+        }
 
         return await this.prisma.account.update({
           where: {
@@ -143,11 +145,11 @@ export class AccountsService {
           },
           data: {
             account_email: updateAccountDto.account_email
-              .toLocaleLowerCase()
-              .trim(),
+              ? updateAccountDto.account_email.toLocaleLowerCase().trim()
+              : updateAccountDto.account_email,
             account_name: updateAccountDto.account_name
-              .toLocaleLowerCase()
-              .trim(),
+              ? updateAccountDto.account_name.toLocaleLowerCase().trim()
+              : updateAccountDto.account_name,
             account_password: updateAccountDto.account_password,
             account_roleId: updateAccountDto.account_roleId,
           },

@@ -2,6 +2,8 @@ import {
   PrismaClientKnownRequestError,
   PrismaClientUnknownRequestError,
 } from '@prisma/client/runtime/library';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
 import { PrismaService } from 'src/prisma.service';
 
 export const getRoleFromDB = async (

@@ -10,13 +10,14 @@ exports.BannedPeopleModule = void 0;
 const common_1 = require("@nestjs/common");
 const banned_people_service_1 = require("./banned-people.service");
 const banned_people_controller_1 = require("./banned-people.controller");
+const prisma_service_1 = require("../prisma.service");
 let BannedPeopleModule = class BannedPeopleModule {
 };
 exports.BannedPeopleModule = BannedPeopleModule;
 exports.BannedPeopleModule = BannedPeopleModule = __decorate([
     (0, common_1.Module)({
         controllers: [banned_people_controller_1.BannedPeopleController],
-        providers: [banned_people_service_1.BannedPeopleService],
+        providers: [banned_people_service_1.BannedPeopleService, prisma_service_1.PrismaService],
     })
 ], BannedPeopleModule);
 //# sourceMappingURL=banned-people.module.js.map
