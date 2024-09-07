@@ -17,20 +17,19 @@ let BannedPeopleService = class BannedPeopleService {
     constructor(prisma) {
         this.prisma = prisma;
     }
-    async create(request, file, bannedPersonWithBanDetailsDto) {
+    async create(request, file, createBannedPersonWithBanDetailsDto) {
         try {
             if (file === undefined) {
-                bannedPersonWithBanDetailsDto.bannedPerson_image = 'undefined';
+                createBannedPersonWithBanDetailsDto.bannedPerson_image = 'undefined';
             }
             const banProfile = await this.prisma.bannedPerson.create({
                 data: {
-                    bannedPerson_image: bannedPersonWithBanDetailsDto.bannedPerson_image,
-                    bannedPerson_name: bannedPersonWithBanDetailsDto.bannedPerson_name
+                    bannedPerson_image: createBannedPersonWithBanDetailsDto.bannedPerson_image,
+                    bannedPerson_name: createBannedPersonWithBanDetailsDto.bannedPerson_name
                         .toLocaleLowerCase()
                         .trim(),
                 },
             });
-            console.log(banProfile);
             const uploaderAccount = await (0, utils_1.getAccountWithEmail)(this.prisma, request.account.email);
             if (uploaderAccount === undefined) {
                 return 'uploaderAccount is undefined';
@@ -44,21 +43,39 @@ let BannedPeopleService = class BannedPeopleService {
                 businessManagerRole.role_id,
             ];
             const isBanPending = !acceptedRoles.includes(uploaderAccount.account_roleId);
-            const banDetails = await this.prisma.banDetail.create({
+            await this.prisma.banDetail.create({
                 data: {
-                    banDetail_reason: bannedPersonWithBanDetailsDto.banDetail_reason,
-                    banDetail_startDate: bannedPersonWithBanDetailsDto.banDetail_startDate,
-                    banDetail_endDate: bannedPersonWithBanDetailsDto.banDetail_endDate,
+                    banDetail_reason: createBannedPersonWithBanDetailsDto.banDetail_reason,
+                    banDetail_startDate: createBannedPersonWithBanDetailsDto.banDetail_startDate,
+                    banDetail_endDate: createBannedPersonWithBanDetailsDto.banDetail_endDate,
                     banDetail_isBanPending: isBanPending,
                     banDetail_bannedPersonId: banProfile.bannedPerson_id,
                 },
             });
-            return this.prisma.bannedPerson.findFirstOrThrow({
+            if (typeof createBannedPersonWithBanDetailsDto.banLocation_venues === 'string') {
+                const venueIdsConverted = JSON.parse(createBannedPersonWithBanDetailsDto.banLocation_venues).map((toBeConverted) => {
+                    return Number(toBeConverted);
+                });
+                createBannedPersonWithBanDetailsDto.banLocation_venues = venueIdsConverted;
+            }
+            const locationsToBeBannedFrom = createBannedPersonWithBanDetailsDto.banLocation_venues.map((venuIds) => {
+                return {
+                    banLocation_bannedPersonId: banProfile.bannedPerson_id,
+                    banLocation_venueId: venuIds
+                };
+            });
+            console.log(locationsToBeBannedFrom);
+            const test = await this.prisma.banLocation.createMany({
+                data: locationsToBeBannedFrom,
+            });
+            console.log(test);
+            return await this.prisma.bannedPerson.findFirstOrThrow({
                 where: {
                     bannedPerson_id: banProfile.bannedPerson_id,
                 },
                 include: {
                     BanDetail: true,
+                    BanLocation: true,
                 },
             });
         }
@@ -66,7 +83,7 @@ let BannedPeopleService = class BannedPeopleService {
             (0, utils_1.handleError)(error);
         }
     }
-    findAll() {
+    async findAll() {
         return `This action returns all bannedPeople`;
     }
     findOne(id) {

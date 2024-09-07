@@ -33,7 +33,7 @@ model BannedPerson {
   bannedPerson_id    Int           @id @default(autoincrement())
   bannedPerson_image String?
   bannedPerson_name  String
-  BanList            BanLocation[]
+  BanLocation        BanLocation[]
   BanDetail          BanDetail[]
   AlertInfo          AlertDetail[]
 }

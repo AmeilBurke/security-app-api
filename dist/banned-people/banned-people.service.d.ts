@@ -4,7 +4,12 @@ import { PrismaService } from 'src/prisma.service';
 export declare class BannedPeopleService {
     private prisma;
     constructor(prisma: PrismaService);
-    create(request: RequestWithAccount, file: Express.Multer.File, bannedPersonWithBanDetailsDto: BannedPersonWithBanDetailsDto): Promise<"uploaderAccount is undefined" | ({
+    create(request: RequestWithAccount, file: Express.Multer.File, createBannedPersonWithBanDetailsDto: BannedPersonWithBanDetailsDto): Promise<"uploaderAccount is undefined" | ({
+        BanLocation: {
+            banLocation_id: number;
+            banLocation_bannedPersonId: number;
+            banLocation_venueId: number;
+        }[];
         BanDetail: {
             banDetail_id: number;
             banDetail_reason: string;
@@ -18,7 +23,7 @@ export declare class BannedPeopleService {
         bannedPerson_image: string | null;
         bannedPerson_name: string;
     })>;
-    findAll(): string;
+    findAll(): Promise<string>;
     findOne(id: number): string;
     update(id: number, updateBannedPersonDto: UpdateBannedPersonDto): string;
     remove(id: number): string;

@@ -24,7 +24,6 @@ let BannedPeopleController = class BannedPeopleController {
         this.bannedPeopleService = bannedPeopleService;
     }
     create(request, file, createBannedPersonWithBanDetailsDto) {
-        console.log(createBannedPersonWithBanDetailsDto);
         return this.bannedPeopleService.create(request, file, createBannedPersonWithBanDetailsDto);
     }
     findAll() {

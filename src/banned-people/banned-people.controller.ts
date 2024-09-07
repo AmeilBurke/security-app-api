@@ -37,13 +37,8 @@ export class BannedPeopleController {
     @Req() request: RequestWithAccount,
     @UploadedFile() file: Express.Multer.File,
     @Body() createBannedPersonWithBanDetailsDto: BannedPersonWithBanDetailsDto,
-  ) {
-    console.log(createBannedPersonWithBanDetailsDto);
-    return this.bannedPeopleService.create(
-      request,
-      file,
-      createBannedPersonWithBanDetailsDto,
-    );
+  ) { 
+    return this.bannedPeopleService.create(request,file,createBannedPersonWithBanDetailsDto);
   }
 
   @Get()

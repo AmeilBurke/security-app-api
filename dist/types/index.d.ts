@@ -11,4 +11,5 @@ export type BannedPersonWithBanDetailsDto = CreateBannedPersonDto & {
     banDetail_reason: string;
     banDetail_startDate: string;
     banDetail_endDate: string;
+    banLocation_venues: string | number[];
 };

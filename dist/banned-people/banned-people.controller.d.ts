@@ -5,6 +5,11 @@ export declare class BannedPeopleController {
     private readonly bannedPeopleService;
     constructor(bannedPeopleService: BannedPeopleService);
     create(request: RequestWithAccount, file: Express.Multer.File, createBannedPersonWithBanDetailsDto: BannedPersonWithBanDetailsDto): Promise<"uploaderAccount is undefined" | ({
+        BanLocation: {
+            banLocation_id: number;
+            banLocation_bannedPersonId: number;
+            banLocation_venueId: number;
+        }[];
         BanDetail: {
             banDetail_id: number;
             banDetail_reason: string;
@@ -18,7 +23,7 @@ export declare class BannedPeopleController {
         bannedPerson_image: string | null;
         bannedPerson_name: string;
     })>;
-    findAll(): string;
+    findAll(): Promise<string>;
     findOne(id: string): string;
     update(id: string, updateBannedPersonDto: UpdateBannedPersonDto): string;
     remove(id: string): string;

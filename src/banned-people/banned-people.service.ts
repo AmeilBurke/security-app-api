@@ -3,6 +3,7 @@ import { UpdateBannedPersonDto } from './dto/update-banned-person.dto';
 import { BannedPersonWithBanDetailsDto, RequestWithAccount } from 'src/types';
 import { getAccountWithEmail, getRoleFromDB, handleError } from 'src/utils';
 import { PrismaService } from 'src/prisma.service';
+import { BanLocation } from '@prisma/client';
 
 @Injectable()
 export class BannedPeopleService {
@@ -11,22 +12,22 @@ export class BannedPeopleService {
   async create(
     request: RequestWithAccount,
     file: Express.Multer.File,
-    bannedPersonWithBanDetailsDto: BannedPersonWithBanDetailsDto,
+    createBannedPersonWithBanDetailsDto: BannedPersonWithBanDetailsDto,
   ) {
     try {
       if (file === undefined) {
-        bannedPersonWithBanDetailsDto.bannedPerson_image = 'undefined';
+        createBannedPersonWithBanDetailsDto.bannedPerson_image = 'undefined';
       }
       const banProfile = await this.prisma.bannedPerson.create({
         data: {
-          bannedPerson_image: bannedPersonWithBanDetailsDto.bannedPerson_image,
-          bannedPerson_name: bannedPersonWithBanDetailsDto.bannedPerson_name
-            .toLocaleLowerCase()
-            .trim(),
+          bannedPerson_image:
+            createBannedPersonWithBanDetailsDto.bannedPerson_image,
+          bannedPerson_name:
+            createBannedPersonWithBanDetailsDto.bannedPerson_name
+              .toLocaleLowerCase()
+              .trim(),
         },
       });
-
-      console.log(banProfile);
 
       const uploaderAccount = await getAccountWithEmail(
         this.prisma,
@@ -57,22 +58,49 @@ export class BannedPeopleService {
         uploaderAccount.account_roleId,
       );
 
-      const banDetails = await this.prisma.banDetail.create({
+      await this.prisma.banDetail.create({
         data: {
-          banDetail_reason: bannedPersonWithBanDetailsDto.banDetail_reason,
+          banDetail_reason:
+            createBannedPersonWithBanDetailsDto.banDetail_reason,
           banDetail_startDate:
-            bannedPersonWithBanDetailsDto.banDetail_startDate,
-          banDetail_endDate: bannedPersonWithBanDetailsDto.banDetail_endDate,
+            createBannedPersonWithBanDetailsDto.banDetail_startDate,
+          banDetail_endDate:
+            createBannedPersonWithBanDetailsDto.banDetail_endDate,
           banDetail_isBanPending: isBanPending,
           banDetail_bannedPersonId: banProfile.bannedPerson_id,
         },
       });
-      return this.prisma.bannedPerson.findFirstOrThrow({
+
+      if (typeof createBannedPersonWithBanDetailsDto.banLocation_venues === 'string') {
+        const venueIdsConverted: number[] = JSON.parse(createBannedPersonWithBanDetailsDto.banLocation_venues).map((toBeConverted: string) => {
+          return Number(toBeConverted);
+        });
+
+        createBannedPersonWithBanDetailsDto.banLocation_venues = venueIdsConverted;
+      }
+
+      const locationsToBeBannedFrom = createBannedPersonWithBanDetailsDto.banLocation_venues.map((venuIds: number) => {
+        return {
+          banLocation_bannedPersonId: banProfile.bannedPerson_id,
+          banLocation_venueId: venuIds
+        }
+      });
+
+      console.log(locationsToBeBannedFrom);
+
+     const test = await this.prisma.banLocation.createMany({
+        data: locationsToBeBannedFrom,
+      });
+
+      console.log(test);
+
+      return await this.prisma.bannedPerson.findFirstOrThrow({
         where: {
           bannedPerson_id: banProfile.bannedPerson_id,
         },
         include: {
           BanDetail: true,
+          BanLocation: true,
         },
       });
     } catch (error: unknown) {
@@ -80,7 +108,7 @@ export class BannedPeopleService {
     }
   }
 
-  findAll() {
+  async findAll() {
     return `This action returns all bannedPeople`;
   }
 
