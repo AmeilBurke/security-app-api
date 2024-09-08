@@ -1,9 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, StreamableFile } from '@nestjs/common';
 import { UpdateBannedPersonDto } from './dto/update-banned-person.dto';
 import { BannedPersonWithBanDetailsDto, RequestWithAccount } from 'src/types';
 import { getAccountWithEmail, getRoleFromDB, handleError } from 'src/utils';
 import { PrismaService } from 'src/prisma.service';
-import { BanLocation } from '@prisma/client';
+import { createReadStream } from 'fs';
+import type { Response as ExpressResponse } from 'express';
+import { BanLocation, BannedPerson } from '@prisma/client';
 
 @Injectable()
 export class BannedPeopleService {
@@ -18,10 +20,10 @@ export class BannedPeopleService {
       if (file === undefined) {
         createBannedPersonWithBanDetailsDto.bannedPerson_image = 'undefined';
       }
+
       const banProfile = await this.prisma.bannedPerson.create({
         data: {
-          bannedPerson_image:
-            createBannedPersonWithBanDetailsDto.bannedPerson_image,
+          bannedPerson_image: file.filename,
           bannedPerson_name:
             createBannedPersonWithBanDetailsDto.bannedPerson_name
               .toLocaleLowerCase()
@@ -71,28 +73,33 @@ export class BannedPeopleService {
         },
       });
 
-      if (typeof createBannedPersonWithBanDetailsDto.banLocation_venues === 'string') {
-        const venueIdsConverted: number[] = JSON.parse(createBannedPersonWithBanDetailsDto.banLocation_venues).map((toBeConverted: string) => {
+      if (
+        typeof createBannedPersonWithBanDetailsDto.banLocation_venues ===
+        'string'
+      ) {
+        const venueIdsConverted: number[] = JSON.parse(
+          createBannedPersonWithBanDetailsDto.banLocation_venues,
+        ).map((toBeConverted: string) => {
           return Number(toBeConverted);
         });
 
-        createBannedPersonWithBanDetailsDto.banLocation_venues = venueIdsConverted;
+        createBannedPersonWithBanDetailsDto.banLocation_venues =
+          venueIdsConverted;
       }
 
-      const locationsToBeBannedFrom = createBannedPersonWithBanDetailsDto.banLocation_venues.map((venuIds: number) => {
-        return {
-          banLocation_bannedPersonId: banProfile.bannedPerson_id,
-          banLocation_venueId: venuIds
-        }
-      });
+      const locationsToBeBannedFrom =
+        createBannedPersonWithBanDetailsDto.banLocation_venues.map(
+          (venuIds: number) => {
+            return {
+              banLocation_bannedPersonId: banProfile.bannedPerson_id,
+              banLocation_venueId: venuIds,
+            };
+          },
+        );
 
-      console.log(locationsToBeBannedFrom);
-
-     const test = await this.prisma.banLocation.createMany({
+      await this.prisma.banLocation.createMany({
         data: locationsToBeBannedFrom,
       });
-
-      console.log(test);
 
       return await this.prisma.bannedPerson.findFirstOrThrow({
         where: {
@@ -109,11 +116,80 @@ export class BannedPeopleService {
   }
 
   async findAll() {
-    return `This action returns all bannedPeople`;
+    try {
+      return `This action returns all bannedPeople`;
+    } catch (error: unknown) {
+      return handleError(error);
+    }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} bannedPerson`;
+  async findOne(id: number, res: ExpressResponse) {
+    try {
+      return await this.prisma.bannedPerson.findFirstOrThrow({
+        where: {
+          bannedPerson_id: id,
+        },
+        include: {
+          BanDetail: true,
+          BanLocation: true,
+        },
+      });
+    } catch (error: unknown) {
+      return handleError(error);
+    }
+  }
+
+  async getAccountPicture(id: number, res: ExpressResponse) {
+    try {
+      const bannedPersonDetails =
+        await this.prisma.bannedPerson.findFirstOrThrow({
+          where: {
+            bannedPerson_id: id,
+          },
+        });
+
+      if (bannedPersonDetails.bannedPerson_image === 'undefined') {
+        return 'this person does not have any photos';
+      } else {
+        const file = createReadStream(
+          `src\\images\\people\\${bannedPersonDetails.bannedPerson_image}`,
+        );
+
+        res.set({
+          'Content-Type': `image/${bannedPersonDetails.bannedPerson_image.split('.')[1]}`,
+        });
+
+        return new StreamableFile(file);
+      }
+    } catch (error: unknown) {
+      return handleError(error);
+    }
+  }
+
+  async getBannedPeopleByEstablishment(id: number) {
+    try {
+      const banLocationForVenue = await this.prisma.banLocation.findMany({
+        where: {
+          banLocation_venueId: id,
+        },
+      });
+
+      const bannedPeopleIds = banLocationForVenue.map(
+        (banLocations: BanLocation) => {
+          return banLocations.banLocation_bannedPersonId;
+        },
+      );
+
+      return await this.prisma.bannedPerson.findMany({
+        where: {
+          bannedPerson_id: {
+            in: bannedPeopleIds,
+          },
+        },
+      });
+    } catch (error: unknown) {
+      return handleError(error);
+    }
   }
 
   update(id: number, updateBannedPersonDto: UpdateBannedPersonDto) {

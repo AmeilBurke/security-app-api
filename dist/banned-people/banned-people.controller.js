@@ -29,14 +29,20 @@ let BannedPeopleController = class BannedPeopleController {
     findAll() {
         return this.bannedPeopleService.findAll();
     }
-    findOne(id) {
-        return this.bannedPeopleService.findOne(+id);
+    getPhotoFromBannedPersons(id, res) {
+        return this.bannedPeopleService.getAccountPicture(Number(id), res);
+    }
+    getBannedPeopleByVenue(id) {
+        return this.bannedPeopleService.getBannedPeopleByEstablishment(Number(id));
+    }
+    findOne(id, res) {
+        return this.bannedPeopleService.findOne(Number(id), res);
     }
     update(id, updateBannedPersonDto) {
-        return this.bannedPeopleService.update(+id, updateBannedPersonDto);
+        return this.bannedPeopleService.update(Number(id), updateBannedPersonDto);
     }
     remove(id) {
-        return this.bannedPeopleService.remove(+id);
+        return this.bannedPeopleService.remove(Number(id));
     }
 };
 exports.BannedPeopleController = BannedPeopleController;
@@ -65,10 +71,26 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], BannedPeopleController.prototype, "findAll", null);
 __decorate([
-    (0, common_1.Get)(':id'),
+    (0, common_1.Get)('image/:id'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Res)({ passthrough: true })),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", void 0)
+], BannedPeopleController.prototype, "getPhotoFromBannedPersons", null);
+__decorate([
+    (0, common_1.Get)('by-venue/:id'),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], BannedPeopleController.prototype, "getBannedPeopleByVenue", null);
+__decorate([
+    (0, common_1.Get)(':id'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Res)({ passthrough: true })),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", void 0)
 ], BannedPeopleController.prototype, "findOne", null);
 __decorate([
