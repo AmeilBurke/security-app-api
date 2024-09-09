@@ -47,6 +47,11 @@ export class BannedPeopleController {
     );
   }
 
+  @Post('/alert/:id')
+  createAlert(@Param('id') id: string, @Body() body: { business_id: number }) {
+    return this.bannedPeopleService.createAlert(Number(id), body.business_id);
+  }
+
   @Get()
   findAll() {
     return this.bannedPeopleService.findAll();
@@ -61,9 +66,7 @@ export class BannedPeopleController {
   }
 
   @Get('by-venue/:id')
-  getBannedPeopleByVenue(
-    @Param('id') id: string,
-  ) {
+  getBannedPeopleByVenue(@Param('id') id: string) {
     return this.bannedPeopleService.getBannedPeopleByEstablishment(Number(id));
   }
 
@@ -76,11 +79,27 @@ export class BannedPeopleController {
   }
 
   @Patch(':id')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: 'src\\images\\people',
+        filename: (req, file, cb) => {
+          const fileType = file.mimetype.split('/')[1];
+          cb(null, `${uuidv4()}.${fileType}`);
+        },
+      }),
+    }),
+  )
   update(
     @Param('id') id: string,
+    @UploadedFile() file: Express.Multer.File,
     @Body() updateBannedPersonDto: UpdateBannedPersonDto,
   ) {
-    return this.bannedPeopleService.update(Number(id), updateBannedPersonDto);
+    return this.bannedPeopleService.update(
+      Number(id),
+      file,
+      updateBannedPersonDto,
+    );
   }
 
   @Delete(':id')

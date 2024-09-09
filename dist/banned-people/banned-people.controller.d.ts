@@ -24,6 +24,13 @@ export declare class BannedPeopleController {
         bannedPerson_image: string | null;
         bannedPerson_name: string;
     })>;
+    createAlert(id: string, body: {
+        business_id: number;
+    }): Promise<string | {
+        alertDetails_id: number;
+        alertDetails_bannedPersonId: number;
+        alertDetails_businessId: number;
+    }>;
     findAll(): Promise<string>;
     getPhotoFromBannedPersons(id: string, res: ExpressResponse): Promise<string | import("@nestjs/common").StreamableFile>;
     getBannedPeopleByVenue(id: string): Promise<string | {
@@ -50,6 +57,14 @@ export declare class BannedPeopleController {
         bannedPerson_image: string | null;
         bannedPerson_name: string;
     })>;
-    update(id: string, updateBannedPersonDto: UpdateBannedPersonDto): string;
-    remove(id: string): string;
+    update(id: string, file: Express.Multer.File, updateBannedPersonDto: UpdateBannedPersonDto): Promise<string | {
+        bannedPerson_id: number;
+        bannedPerson_image: string | null;
+        bannedPerson_name: string;
+    }>;
+    remove(id: string): string | import(".prisma/client").Prisma.Prisma__BannedPersonClient<{
+        bannedPerson_id: number;
+        bannedPerson_image: string | null;
+        bannedPerson_name: string;
+    }, never, import("@prisma/client/runtime/library").DefaultArgs>;
 }

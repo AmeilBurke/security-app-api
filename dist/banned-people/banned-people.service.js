@@ -84,6 +84,19 @@ let BannedPeopleService = class BannedPeopleService {
             (0, utils_1.handleError)(error);
         }
     }
+    async createAlert(id, businessId) {
+        try {
+            return this.prisma.alertDetail.create({
+                data: {
+                    alertDetails_bannedPersonId: id,
+                    alertDetails_businessId: businessId,
+                },
+            });
+        }
+        catch (error) {
+            return (0, utils_1.handleError)(error);
+        }
+    }
     async findAll() {
         try {
             return `This action returns all bannedPeople`;
@@ -152,11 +165,35 @@ let BannedPeopleService = class BannedPeopleService {
             return (0, utils_1.handleError)(error);
         }
     }
-    update(id, updateBannedPersonDto) {
-        return `This action updates a #${id} bannedPerson`;
+    async update(id, file, updateBannedPersonDto) {
+        try {
+            return this.prisma.bannedPerson.update({
+                where: {
+                    bannedPerson_id: id,
+                },
+                data: {
+                    bannedPerson_name: updateBannedPersonDto.bannedPerson_name,
+                    bannedPerson_image: file !== undefined
+                        ? file.filename
+                        : updateBannedPersonDto.bannedPerson_image,
+                },
+            });
+        }
+        catch (error) {
+            return (0, utils_1.handleError)(error);
+        }
     }
     remove(id) {
-        return `This action removes a #${id} bannedPerson`;
+        try {
+            return this.prisma.bannedPerson.delete({
+                where: {
+                    bannedPerson_id: id,
+                },
+            });
+        }
+        catch (error) {
+            return (0, utils_1.handleError)(error);
+        }
     }
 };
 exports.BannedPeopleService = BannedPeopleService;

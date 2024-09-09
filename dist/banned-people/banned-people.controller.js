@@ -26,6 +26,9 @@ let BannedPeopleController = class BannedPeopleController {
     create(request, file, createBannedPersonWithBanDetailsDto) {
         return this.bannedPeopleService.create(request, file, createBannedPersonWithBanDetailsDto);
     }
+    createAlert(id, body) {
+        return this.bannedPeopleService.createAlert(Number(id), body.business_id);
+    }
     findAll() {
         return this.bannedPeopleService.findAll();
     }
@@ -38,8 +41,8 @@ let BannedPeopleController = class BannedPeopleController {
     findOne(id, res) {
         return this.bannedPeopleService.findOne(Number(id), res);
     }
-    update(id, updateBannedPersonDto) {
-        return this.bannedPeopleService.update(Number(id), updateBannedPersonDto);
+    update(id, file, updateBannedPersonDto) {
+        return this.bannedPeopleService.update(Number(id), file, updateBannedPersonDto);
     }
     remove(id) {
         return this.bannedPeopleService.remove(Number(id));
@@ -64,6 +67,14 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object, Object]),
     __metadata("design:returntype", void 0)
 ], BannedPeopleController.prototype, "create", null);
+__decorate([
+    (0, common_1.Post)('/alert/:id'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", void 0)
+], BannedPeopleController.prototype, "createAlert", null);
 __decorate([
     (0, common_1.Get)(),
     __metadata("design:type", Function),
@@ -95,10 +106,20 @@ __decorate([
 ], BannedPeopleController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Patch)(':id'),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file', {
+        storage: (0, multer_1.diskStorage)({
+            destination: 'src\\images\\people',
+            filename: (req, file, cb) => {
+                const fileType = file.mimetype.split('/')[1];
+                cb(null, `${(0, uuid_1.v4)()}.${fileType}`);
+            },
+        }),
+    })),
     __param(0, (0, common_1.Param)('id')),
-    __param(1, (0, common_1.Body)()),
+    __param(1, (0, common_1.UploadedFile)()),
+    __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, update_banned_person_dto_1.UpdateBannedPersonDto]),
+    __metadata("design:paramtypes", [String, Object, update_banned_person_dto_1.UpdateBannedPersonDto]),
     __metadata("design:returntype", void 0)
 ], BannedPeopleController.prototype, "update", null);
 __decorate([

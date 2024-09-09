@@ -5,7 +5,7 @@ import { getAccountWithEmail, getRoleFromDB, handleError } from 'src/utils';
 import { PrismaService } from 'src/prisma.service';
 import { createReadStream } from 'fs';
 import type { Response as ExpressResponse } from 'express';
-import { BanLocation, BannedPerson } from '@prisma/client';
+import { BanLocation } from '@prisma/client';
 
 @Injectable()
 export class BannedPeopleService {
@@ -115,6 +115,19 @@ export class BannedPeopleService {
     }
   }
 
+  async createAlert(id: number, businessId: number) {
+    try {
+      return this.prisma.alertDetail.create({
+        data: {
+          alertDetails_bannedPersonId: id,
+          alertDetails_businessId: businessId,
+        },
+      });
+    } catch (error: unknown) {
+      return handleError(error);
+    }
+  }
+
   async findAll() {
     try {
       return `This action returns all bannedPeople`;
@@ -192,11 +205,38 @@ export class BannedPeopleService {
     }
   }
 
-  update(id: number, updateBannedPersonDto: UpdateBannedPersonDto) {
-    return `This action updates a #${id} bannedPerson`;
+  async update(
+    id: number,
+    file: Express.Multer.File,
+    updateBannedPersonDto: UpdateBannedPersonDto,
+  ) {
+    try {
+      return this.prisma.bannedPerson.update({
+        where: {
+          bannedPerson_id: id,
+        },
+        data: {
+          bannedPerson_name: updateBannedPersonDto.bannedPerson_name,
+          bannedPerson_image:
+            file !== undefined
+              ? file.filename
+              : updateBannedPersonDto.bannedPerson_image,
+        },
+      });
+    } catch (error: unknown) {
+      return handleError(error);
+    }
   }
 
   remove(id: number) {
-    return `This action removes a #${id} bannedPerson`;
+    try {
+      return this.prisma.bannedPerson.delete({
+        where: {
+          bannedPerson_id: id,
+        },
+      });
+    } catch (error: unknown) {
+      return handleError(error);
+    }
   }
 }
