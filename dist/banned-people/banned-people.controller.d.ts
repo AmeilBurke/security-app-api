@@ -24,13 +24,6 @@ export declare class BannedPeopleController {
         bannedPerson_image: string | null;
         bannedPerson_name: string;
     })>;
-    createAlert(id: string, body: {
-        business_id: number;
-    }): Promise<string | {
-        alertDetails_id: number;
-        alertDetails_bannedPersonId: number;
-        alertDetails_businessId: number;
-    }>;
     findAll(): Promise<string>;
     getPhotoFromBannedPersons(id: string, res: ExpressResponse): Promise<string | import("@nestjs/common").StreamableFile>;
     getBannedPeopleByVenue(id: string): Promise<string | {

@@ -1,9 +1,16 @@
 import { CreateAlertDetailDto } from './dto/create-alert-detail.dto';
-import { UpdateAlertDetailDto } from './dto/update-alert-detail.dto';
+import { PrismaService } from 'src/prisma.service';
 export declare class AlertDetailsService {
-    create(createAlertDetailDto: CreateAlertDetailDto): string;
-    findAll(): string;
-    findOne(id: number): string;
-    update(id: number, updateAlertDetailDto: UpdateAlertDetailDto): string;
-    remove(id: number): string;
+    private prisma;
+    constructor(prisma: PrismaService);
+    create(createAlertDetailDto: CreateAlertDetailDto): Promise<string | {
+        alertDetails_id: number;
+        alertDetails_bannedPersonId: number;
+        alertDetails_businessId: number;
+    }>;
+    remove(id: number): Promise<{
+        alertDetails_id: number;
+        alertDetails_bannedPersonId: number;
+        alertDetails_businessId: number;
+    }>;
 }

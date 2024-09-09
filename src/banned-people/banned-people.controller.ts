@@ -47,11 +47,6 @@ export class BannedPeopleController {
     );
   }
 
-  @Post('/alert/:id')
-  createAlert(@Param('id') id: string, @Body() body: { business_id: number }) {
-    return this.bannedPeopleService.createAlert(Number(id), body.business_id);
-  }
-
   @Get()
   findAll() {
     return this.bannedPeopleService.findAll();

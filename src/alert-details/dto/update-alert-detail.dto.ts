@@ -1,4 +1,13 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateAlertDetailDto } from './create-alert-detail.dto';
+import { IsNumber, IsOptional, IsPositive } from 'class-validator';
 
-export class UpdateAlertDetailDto extends PartialType(CreateAlertDetailDto) {}
+export class UpdateAlertDetailDto {
+  @IsNumber()
+  @IsPositive()
+  @IsOptional()
+  alertDetails_bannedPersonId: number;
+
+  @IsNumber()
+  @IsPositive()
+  @IsOptional()
+  alertDetails_businessId: number;
+}

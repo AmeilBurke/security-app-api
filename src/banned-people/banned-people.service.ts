@@ -115,19 +115,6 @@ export class BannedPeopleService {
     }
   }
 
-  async createAlert(id: number, businessId: number) {
-    try {
-      return this.prisma.alertDetail.create({
-        data: {
-          alertDetails_bannedPersonId: id,
-          alertDetails_businessId: businessId,
-        },
-      });
-    } catch (error: unknown) {
-      return handleError(error);
-    }
-  }
-
   async findAll() {
     try {
       return `This action returns all bannedPeople`;

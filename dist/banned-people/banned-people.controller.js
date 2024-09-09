@@ -26,9 +26,6 @@ let BannedPeopleController = class BannedPeopleController {
     create(request, file, createBannedPersonWithBanDetailsDto) {
         return this.bannedPeopleService.create(request, file, createBannedPersonWithBanDetailsDto);
     }
-    createAlert(id, body) {
-        return this.bannedPeopleService.createAlert(Number(id), body.business_id);
-    }
     findAll() {
         return this.bannedPeopleService.findAll();
     }
@@ -67,14 +64,6 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object, Object]),
     __metadata("design:returntype", void 0)
 ], BannedPeopleController.prototype, "create", null);
-__decorate([
-    (0, common_1.Post)('/alert/:id'),
-    __param(0, (0, common_1.Param)('id')),
-    __param(1, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
-    __metadata("design:returntype", void 0)
-], BannedPeopleController.prototype, "createAlert", null);
 __decorate([
     (0, common_1.Get)(),
     __metadata("design:type", Function),

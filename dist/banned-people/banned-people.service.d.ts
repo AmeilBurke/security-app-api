@@ -25,11 +25,6 @@ export declare class BannedPeopleService {
         bannedPerson_image: string | null;
         bannedPerson_name: string;
     })>;
-    createAlert(id: number, businessId: number): Promise<string | {
-        alertDetails_id: number;
-        alertDetails_bannedPersonId: number;
-        alertDetails_businessId: number;
-    }>;
     findAll(): Promise<string>;
     findOne(id: number, res: ExpressResponse): Promise<string | ({
         BanLocation: {
