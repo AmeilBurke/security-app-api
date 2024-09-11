@@ -24,7 +24,6 @@ export declare class BannedPeopleController {
         bannedPerson_image: string | null;
         bannedPerson_name: string;
     })>;
-    findAll(): Promise<string>;
     getPhotoFromBannedPersons(id: string, res: ExpressResponse): Promise<string | import("@nestjs/common").StreamableFile>;
     getBannedPeopleByVenue(id: string): Promise<string | {
         bannedPerson_id: number;
@@ -50,7 +49,7 @@ export declare class BannedPeopleController {
         bannedPerson_image: string | null;
         bannedPerson_name: string;
     })>;
-    update(id: string, file: Express.Multer.File, updateBannedPersonDto: UpdateBannedPersonDto): Promise<string | {
+    update(id: string, file: Express.Multer.File, request: RequestWithAccount, updateBannedPersonDto: UpdateBannedPersonDto): Promise<string | {
         bannedPerson_id: number;
         bannedPerson_image: string | null;
         bannedPerson_name: string;

@@ -1,6 +1,7 @@
-import { Controller, Post, Body, Param, Delete } from '@nestjs/common';
+import { Controller, Post, Body, Param, Delete, Req } from '@nestjs/common';
 import { AlertDetailsService } from './alert-details.service';
 import { CreateAlertDetailDto } from './dto/create-alert-detail.dto';
+import { RequestWithAccount } from 'src/types';
 
 @Controller('alert-details')
 export class AlertDetailsController {
@@ -12,7 +13,7 @@ export class AlertDetailsController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.alertDetailsService.remove(Number(id));
+  remove(@Param('id') id: string, @Req() request: RequestWithAccount) {
+    return this.alertDetailsService.remove(Number(id), request);
   }
 }

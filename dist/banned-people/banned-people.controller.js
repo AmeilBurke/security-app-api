@@ -26,9 +26,6 @@ let BannedPeopleController = class BannedPeopleController {
     create(request, file, createBannedPersonWithBanDetailsDto) {
         return this.bannedPeopleService.create(request, file, createBannedPersonWithBanDetailsDto);
     }
-    findAll() {
-        return this.bannedPeopleService.findAll();
-    }
     getPhotoFromBannedPersons(id, res) {
         return this.bannedPeopleService.getAccountPicture(Number(id), res);
     }
@@ -38,8 +35,8 @@ let BannedPeopleController = class BannedPeopleController {
     findOne(id, res) {
         return this.bannedPeopleService.findOne(Number(id), res);
     }
-    update(id, file, updateBannedPersonDto) {
-        return this.bannedPeopleService.update(Number(id), file, updateBannedPersonDto);
+    update(id, file, request, updateBannedPersonDto) {
+        return this.bannedPeopleService.update(Number(id), file, request, updateBannedPersonDto);
     }
     remove(id) {
         return this.bannedPeopleService.remove(Number(id));
@@ -64,12 +61,6 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object, Object]),
     __metadata("design:returntype", void 0)
 ], BannedPeopleController.prototype, "create", null);
-__decorate([
-    (0, common_1.Get)(),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", void 0)
-], BannedPeopleController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)('image/:id'),
     __param(0, (0, common_1.Param)('id')),
@@ -106,9 +97,10 @@ __decorate([
     })),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.UploadedFile)()),
-    __param(2, (0, common_1.Body)()),
+    __param(2, (0, common_1.Req)()),
+    __param(3, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object, update_banned_person_dto_1.UpdateBannedPersonDto]),
+    __metadata("design:paramtypes", [String, Object, Object, update_banned_person_dto_1.UpdateBannedPersonDto]),
     __metadata("design:returntype", void 0)
 ], BannedPeopleController.prototype, "update", null);
 __decorate([

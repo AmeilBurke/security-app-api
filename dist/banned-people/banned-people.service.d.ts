@@ -25,7 +25,6 @@ export declare class BannedPeopleService {
         bannedPerson_image: string | null;
         bannedPerson_name: string;
     })>;
-    findAll(): Promise<string>;
     findOne(id: number, res: ExpressResponse): Promise<string | ({
         BanLocation: {
             banLocation_id: number;
@@ -51,7 +50,7 @@ export declare class BannedPeopleService {
         bannedPerson_image: string | null;
         bannedPerson_name: string;
     }[]>;
-    update(id: number, file: Express.Multer.File, updateBannedPersonDto: UpdateBannedPersonDto): Promise<string | {
+    update(id: number, file: Express.Multer.File, request: RequestWithAccount, updateBannedPersonDto: UpdateBannedPersonDto): Promise<string | {
         bannedPerson_id: number;
         bannedPerson_image: string | null;
         bannedPerson_name: string;

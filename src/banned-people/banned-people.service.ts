@@ -115,13 +115,13 @@ export class BannedPeopleService {
     }
   }
 
-  async findAll() {
-    try {
-      return `This action returns all bannedPeople`;
-    } catch (error: unknown) {
-      return handleError(error);
-    }
-  }
+  // async findAll() {
+  //   try {
+  //     return `This action returns all bannedPeople`;
+  //   } catch (error: unknown) {
+  //     return handleError(error);
+  //   }
+  // }
 
   async findOne(id: number, res: ExpressResponse) {
     try {
@@ -192,12 +192,49 @@ export class BannedPeopleService {
     }
   }
 
+  // need to add request: RequestWithAccount to services that need to check permissions
+
   async update(
     id: number,
     file: Express.Multer.File,
+    request: RequestWithAccount,
     updateBannedPersonDto: UpdateBannedPersonDto,
   ) {
     try {
+
+      const uploaderAccount = await getAccountWithEmail(
+        this.prisma,
+        request.account.email,
+      );
+
+      if (uploaderAccount === undefined) {
+        return 'uploaderAccount is undefined';
+      }
+
+      const adminRole = await getRoleFromDB(this.prisma, 'admin');
+      const venueManagerRole = await getRoleFromDB(
+        this.prisma,
+        'venue manager',
+      );
+      const businessManagerRole = await getRoleFromDB(
+        this.prisma,
+        'business manager',
+      );
+
+      const acceptedRoles = [
+        adminRole.role_id,
+        venueManagerRole.role_id,
+        businessManagerRole.role_id,
+      ];
+
+      const canAccountEdit = acceptedRoles.includes(
+        uploaderAccount.account_roleId,
+      );
+
+      if(!canAccountEdit) {
+        return 'you do not have permission to access this'
+      }
+
       return this.prisma.bannedPerson.update({
         where: {
           bannedPerson_id: id,

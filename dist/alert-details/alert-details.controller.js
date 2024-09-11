@@ -23,8 +23,8 @@ let AlertDetailsController = class AlertDetailsController {
     create(createAlertDetailDto) {
         return this.alertDetailsService.create(createAlertDetailDto);
     }
-    remove(id) {
-        return this.alertDetailsService.remove(Number(id));
+    remove(id, request) {
+        return this.alertDetailsService.remove(Number(id), request);
     }
 };
 exports.AlertDetailsController = AlertDetailsController;
@@ -38,8 +38,9 @@ __decorate([
 __decorate([
     (0, common_1.Delete)(':id'),
     __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", void 0)
 ], AlertDetailsController.prototype, "remove", null);
 exports.AlertDetailsController = AlertDetailsController = __decorate([

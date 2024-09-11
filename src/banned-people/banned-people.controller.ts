@@ -47,10 +47,10 @@ export class BannedPeopleController {
     );
   }
 
-  @Get()
-  findAll() {
-    return this.bannedPeopleService.findAll();
-  }
+  // @Get()
+  // findAll() {
+  //   return this.bannedPeopleService.findAll();
+  // }
 
   @Get('image/:id')
   getPhotoFromBannedPersons(
@@ -88,11 +88,13 @@ export class BannedPeopleController {
   update(
     @Param('id') id: string,
     @UploadedFile() file: Express.Multer.File,
+    @Req() request: RequestWithAccount,
     @Body() updateBannedPersonDto: UpdateBannedPersonDto,
   ) {
     return this.bannedPeopleService.update(
       Number(id),
       file,
+      request,
       updateBannedPersonDto,
     );
   }

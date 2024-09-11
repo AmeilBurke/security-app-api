@@ -27,12 +27,44 @@ let AlertDetailsService = class AlertDetailsService {
             return (0, utils_1.handleError)(error);
         }
     }
-    async remove(id) {
-        return await this.prisma.alertDetail.delete({
-            where: {
-                alertDetails_id: id,
-            },
-        });
+    async remove(id, request) {
+        try {
+            const uploaderAccount = await (0, utils_1.getAccountWithEmail)(this.prisma, request.account.email);
+            const allRoles = await this.prisma.role.findMany();
+            if (uploaderAccount.account_roleId === allRoles[0].role_id) {
+                return await this.prisma.alertDetail.delete({
+                    where: {
+                        alertDetails_id: id,
+                    },
+                });
+            }
+            else {
+                const alertDetailInfo = await this.prisma.alertDetail.findFirstOrThrow({
+                    where: {
+                        alertDetails_id: id,
+                    },
+                });
+                const businessAccess = await this.prisma.businessAccess.findMany({
+                    where: {
+                        businessAccess_accountId: uploaderAccount.account_id,
+                        businessAccess_businessId: alertDetailInfo.alertDetails_businessId,
+                    },
+                });
+                if (businessAccess.length > 0) {
+                    return await this.prisma.alertDetail.delete({
+                        where: {
+                            alertDetails_id: id,
+                        },
+                    });
+                }
+                else {
+                    return 'you do not have permission to access this';
+                }
+            }
+        }
+        catch (error) {
+            return (0, utils_1.handleError)(error);
+        }
     }
 };
 exports.AlertDetailsService = AlertDetailsService;

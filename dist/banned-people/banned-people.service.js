@@ -84,14 +84,6 @@ let BannedPeopleService = class BannedPeopleService {
             (0, utils_1.handleError)(error);
         }
     }
-    async findAll() {
-        try {
-            return `This action returns all bannedPeople`;
-        }
-        catch (error) {
-            return (0, utils_1.handleError)(error);
-        }
-    }
     async findOne(id, res) {
         try {
             return await this.prisma.bannedPerson.findFirstOrThrow({
@@ -152,8 +144,24 @@ let BannedPeopleService = class BannedPeopleService {
             return (0, utils_1.handleError)(error);
         }
     }
-    async update(id, file, updateBannedPersonDto) {
+    async update(id, file, request, updateBannedPersonDto) {
         try {
+            const uploaderAccount = await (0, utils_1.getAccountWithEmail)(this.prisma, request.account.email);
+            if (uploaderAccount === undefined) {
+                return 'uploaderAccount is undefined';
+            }
+            const adminRole = await (0, utils_1.getRoleFromDB)(this.prisma, 'admin');
+            const venueManagerRole = await (0, utils_1.getRoleFromDB)(this.prisma, 'venue manager');
+            const businessManagerRole = await (0, utils_1.getRoleFromDB)(this.prisma, 'business manager');
+            const acceptedRoles = [
+                adminRole.role_id,
+                venueManagerRole.role_id,
+                businessManagerRole.role_id,
+            ];
+            const canAccountEdit = acceptedRoles.includes(uploaderAccount.account_roleId);
+            if (!canAccountEdit) {
+                return 'you do not have permission to access this';
+            }
             return this.prisma.bannedPerson.update({
                 where: {
                     bannedPerson_id: id,
