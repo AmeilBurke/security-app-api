@@ -31,7 +31,7 @@ export class AccountsService {
           createAccountDto.account_password,
         );
 
-        return await this.prisma.account.create({
+        const newAccount = await this.prisma.account.create({
           data: {
             account_email: createAccountDto.account_email
               .toLocaleLowerCase()
@@ -43,6 +43,50 @@ export class AccountsService {
             account_roleId: createAccountDto.account_roleId,
           },
         });
+
+        createAccountDto.account_allowedVenues.map(async (venueId: number) => {
+          await this.prisma.venueAccess.createMany({
+            data: {
+              venueAccess_accountId: newAccount.account_id,
+              venueAccess_venueId: venueId,
+            },
+          });
+        });
+
+        createAccountDto.account_allowedBusinesses.map(
+          async (businessId: number) => {
+            await this.prisma.businessAccess.createMany({
+              data: {
+                businessAccess_accountId: newAccount.account_id,
+                businessAccess_businessId: businessId,
+              },
+            });
+          },
+        );
+
+        if (createAccountDto.account_venueManager) {
+          createAccountDto.account_venueManager.map(async (venueId: number) => {
+            await this.prisma.venueManager.create({
+              data: {
+                venueManager_accountId: newAccount.account_id,
+                venueManager_venueId: venueId,
+              },
+            });
+          });
+        }
+
+        if (createAccountDto.account_businessManager) {
+          createAccountDto.account_businessManager.map(
+            async (businessId: number) => {
+              await this.prisma.businessManager.create({
+                data: {
+                  businessManager_accountId: newAccount.account_id,
+                  businessManager_businessId: businessId,
+                },
+              });
+            },
+          );
+        }
       } else {
         return 'you do not have permission to access this';
       }

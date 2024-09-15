@@ -47,11 +47,6 @@ export class BannedPeopleController {
     );
   }
 
-  // @Get()
-  // findAll() {
-  //   return this.bannedPeopleService.findAll();
-  // }
-
   @Get('image/:id')
   getPhotoFromBannedPersons(
     @Param('id') id: string,

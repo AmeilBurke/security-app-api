@@ -5,6 +5,7 @@ import { AccountsModule } from 'src/accounts/accounts.module';
 import { JwtModule } from '@nestjs/jwt';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthenticationGuard } from './authentication.guard';
+import { never } from 'rxjs';
 
 @Module({
   controllers: [AuthenticationController],
@@ -20,7 +21,7 @@ import { AuthenticationGuard } from './authentication.guard';
     JwtModule.register({
       global: true,
       secret: process.env.JWT_SECRET,
-      signOptions: { expiresIn: '80000s' },
+      signOptions: { expiresIn: "7 days" },
     }),
   ],
 })

@@ -34,4 +34,22 @@ __decorate([
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
 ], CreateAccountDto.prototype, "account_roleId", void 0);
+__decorate([
+    (0, class_validator_1.IsNumber)({}, { each: true }),
+    __metadata("design:type", Array)
+], CreateAccountDto.prototype, "account_allowedVenues", void 0);
+__decorate([
+    (0, class_validator_1.IsNumber)({}, { each: true }),
+    __metadata("design:type", Array)
+], CreateAccountDto.prototype, "account_allowedBusinesses", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumber)({}, { each: true }),
+    __metadata("design:type", Array)
+], CreateAccountDto.prototype, "account_venueManager", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumber)({}, { each: true }),
+    __metadata("design:type", Array)
+], CreateAccountDto.prototype, "account_businessManager", void 0);
 //# sourceMappingURL=create-account.dto.js.map

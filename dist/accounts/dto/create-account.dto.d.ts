@@ -3,4 +3,8 @@ export declare class CreateAccountDto {
     account_email: string;
     account_password: string;
     account_roleId: number;
+    account_allowedVenues: number[];
+    account_allowedBusinesses: number[];
+    account_venueManager?: number[];
+    account_businessManager?: number[];
 }

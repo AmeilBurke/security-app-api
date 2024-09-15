@@ -1,4 +1,5 @@
 import {
+  IsBoolean,
   IsEmail,
   IsNotEmpty,
   IsNumber,
@@ -26,4 +27,21 @@ export class UpdateAccountDto {
   @IsOptional()
   @IsNumber()
   account_roleId?: number;
+
+  @IsOptional()
+  @IsNumber(null, { each: true })
+  account_allowedVenues: number[];
+
+  @IsOptional()
+  // need to see if this validates
+  @IsNumber(null, { each: true })
+  account_allowedBusinesses: number[];
+
+  @IsOptional()
+  @IsNumber(null, { each: true })
+  account_venueManager?: number[];
+
+  @IsOptional()
+  @IsNumber(null, { each: true })
+  account_businessManager?: number[];
 }

@@ -5,13 +5,7 @@ import { RequestWithAccount } from 'src/types';
 export declare class AccountsService {
     private prisma;
     constructor(prisma: PrismaService);
-    create(request: RequestWithAccount, createAccountDto: CreateAccountDto): Promise<string | {
-        account_id: number;
-        account_email: string;
-        account_name: string;
-        account_password: string;
-        account_roleId: number;
-    }>;
+    create(request: RequestWithAccount, createAccountDto: CreateAccountDto): Promise<string>;
     findAll(request: RequestWithAccount): Promise<string | {
         account_id: number;
         account_email: string;
@@ -40,11 +34,11 @@ export declare class AccountsService {
         account_password: string;
         account_roleId: number;
     }>;
-    remove(id: number, request: RequestWithAccount): Promise<{
+    remove(id: number, request: RequestWithAccount): Promise<"uploaderAccount is undefined" | {
         account_id: number;
         account_email: string;
         account_name: string;
         account_password: string;
         account_roleId: number;
-    } | "uploaderAccount is undefined">;
+    }>;
 }
