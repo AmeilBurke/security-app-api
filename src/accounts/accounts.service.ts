@@ -1,10 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { CreateAccountDto } from './dto/create-account.dto';
 import { UpdateAccountDto } from './dto/update-account.dto';
+import { UpdateAccountAccessDto } from './dto/update-account-access.dto';
 import { getAccountWithEmail, getRoleFromDB, handleError } from 'src/utils';
 import { PrismaService } from 'src/prisma.service';
 import { encryptPassword } from 'src/bcrypt/bcrypt';
 import { RequestWithAccount } from 'src/types';
+import { Prisma, VenueManager } from '@prisma/client';
 
 @Injectable()
 export class AccountsService {
@@ -159,7 +161,7 @@ export class AccountsService {
     }
   }
 
-  async update(
+  async updateAccountDetails(
     id: number,
     request: RequestWithAccount,
     updateAccountDto: UpdateAccountDto,
@@ -196,6 +198,129 @@ export class AccountsService {
               : updateAccountDto.account_name,
             account_password: updateAccountDto.account_password,
             account_roleId: updateAccountDto.account_roleId,
+          },
+        });
+      }
+    } catch (error: unknown) {
+      return handleError(error);
+    }
+  }
+
+  async updateAccountAccess(
+    id: number,
+    request: RequestWithAccount,
+    updateAccountAccessDto: UpdateAccountAccessDto,
+  ) {
+    try {
+      const uploaderAccount = await getAccountWithEmail(
+        this.prisma,
+        request.account.email,
+      );
+
+      if (uploaderAccount === undefined) {
+        return 'uploaderAccount is undefined';
+      }
+
+      const adminRole = await getRoleFromDB(this.prisma, 'admin');
+
+      if (uploaderAccount.account_roleId === adminRole.role_id) {
+        await this.prisma.venueAccess.deleteMany({
+          where: {
+            venueAccess_accountId: id,
+          },
+        });
+
+        updateAccountAccessDto.account_allowedVenues.map(
+          async (venueId: number) => {
+            try {
+              await this.prisma.venueAccess.create({
+                data: {
+                  venueAccess_accountId: id,
+                  venueAccess_venueId: venueId,
+                },
+              });
+            } catch (error: unknown) {
+              return handleError(error);
+            }
+          },
+        );
+
+        await this.prisma.businessAccess.deleteMany({
+          where: {
+            businessAccess_accountId: id,
+          },
+        });
+
+        updateAccountAccessDto.account_allowedBusinesses.map(
+          async (businessId: number) => {
+            try {
+              await this.prisma.businessAccess.create({
+                data: {
+                  businessAccess_accountId: id,
+                  businessAccess_businessId: businessId,
+                },
+              });
+            } catch (error: unknown) {
+              return handleError(error);
+            }
+          },
+        );
+
+        if (updateAccountAccessDto.account_venueManager) {
+          await this.prisma.venueManager.deleteMany({
+            where: {
+              venueManager_accountId: id,
+            },
+          });
+
+          updateAccountAccessDto.account_venueManager.map(
+            async (venueId: number) => {
+              try {
+                await this.prisma.venueManager.create({
+                  data: {
+                    venueManager_accountId: id,
+                    venueManager_venueId: venueId,
+                  },
+                });
+              } catch (error: unknown) {
+                return handleError(error);
+              }
+            },
+          );
+        }
+
+        if (updateAccountAccessDto.account_businessManager) {
+          await this.prisma.businessManager.deleteMany({
+            where: {
+              businessManager_accountId: id,
+            },
+          });
+
+          updateAccountAccessDto.account_businessManager.map(
+            async (venueId: number) => {
+              try {
+                await this.prisma.businessManager.create({
+                  data: {
+                    businessManager_accountId: id,
+                    businessManager_businessId: venueId,
+                  },
+                });
+              } catch (error: unknown) {
+                return handleError(error);
+              }
+            },
+          );
+        }
+
+        return await this.prisma.account.findFirstOrThrow({
+          where: {
+            account_id: id,
+          },
+          include: {
+            VenueAccess: true,
+            BusinessAccess: true,
+            VenueManager: true,
+            BusinessManager: true,
           },
         });
       }

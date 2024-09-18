@@ -138,7 +138,7 @@ let AccountsService = class AccountsService {
             return (0, utils_1.handleError)(error);
         }
     }
-    async update(id, request, updateAccountDto) {
+    async updateAccountDetails(id, request, updateAccountDto) {
         try {
             const uploaderAccount = await (0, utils_1.getAccountWithEmail)(this.prisma, request.account.email);
             if (uploaderAccount === undefined) {
@@ -162,6 +162,107 @@ let AccountsService = class AccountsService {
                             : updateAccountDto.account_name,
                         account_password: updateAccountDto.account_password,
                         account_roleId: updateAccountDto.account_roleId,
+                    },
+                });
+            }
+        }
+        catch (error) {
+            return (0, utils_1.handleError)(error);
+        }
+    }
+    async updateAccountAccess(id, request, updateAccountAccessDto) {
+        try {
+            const uploaderAccount = await (0, utils_1.getAccountWithEmail)(this.prisma, request.account.email);
+            if (uploaderAccount === undefined) {
+                return 'uploaderAccount is undefined';
+            }
+            const adminRole = await (0, utils_1.getRoleFromDB)(this.prisma, 'admin');
+            if (uploaderAccount.account_roleId === adminRole.role_id) {
+                await this.prisma.venueAccess.deleteMany({
+                    where: {
+                        venueAccess_accountId: id,
+                    },
+                });
+                updateAccountAccessDto.account_allowedVenues.map(async (venueId) => {
+                    try {
+                        await this.prisma.venueAccess.create({
+                            data: {
+                                venueAccess_accountId: id,
+                                venueAccess_venueId: venueId,
+                            },
+                        });
+                    }
+                    catch (error) {
+                        return (0, utils_1.handleError)(error);
+                    }
+                });
+                await this.prisma.businessAccess.deleteMany({
+                    where: {
+                        businessAccess_accountId: id,
+                    },
+                });
+                updateAccountAccessDto.account_allowedBusinesses.map(async (businessId) => {
+                    try {
+                        await this.prisma.businessAccess.create({
+                            data: {
+                                businessAccess_accountId: id,
+                                businessAccess_businessId: businessId,
+                            },
+                        });
+                    }
+                    catch (error) {
+                        return (0, utils_1.handleError)(error);
+                    }
+                });
+                if (updateAccountAccessDto.account_venueManager) {
+                    await this.prisma.venueManager.deleteMany({
+                        where: {
+                            venueManager_accountId: id,
+                        },
+                    });
+                    updateAccountAccessDto.account_venueManager.map(async (venueId) => {
+                        try {
+                            await this.prisma.venueManager.create({
+                                data: {
+                                    venueManager_accountId: id,
+                                    venueManager_venueId: venueId,
+                                },
+                            });
+                        }
+                        catch (error) {
+                            return (0, utils_1.handleError)(error);
+                        }
+                    });
+                }
+                if (updateAccountAccessDto.account_businessManager) {
+                    await this.prisma.businessManager.deleteMany({
+                        where: {
+                            businessManager_accountId: id,
+                        },
+                    });
+                    updateAccountAccessDto.account_businessManager.map(async (venueId) => {
+                        try {
+                            await this.prisma.businessManager.create({
+                                data: {
+                                    businessManager_accountId: id,
+                                    businessManager_businessId: venueId,
+                                },
+                            });
+                        }
+                        catch (error) {
+                            return (0, utils_1.handleError)(error);
+                        }
+                    });
+                }
+                return await this.prisma.account.findFirstOrThrow({
+                    where: {
+                        account_id: id,
+                    },
+                    include: {
+                        VenueAccess: true,
+                        BusinessAccess: true,
+                        VenueManager: true,
+                        BusinessManager: true,
                     },
                 });
             }

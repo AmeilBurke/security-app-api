@@ -69,6 +69,7 @@ let BannedPeopleService = class BannedPeopleService {
             });
             await this.prisma.banLocation.createMany({
                 data: locationsToBeBannedFrom,
+                skipDuplicates: true
             });
             return await this.prisma.bannedPerson.findFirstOrThrow({
                 where: {

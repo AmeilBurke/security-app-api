@@ -99,6 +99,7 @@ export class BannedPeopleService {
 
       await this.prisma.banLocation.createMany({
         data: locationsToBeBannedFrom,
+        skipDuplicates: true
       });
 
       return await this.prisma.bannedPerson.findFirstOrThrow({
@@ -191,8 +192,6 @@ export class BannedPeopleService {
       return handleError(error);
     }
   }
-
-  // need to add request: RequestWithAccount to services that need to check permissions
 
   async update(
     id: number,

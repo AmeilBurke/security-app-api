@@ -1,7 +1,5 @@
-import {
-  PrismaClientKnownRequestError,
-  PrismaClientUnknownRequestError,
-} from '@prisma/client/runtime/library';
+import { Prisma } from '@prisma/client';
+import { PrismaClientKnownRequestError, PrismaClientUnknownRequestError } from '@prisma/client/runtime/library';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { PrismaService } from 'src/prisma.service';
@@ -37,6 +35,11 @@ export const handleError = (error: unknown) => {
     if (error.code === 'P2002') {
       return 'you cannot use the same email for multiple accounts';
     }
+
+    if (error.code === 'P2003') {
+      return `there was an error with one or more foreign keys`;
+    }
+
     if (error.code === 'P2025') {
       return 'not found error';
     }

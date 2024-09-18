@@ -16,6 +16,7 @@ exports.AccountsController = void 0;
 const common_1 = require("@nestjs/common");
 const accounts_service_1 = require("./accounts.service");
 const create_account_dto_1 = require("./dto/create-account.dto");
+const update_account_access_dto_1 = require("./dto/update-account-access.dto");
 const update_account_dto_1 = require("./dto/update-account.dto");
 let AccountsController = class AccountsController {
     constructor(accountsService) {
@@ -30,8 +31,11 @@ let AccountsController = class AccountsController {
     findOne(id, request) {
         return this.accountsService.findOne(Number(id), request);
     }
-    update(id, request, updateAccountDto) {
-        return this.accountsService.update(Number(id), request, updateAccountDto);
+    updateAccountDetails(id, request, updateAccountDto) {
+        return this.accountsService.updateAccountDetails(Number(id), request, updateAccountDto);
+    }
+    updateAccountAccess(id, request, updateAccountAccessDto) {
+        return this.accountsService.updateAccountAccess(Number(id), request, updateAccountAccessDto);
     }
     remove(id, request) {
         return this.accountsService.remove(Number(id), request);
@@ -62,14 +66,23 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AccountsController.prototype, "findOne", null);
 __decorate([
-    (0, common_1.Patch)(':id'),
+    (0, common_1.Patch)('/details/:id'),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Req)()),
     __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, Object, update_account_dto_1.UpdateAccountDto]),
     __metadata("design:returntype", Promise)
-], AccountsController.prototype, "update", null);
+], AccountsController.prototype, "updateAccountDetails", null);
+__decorate([
+    (0, common_1.Patch)('/access/:id'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Req)()),
+    __param(2, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object, update_account_access_dto_1.UpdateAccountAccessDto]),
+    __metadata("design:returntype", Promise)
+], AccountsController.prototype, "updateAccountAccess", null);
 __decorate([
     (0, common_1.Delete)(':id'),
     __param(0, (0, common_1.Param)('id')),

@@ -10,9 +10,10 @@ import {
 } from '@nestjs/common';
 import { AccountsService } from './accounts.service';
 import { CreateAccountDto } from './dto/create-account.dto';
-import { UpdateAccountDto } from './dto/update-account.dto';
+import { UpdateAccountAccessDto } from './dto/update-account-access.dto';
 import { Account } from '@prisma/client';
 import { RequestWithAccount } from 'src/types';
+import { UpdateAccountDto } from './dto/update-account.dto';
 
 @Controller('accounts')
 export class AccountsController {
@@ -39,13 +40,22 @@ export class AccountsController {
     return this.accountsService.findOne(Number(id), request);
   }
 
-  @Patch(':id')
-  update(
+  @Patch('/details/:id')
+  updateAccountDetails(
     @Param('id') id: string,
     @Req() request: RequestWithAccount,
     @Body() updateAccountDto: UpdateAccountDto,
   ): Promise<Account | string> {
-    return this.accountsService.update(Number(id), request, updateAccountDto);
+    return this.accountsService.updateAccountDetails(Number(id), request, updateAccountDto);
+  }
+
+  @Patch('/access/:id')
+  updateAccountAccess(
+    @Param('id') id: string,
+    @Req() request: RequestWithAccount,
+    @Body() updateAccountAccessDto: UpdateAccountAccessDto,
+  ): Promise<Account | string> {
+    return this.accountsService.updateAccountAccess(Number(id), request, updateAccountAccessDto);
   }
 
   @Delete(':id')
