@@ -1,4 +1,4 @@
 
 ## Security App
 
-This is an app to help bouncers to see, add, edit & activate alerts about problem customers.
+This is the back-end of a security app that is being developed to help bouncers communicate between venues to identify problematic & barred customers.
