@@ -2,6 +2,7 @@ import { BannedPeopleService } from './banned-people.service';
 import { UpdateBannedPersonDto } from './dto/update-banned-person.dto';
 import { BannedPersonWithBanDetailsDto, RequestWithAccount } from 'src/types';
 import type { Response as ExpressResponse } from 'express';
+import { BanDetail } from '@prisma/client';
 export declare class BannedPeopleController {
     private readonly bannedPeopleService;
     constructor(bannedPeopleService: BannedPeopleService);
@@ -24,6 +25,14 @@ export declare class BannedPeopleController {
         bannedPerson_image: string | null;
         bannedPerson_name: string;
     })>;
+    createNewBan(id: string, request: RequestWithAccount, body: BanDetail): Promise<string | {
+        banDetail_id: number;
+        banDetail_reason: string;
+        banDetail_startDate: string;
+        banDetail_endDate: string;
+        banDetail_isBanPending: boolean;
+        banDetail_bannedPersonId: number | null;
+    }>;
     getPhotoFromBannedPersons(id: string, res: ExpressResponse): Promise<string | import("@nestjs/common").StreamableFile>;
     getBannedPeopleByVenue(id: string): Promise<string | {
         bannedPerson_id: number;

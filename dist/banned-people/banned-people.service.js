@@ -69,7 +69,7 @@ let BannedPeopleService = class BannedPeopleService {
             });
             await this.prisma.banLocation.createMany({
                 data: locationsToBeBannedFrom,
-                skipDuplicates: true
+                skipDuplicates: true,
             });
             return await this.prisma.bannedPerson.findFirstOrThrow({
                 where: {
@@ -83,6 +83,36 @@ let BannedPeopleService = class BannedPeopleService {
         }
         catch (error) {
             (0, utils_1.handleError)(error);
+        }
+    }
+    async createNewBanDetail(id, request, body) {
+        try {
+            const uploaderAccount = await this.prisma.account.findFirstOrThrow({
+                where: {
+                    account_email: request.account.email,
+                },
+            });
+            if (uploaderAccount === undefined) {
+                return 'uploaderAccount is undefined';
+            }
+            const adminRole = await (0, utils_1.getRoleFromDB)(this.prisma, 'admin');
+            let isBanPending = true;
+            if (uploaderAccount.account_roleId === adminRole.role_id) {
+                isBanPending = false;
+            }
+            const newBanDetail = await this.prisma.banDetail.create({
+                data: {
+                    banDetail_reason: body.banDetail_reason,
+                    banDetail_startDate: body.banDetail_startDate,
+                    banDetail_endDate: body.banDetail_endDate,
+                    banDetail_bannedPersonId: id,
+                    banDetail_isBanPending: isBanPending,
+                },
+            });
+            return newBanDetail;
+        }
+        catch (error) {
+            return (0, utils_1.handleError)(error);
         }
     }
     async findOne(id, res) {

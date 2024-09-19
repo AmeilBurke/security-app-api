@@ -18,6 +18,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { v4 as uuidv4 } from 'uuid';
 import type { Response as ExpressResponse } from 'express';
+import { BanDetail } from '@prisma/client';
 
 @Controller('banned-people')
 export class BannedPeopleController {
@@ -45,6 +46,15 @@ export class BannedPeopleController {
       file,
       createBannedPersonWithBanDetailsDto,
     );
+  }
+
+  @Post('new-ban/:id')
+  createNewBan(
+    @Param('id') id: string,
+    @Req() request: RequestWithAccount,
+    @Body() body: BanDetail,
+  ) {
+    return this.bannedPeopleService.createNewBanDetail(Number(id), request, body);
   }
 
   @Get('image/:id')

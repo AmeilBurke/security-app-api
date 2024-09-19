@@ -5,7 +5,7 @@ import { getAccountWithEmail, getRoleFromDB, handleError } from 'src/utils';
 import { PrismaService } from 'src/prisma.service';
 import { createReadStream } from 'fs';
 import type { Response as ExpressResponse } from 'express';
-import { BanLocation } from '@prisma/client';
+import { BanDetail, BanLocation } from '@prisma/client';
 
 @Injectable()
 export class BannedPeopleService {
@@ -99,7 +99,7 @@ export class BannedPeopleService {
 
       await this.prisma.banLocation.createMany({
         data: locationsToBeBannedFrom,
-        skipDuplicates: true
+        skipDuplicates: true,
       });
 
       return await this.prisma.bannedPerson.findFirstOrThrow({
@@ -115,14 +115,47 @@ export class BannedPeopleService {
       handleError(error);
     }
   }
+  
+  async createNewBanDetail(
+    id: number,
+    request: RequestWithAccount,
+    body: BanDetail,
+  ) {
+    try {
+      const uploaderAccount = await this.prisma.account.findFirstOrThrow({
+        where: {
+          account_email: request.account.email,
+        },
+      });
 
-  // async findAll() {
-  //   try {
-  //     return `This action returns all bannedPeople`;
-  //   } catch (error: unknown) {
-  //     return handleError(error);
-  //   }
-  // }
+      if (uploaderAccount === undefined) {
+        return 'uploaderAccount is undefined';
+      }
+
+      const adminRole = await getRoleFromDB(this.prisma, 'admin');
+
+      let isBanPending = true;
+
+      if (uploaderAccount.account_roleId === adminRole.role_id) {
+        isBanPending = false;
+      }
+
+      const newBanDetail = await this.prisma.banDetail.create({
+        data: {
+          banDetail_reason: body.banDetail_reason,
+          banDetail_startDate: body.banDetail_startDate,
+          banDetail_endDate: body.banDetail_endDate,
+          banDetail_bannedPersonId: id,
+          banDetail_isBanPending: isBanPending,
+        },
+      });
+
+      return newBanDetail;
+
+    } catch (error: unknown) {
+      return handleError(error);
+    }
+  }
 
   async findOne(id: number, res: ExpressResponse) {
     try {
@@ -200,7 +233,6 @@ export class BannedPeopleService {
     updateBannedPersonDto: UpdateBannedPersonDto,
   ) {
     try {
-
       const uploaderAccount = await getAccountWithEmail(
         this.prisma,
         request.account.email,
@@ -230,8 +262,8 @@ export class BannedPeopleService {
         uploaderAccount.account_roleId,
       );
 
-      if(!canAccountEdit) {
-        return 'you do not have permission to access this'
+      if (!canAccountEdit) {
+        return 'you do not have permission to access this';
       }
 
       return this.prisma.bannedPerson.update({

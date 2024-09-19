@@ -6,6 +6,7 @@ import { BannedPeopleModule } from './banned-people/banned-people.module';
 import { AuthenticationModule } from './authentication/authentication.module';
 import { ConfigModule } from '@nestjs/config';
 import { AlertDetailsModule } from './alert-details/alert-details.module';
+import { BusinessesModule } from './businesses/businesses.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { AlertDetailsModule } from './alert-details/alert-details.module';
       isGlobal: true,
     }),
     AlertDetailsModule,
+    BusinessesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
