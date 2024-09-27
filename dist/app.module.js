@@ -16,6 +16,7 @@ const authentication_module_1 = require("./authentication/authentication.module"
 const config_1 = require("@nestjs/config");
 const alert_details_module_1 = require("./alert-details/alert-details.module");
 const businesses_module_1 = require("./businesses/businesses.module");
+const venues_module_1 = require("./venues/venues.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -30,6 +31,7 @@ exports.AppModule = AppModule = __decorate([
             }),
             alert_details_module_1.AlertDetailsModule,
             businesses_module_1.BusinessesModule,
+            venues_module_1.VenuesModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],

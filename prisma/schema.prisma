@@ -68,8 +68,8 @@ model Venue {
   venue_id         Int            @id @unique @default(autoincrement())
   venue_name       String
   venue_logo       String?
-  business_id      Int
-  venue_businessId Business       @relation(fields: [business_id], references: [business_id])
+  venue_businessId Int
+  business_id      Business       @relation(fields: [venue_businessId], references: [business_id])
   VenueAccess      VenueAccess[]
   VenueManager     VenueManager[]
   BanList          BanLocation[]

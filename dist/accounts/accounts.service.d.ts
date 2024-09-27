@@ -63,11 +63,11 @@ export declare class AccountsService {
         account_password: string;
         account_roleId: number;
     })>;
-    remove(id: number, request: RequestWithAccount): Promise<{
+    remove(id: number, request: RequestWithAccount): Promise<"uploaderAccount is undefined" | {
         account_id: number;
         account_email: string;
         account_name: string;
         account_password: string;
         account_roleId: number;
-    } | "uploaderAccount is undefined">;
+    }>;
 }

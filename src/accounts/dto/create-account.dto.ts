@@ -27,7 +27,6 @@ export class CreateAccountDto {
   @IsNumber({}, { each: true })
   account_allowedVenues: number[];
 
-  // need to see if this validates
   @IsNumber({}, { each: true })
   account_allowedBusinesses: number[];
 
