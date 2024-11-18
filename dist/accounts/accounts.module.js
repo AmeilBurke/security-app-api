@@ -18,7 +18,6 @@ exports.AccountsModule = AccountsModule = __decorate([
     (0, common_1.Module)({
         controllers: [accounts_controller_1.AccountsController],
         providers: [accounts_service_1.AccountsService, prisma_service_1.PrismaService],
-        exports: [accounts_service_1.AccountsService],
     })
 ], AccountsModule);
 //# sourceMappingURL=accounts.module.js.map

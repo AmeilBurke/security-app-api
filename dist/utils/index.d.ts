@@ -1,13 +1,5 @@
+import { Account } from '@prisma/client';
 import { PrismaService } from 'src/prisma.service';
-export declare const getRoleFromDB: (prisma: PrismaService, roleName: string) => Promise<{
-    role_id: number;
-    role_name: string;
-}>;
-export declare const getAccountWithEmail: (prisma: PrismaService, email: string) => Promise<{
-    account_id: number;
-    account_email: string;
-    account_name: string;
-    account_password: string;
-    account_roleId: number;
-}>;
 export declare const handleError: (error: unknown) => string;
+export declare const getAccountInfoFromId: (prisma: PrismaService, id: number) => Promise<Account | string>;
+export declare const isAccountAdminRole: (prisma: PrismaService, account: Account) => Promise<Boolean>;

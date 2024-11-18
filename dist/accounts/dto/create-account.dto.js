@@ -18,12 +18,6 @@ __decorate([
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
-], CreateAccountDto.prototype, "account_name", void 0);
-__decorate([
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.IsNotEmpty)(),
-    (0, class_validator_1.IsEmail)(),
-    __metadata("design:type", String)
 ], CreateAccountDto.prototype, "account_email", void 0);
 __decorate([
     (0, class_validator_1.IsString)(),
@@ -31,25 +25,17 @@ __decorate([
     __metadata("design:type", String)
 ], CreateAccountDto.prototype, "account_password", void 0);
 __decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], CreateAccountDto.prototype, "account_name", void 0);
+__decorate([
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
 ], CreateAccountDto.prototype, "account_roleId", void 0);
 __decorate([
-    (0, class_validator_1.IsNumber)({}, { each: true }),
-    __metadata("design:type", Array)
-], CreateAccountDto.prototype, "account_allowedVenues", void 0);
-__decorate([
-    (0, class_validator_1.IsNumber)({}, { each: true }),
-    __metadata("design:type", Array)
-], CreateAccountDto.prototype, "account_allowedBusinesses", void 0);
-__decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsNumber)({}, { each: true }),
     __metadata("design:type", Array)
-], CreateAccountDto.prototype, "account_venueManager", void 0);
-__decorate([
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsNumber)({}, { each: true }),
-    __metadata("design:type", Array)
-], CreateAccountDto.prototype, "account_businessManager", void 0);
+], CreateAccountDto.prototype, "account_venueAccessIds", void 0);
 //# sourceMappingURL=create-account.dto.js.map

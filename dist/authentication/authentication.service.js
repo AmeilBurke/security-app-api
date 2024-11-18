@@ -20,7 +20,7 @@ let AuthenticationService = class AuthenticationService {
         this.jwtService = jwtService;
     }
     async signIn(email, password) {
-        const account = await this.accountsService.findOneToSignIn(email);
+        const account = await this.accountsService.findOneByEmail(email);
         if (typeof account === 'string') {
             return 'there was an error signing in, check your email & try again';
         }

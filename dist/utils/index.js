@@ -1,45 +1,42 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.handleError = exports.getAccountWithEmail = exports.getRoleFromDB = void 0;
+exports.isAccountAdminRole = exports.getAccountInfoFromId = exports.handleError = void 0;
 const library_1 = require("@prisma/client/runtime/library");
-const getRoleFromDB = async (prisma, roleName) => {
-    return await prisma.role.findFirstOrThrow({
-        where: {
-            role_name: roleName,
-        },
-    });
-};
-exports.getRoleFromDB = getRoleFromDB;
-const getAccountWithEmail = async (prisma, email) => {
-    try {
-        return await prisma.account.findFirstOrThrow({
-            where: {
-                account_email: email,
-            },
-        });
-    }
-    catch (error) {
-        (0, exports.handleError)(error);
-    }
-};
-exports.getAccountWithEmail = getAccountWithEmail;
 const handleError = (error) => {
+    console.log(error);
     if (error instanceof library_1.PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
-            return 'you cannot use the same email for multiple accounts';
+            return `${error.meta.target[0]} has failed the unique constraint requirement`;
         }
-        if (error.code === 'P2003') {
-            return `there was an error with one or more foreign keys`;
-        }
-        if (error.code === 'P2025') {
-            return 'not found error';
-        }
-        return error.message;
-    }
-    if (error instanceof library_1.PrismaClientUnknownRequestError) {
-        return error.message;
     }
     return String(error);
 };
 exports.handleError = handleError;
+const getAccountInfoFromId = async (prisma, id) => {
+    try {
+        return await prisma.account.findFirstOrThrow({
+            where: {
+                account_id: id,
+            },
+        });
+    }
+    catch (error) {
+        return (0, exports.handleError)(error);
+    }
+};
+exports.getAccountInfoFromId = getAccountInfoFromId;
+const isAccountAdminRole = async (prisma, account) => {
+    const role = await prisma.role.findFirstOrThrow({
+        where: {
+            role_name: 'admin',
+        },
+    });
+    if (account.account_roleId === role.role_id) {
+        return true;
+    }
+    else {
+        return false;
+    }
+};
+exports.isAccountAdminRole = isAccountAdminRole;
 //# sourceMappingURL=index.js.map

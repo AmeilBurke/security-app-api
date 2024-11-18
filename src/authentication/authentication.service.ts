@@ -10,9 +10,8 @@ export class AuthenticationService {
     private jwtService: JwtService,
   ) {}
 
-  // need to send postman testing
   async signIn(email: string, password: string) {
-    const account = await this.accountsService.findOneToSignIn(email);
+    const account = await this.accountsService.findOneByEmail(email);
     if (typeof account === 'string') {
       return 'there was an error signing in, check your email & try again';
     }

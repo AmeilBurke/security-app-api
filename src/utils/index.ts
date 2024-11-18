@@ -1,53 +1,45 @@
-import { Prisma } from '@prisma/client';
-import { PrismaClientKnownRequestError, PrismaClientUnknownRequestError } from '@prisma/client/runtime/library';
-import { diskStorage } from 'multer';
-import { extname } from 'path';
+import { Account } from '@prisma/client';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { PrismaService } from 'src/prisma.service';
 
-export const getRoleFromDB = async (
-  prisma: PrismaService,
-  roleName: string,
-) => {
-  return await prisma.role.findFirstOrThrow({
-    where: {
-      role_name: roleName,
-    },
-  });
+export const handleError = (error: unknown): string => {
+  console.log(error);
+  if (error instanceof PrismaClientKnownRequestError) {
+    if (error.code === 'P2002') {
+      return `${error.meta.target[0]} has failed the unique constraint requirement`;
+    }
+  }
+  return String(error);
 };
 
-export const getAccountWithEmail = async (
+export const getAccountInfoFromId = async (
   prisma: PrismaService,
-  email: string,
-) => {
+  id: number,
+): Promise<Account | string> => {
   try {
     return await prisma.account.findFirstOrThrow({
       where: {
-        account_email: email,
+        account_id: id,
       },
     });
   } catch (error: unknown) {
-    handleError(error);
+    return handleError(error);
   }
 };
 
-export const handleError = (error: unknown) => {
-  if (error instanceof PrismaClientKnownRequestError) {
-    if (error.code === 'P2002') {
-      return 'you cannot use the same email for multiple accounts';
-    }
+export const isAccountAdminRole = async (
+  prisma: PrismaService,
+  account: Account,
+): Promise<Boolean> => {
+  const role = await prisma.role.findFirstOrThrow({
+    where: {
+      role_name: 'admin',
+    },
+  });
 
-    if (error.code === 'P2003') {
-      return `there was an error with one or more foreign keys`;
-    }
-
-    if (error.code === 'P2025') {
-      return 'not found error';
-    }
-    return error.message;
+  if (account.account_roleId === role.role_id) {
+    return true;
+  } else {
+    return false;
   }
-
-  if (error instanceof PrismaClientUnknownRequestError) {
-    return error.message;
-  }
-  return String(error);
 };

@@ -10,10 +10,11 @@ exports.AuthenticationModule = void 0;
 const common_1 = require("@nestjs/common");
 const authentication_service_1 = require("./authentication.service");
 const authentication_controller_1 = require("./authentication.controller");
-const accounts_module_1 = require("../accounts/accounts.module");
 const jwt_1 = require("@nestjs/jwt");
 const core_1 = require("@nestjs/core");
 const authentication_guard_1 = require("./authentication.guard");
+const accounts_service_1 = require("../accounts/accounts.service");
+const prisma_service_1 = require("../prisma.service");
 let AuthenticationModule = class AuthenticationModule {
 };
 exports.AuthenticationModule = AuthenticationModule;
@@ -22,17 +23,18 @@ exports.AuthenticationModule = AuthenticationModule = __decorate([
         controllers: [authentication_controller_1.AuthenticationController],
         providers: [
             authentication_service_1.AuthenticationService,
+            accounts_service_1.AccountsService,
+            prisma_service_1.PrismaService,
             {
                 provide: core_1.APP_GUARD,
                 useClass: authentication_guard_1.AuthenticationGuard,
             },
         ],
         imports: [
-            accounts_module_1.AccountsModule,
             jwt_1.JwtModule.register({
                 global: true,
                 secret: process.env.JWT_SECRET,
-                signOptions: { expiresIn: "7 days" },
+                signOptions: { expiresIn: '7 days' },
             }),
         ],
     })

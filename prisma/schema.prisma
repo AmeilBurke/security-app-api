@@ -10,109 +10,90 @@ generator client {
   provider = "prisma-client-js"
 }
 
-model Account {
-  account_id       Int               @id @unique @default(autoincrement())
-  account_email    String            @unique
-  account_name     String
-  account_password String
-  account_roleId   Int
-  roleId           Role              @relation(fields: [account_roleId], references: [role_id])
-  BusinessAccess   BusinessAccess[]
-  VenueAccess      VenueAccess[]
-  VenueManager     VenueManager[]
-  BusinessManager  BusinessManager[]
-}
-
 model Role {
-  role_id   Int       @id @default(autoincrement())
-  role_name String    @unique
+  role_id   Int       @id @unique @default(autoincrement())
+  role_name String
   Accounts  Account[]
 }
 
-model BannedPerson {
-  bannedPerson_id    Int           @id @default(autoincrement())
-  bannedPerson_image String?
-  bannedPerson_name  String
-  BanLocation        BanLocation[]
-  BanDetail          BanDetail[]
-  AlertInfo          AlertDetail[]
-}
-
-model BanDetail {
-  banDetail_id             Int           @id @default(autoincrement())
-  banDetail_reason         String
-  banDetail_startDate      String
-  banDetail_endDate        String
-  banDetail_isBanPending   Boolean
-  banDetail_bannedPersonId Int?
-  bannedPersonId           BannedPerson? @relation(fields: [banDetail_bannedPersonId], references: [bannedPerson_id])
-}
-
-model AlertDetail {
-  alertDetails_id             Int          @id @unique @default(autoincrement())
-  alertDetails_bannedPersonId Int
-  alertDetails_businessId     Int
-  bannedPersonId              BannedPerson @relation(fields: [alertDetails_bannedPersonId], references: [bannedPerson_id])
-  businessId                  Business     @relation(fields: [alertDetails_businessId], references: [business_id])
-}
-
-model BanLocation {
-  banLocation_id             Int          @id @unique @default(autoincrement())
-  banLocation_bannedPersonId Int
-  banLocation_venueId        Int
-  bannedPersonId             BannedPerson @relation(fields: [banLocation_bannedPersonId], references: [bannedPerson_id])
-  venueId                    Venue        @relation(fields: [banLocation_venueId], references: [venue_id])
+model Account {
+  account_id       Int            @id @unique @default(autoincrement())
+  account_email    String         @unique
+  account_password String
+  account_name     String
+  role_name        Role           @relation(fields: [account_roleId], references: [role_id])
+  account_roleId   Int
+  VenueAccess      VenueAccess[]
+  VenueManager     VenueManager[]
+  AlertDetail      AlertDetail[]
+  BanDetail        BanDetail[]
 }
 
 model Venue {
-  venue_id         Int            @id @unique @default(autoincrement())
-  venue_name       String
-  venue_logo       String?
-  venue_businessId Int
-  business_id      Business       @relation(fields: [venue_businessId], references: [business_id])
-  VenueAccess      VenueAccess[]
-  VenueManager     VenueManager[]
-  BanList          BanLocation[]
-}
-
-model Business {
-  business_id     Int               @id @unique @default(autoincrement())
-  business_name   String
-  business_logo   String?
-  Venue           Venue[]
-  AlertInfo       AlertDetail[]
-  BusinessAccess  BusinessAccess[]
-  BusinessManager BusinessManager[]
-}
-
-model BusinessAccess {
-  businessAccess_id         Int      @id @unique @default(autoincrement())
-  businessAccess_accountId  Int
-  businessAccess_businessId Int
-  accountId                 Account  @relation(fields: [businessAccess_accountId], references: [account_id])
-  businessId                Business @relation(fields: [businessAccess_businessId], references: [business_id])
+  venue_id        Int            @id @unique @default(autoincrement())
+  venue_name      String         @unique
+  venue_imagePath String
+  VenueAccess     VenueAccess[]
+  VenueManager    VenueManager[]
+  VenueBan        VenueBan[]
 }
 
 model VenueAccess {
-  accountVenueAccess    Int     @id @unique @default(autoincrement())
+  venueAccess_id        Int     @id @unique @default(autoincrement())
+  account_id            Account @relation(fields: [venueAccess_accountId], references: [account_id])
   venueAccess_accountId Int
+  venue_id              Venue   @relation(fields: [venueAccess_venueId], references: [venue_id])
   venueAccess_venueId   Int
-  accountId             Account @relation(fields: [venueAccess_accountId], references: [account_id])
-  venueId               Venue   @relation(fields: [venueAccess_venueId], references: [venue_id])
 }
 
 model VenueManager {
-  venueManagerId         Int     @id @unique @default(autoincrement())
-  venueManager_accountId Int
+  venueManager_id        Int     @id @unique @default(autoincrement())
+  venue_id               Venue   @relation(fields: [venueManager_venueId], references: [venue_id])
   venueManager_venueId   Int
-  accountId              Account @relation(fields: [venueManager_accountId], references: [account_id])
-  venueId                Venue   @relation(fields: [venueManager_venueId], references: [venue_id])
+  account_id             Account @relation(fields: [venueManager_accountId], references: [account_id])
+  venueManager_accountId Int
 }
 
-model BusinessManager {
-  businessManagerId          Int      @id @unique @default(autoincrement())
-  businessManager_accountId  Int
-  businessManager_businessId Int
-  accountId                  Account  @relation(fields: [businessManager_accountId], references: [account_id])
-  venueId                    Business @relation(fields: [businessManager_businessId], references: [business_id])
+model BannedPerson {
+  bannedPerson_id        Int           @id @unique @default(autoincrement())
+  bannedPerson_name      String
+  bannedPerson_imagePath String
+  alertDetail            AlertDetail[]
+  VenueBan               VenueBan[]
+  BanDetail              BanDetail[]
+}
+
+model AlertDetail {
+  alertDetail_id               Int           @id @unique @default(autoincrement())
+  bannedPerson_id              BannedPerson? @relation(fields: [alertDetail_bannedPersonId], references: [bannedPerson_id])
+  alertDetail_bannedPersonId   Int?
+  alertDetail_name             String
+  alertDetail_imagePath        String
+  alertDetails_alertReason     String
+  alertDetails_startTime       String
+  account_id                   Account       @relation(fields: [alertDetails_alertUploadedBy], references: [account_id])
+  alertDetails_alertUploadedBy Int
+}
+
+model VenueBan {
+  venueBan_id             Int          @id @unique @default(autoincrement())
+  bannedPerson_id         BannedPerson @relation(fields: [venueBan_bannedPersonId], references: [bannedPerson_id])
+  venueBan_bannedPersonId Int
+  venue_id                Venue        @relation(fields: [venueBan_venueId], references: [venue_id])
+  venueBan_venueId        Int
+  BanDetail               BanDetail[]
+}
+
+model BanDetail {
+  banDetails_id             Int          @id @unique @default(autoincrement())
+  bannedPerson_id           BannedPerson @relation(fields: [banDetails_bannedPersonId], references: [bannedPerson_id])
+  banDetails_bannedPersonId Int
+  banDetails_reason         String
+  banDetails_banStartDate   String
+  banDetails_banEndDate     String
+  banDetails_bannedFrom     VenueBan     @relation(fields: [banDetails_venueBanId], references: [venueBan_id])
+  banDetails_venueBanId     Int
+  banDetails_isBanPending   Boolean
+  account_id                Account      @relation(fields: [banDetails_banUploadedBy], references: [account_id])
+  banDetails_banUploadedBy  Int
 }

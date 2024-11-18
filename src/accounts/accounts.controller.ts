@@ -10,10 +10,9 @@ import {
 } from '@nestjs/common';
 import { AccountsService } from './accounts.service';
 import { CreateAccountDto } from './dto/create-account.dto';
-import { UpdateAccountAccessDto } from './dto/update-account-access.dto';
-import { Account } from '@prisma/client';
-import { RequestWithAccount } from 'src/types';
 import { UpdateAccountDto } from './dto/update-account.dto';
+import { Public } from 'src/authentication/public.guard';
+import { RequestWithAccount } from 'src/types';
 
 @Controller('accounts')
 export class AccountsController {
@@ -23,46 +22,31 @@ export class AccountsController {
   create(
     @Req() request: RequestWithAccount,
     @Body() createAccountDto: CreateAccountDto,
-  ): Promise<Account | string> {
+  ) {
     return this.accountsService.create(request, createAccountDto);
   }
 
   @Get()
-  findAll(@Req() request: RequestWithAccount): Promise<Account[] | string> {
+  findAll(@Req() request: RequestWithAccount) {
     return this.accountsService.findAll(request);
   }
 
   @Get(':id')
-  findOne(
-    @Param('id') id: string,
-    @Req() request: RequestWithAccount,
-  ): Promise<Account | string> {
-    return this.accountsService.findOne(Number(id), request);
+  findOne(@Req() request: RequestWithAccount, @Param('id') id: string) {
+    return this.accountsService.findOne(request, Number(id));
   }
 
-  @Patch('/details/:id')
-  updateAccountDetails(
-    @Param('id') id: string,
+  @Patch(':id')
+  update(
     @Req() request: RequestWithAccount,
+    @Param('id') id: string,
     @Body() updateAccountDto: UpdateAccountDto,
-  ): Promise<Account | string> {
-    return this.accountsService.updateAccountDetails(Number(id), request, updateAccountDto);
-  }
-
-  @Patch('/access/:id')
-  updateAccountAccess(
-    @Param('id') id: string,
-    @Req() request: RequestWithAccount,
-    @Body() updateAccountAccessDto: UpdateAccountAccessDto,
-  ): Promise<Account | string> {
-    return this.accountsService.updateAccountAccess(Number(id), request, updateAccountAccessDto);
+  ) {
+    return this.accountsService.update(request, Number(id), updateAccountDto);
   }
 
   @Delete(':id')
-  remove(
-    @Param('id') id: string,
-    @Req() request: RequestWithAccount,
-  ): Promise<Account | string> {
-    return this.accountsService.remove(Number(id), request);
+  remove(@Req() request: RequestWithAccount, @Param('id') id: string) {
+    return this.accountsService.remove(request, Number(id));
   }
 }

@@ -24,7 +24,6 @@ let AuthenticationController = class AuthenticationController {
         return this.authenticationService.signIn(userLogin.user_email, userLogin.user_password);
     }
     getProfile(request) {
-        console.log(request.account);
         return request.account;
     }
 };
@@ -42,7 +41,7 @@ __decorate([
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Object)
 ], AuthenticationController.prototype, "getProfile", null);
 exports.AuthenticationController = AuthenticationController = __decorate([
     (0, common_1.Controller)('authentication'),
