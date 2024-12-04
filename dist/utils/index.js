@@ -8,6 +8,9 @@ const handleError = (error) => {
         if (error.code === 'P2002') {
             return `${error.meta.target[0]} has failed the unique constraint requirement`;
         }
+        if (error.code === 'P2025') {
+            return 'no record found in database by that id or name';
+        }
     }
     return String(error);
 };

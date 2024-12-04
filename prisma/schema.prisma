@@ -36,6 +36,7 @@ model Venue {
   VenueAccess     VenueAccess[]
   VenueManager    VenueManager[]
   VenueBan        VenueBan[]
+  BanDetail       BanDetail[]
 }
 
 model VenueAccess {
@@ -57,8 +58,8 @@ model VenueManager {
 model BannedPerson {
   bannedPerson_id        Int           @id @unique @default(autoincrement())
   bannedPerson_name      String
-  bannedPerson_imagePath String
-  alertDetail            AlertDetail[]
+  bannedPerson_imageName String
+  AlertDetail            AlertDetail[]
   VenueBan               VenueBan[]
   BanDetail              BanDetail[]
 }
@@ -68,7 +69,7 @@ model AlertDetail {
   bannedPerson_id              BannedPerson? @relation(fields: [alertDetail_bannedPersonId], references: [bannedPerson_id])
   alertDetail_bannedPersonId   Int?
   alertDetail_name             String
-  alertDetail_imagePath        String
+  alertDetail_imageName        String
   alertDetails_alertReason     String
   alertDetails_startTime       String
   account_id                   Account       @relation(fields: [alertDetails_alertUploadedBy], references: [account_id])
@@ -81,7 +82,6 @@ model VenueBan {
   venueBan_bannedPersonId Int
   venue_id                Venue        @relation(fields: [venueBan_venueId], references: [venue_id])
   venueBan_venueId        Int
-  BanDetail               BanDetail[]
 }
 
 model BanDetail {
@@ -91,7 +91,7 @@ model BanDetail {
   banDetails_reason         String
   banDetails_banStartDate   String
   banDetails_banEndDate     String
-  banDetails_bannedFrom     VenueBan     @relation(fields: [banDetails_venueBanId], references: [venueBan_id])
+  banDetails_bannedFrom     Venue        @relation(fields: [banDetails_venueBanId], references: [venue_id])
   banDetails_venueBanId     Int
   banDetails_isBanPending   Boolean
   account_id                Account      @relation(fields: [banDetails_banUploadedBy], references: [account_id])

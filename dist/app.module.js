@@ -13,6 +13,8 @@ const app_service_1 = require("./app.service");
 const authentication_module_1 = require("./authentication/authentication.module");
 const config_1 = require("@nestjs/config");
 const accounts_module_1 = require("./accounts/accounts.module");
+const banned_people_module_1 = require("./banned-people/banned-people.module");
+const alert_details_module_1 = require("./alert-details/alert-details.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -24,6 +26,8 @@ exports.AppModule = AppModule = __decorate([
                 isGlobal: true,
             }),
             accounts_module_1.AccountsModule,
+            banned_people_module_1.BannedPeopleModule,
+            alert_details_module_1.AlertDetailsModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],
