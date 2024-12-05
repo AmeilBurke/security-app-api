@@ -46,7 +46,7 @@ let AlertDetailsService = class AlertDetailsService {
     constructor(prisma) {
         this.prisma = prisma;
     }
-    async create(payload, createAlertDetailDto, imageName, fileExtension, server) {
+    async create(payload, createAlertDetailDto, imageName, server) {
         try {
             if (!payload.sub) {
                 return 'There was an unspecified error';
@@ -63,7 +63,7 @@ let AlertDetailsService = class AlertDetailsService {
             else {
                 minute = String(dateNow.minute());
             }
-            const newAlert = await this.prisma.alertDetail.create({
+            await this.prisma.alertDetail.create({
                 data: {
                     alertDetail_bannedPersonId: createAlertDetailDto.alertDetail_bannedPersonId,
                     alertDetail_name: createAlertDetailDto.alertDetail_name,
@@ -89,6 +89,38 @@ let AlertDetailsService = class AlertDetailsService {
             });
             server.emit('onAlertCreate', {
                 allAlerts: alertsWithBase64Image,
+            });
+        }
+        catch (error) {
+            return (0, utils_1.handleError)(error);
+        }
+    }
+    async update(payload, updateAlertDetailDto, imageName, server) {
+        try {
+            console.log(updateAlertDetailDto);
+            if (!payload.sub) {
+                return 'There was an unspecified error';
+            }
+            const requestAccount = await (0, utils_1.getAccountInfoFromId)(this.prisma, payload.sub);
+            if (typeof requestAccount === 'string') {
+                return 'there was an error with requestAccount';
+            }
+            await this.prisma.alertDetail.update({
+                where: {
+                    alertDetail_id: updateAlertDetailDto.alertDetail_id,
+                },
+                data: {
+                    alertDetail_name: updateAlertDetailDto.alertDetail_name,
+                    alertDetail_imageName: imageName === ''
+                        ? updateAlertDetailDto.alertDetail_imageName
+                        : imageName,
+                    alertDetails_alertReason: updateAlertDetailDto.alertDetail_alertReason,
+                },
+            });
+            const allAlerts = await this.prisma.alertDetail.findMany();
+            console.log(allAlerts);
+            server.emit('onAlertUpdate', {
+                allAlerts: allAlerts,
             });
         }
         catch (error) {

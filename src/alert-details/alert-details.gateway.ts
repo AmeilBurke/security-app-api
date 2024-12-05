@@ -7,6 +7,7 @@ import {
 } from '@nestjs/websockets';
 import { AlertDetailsService } from './alert-details.service';
 import { CreateAlertDetailDto } from './dto/create-alert-detail.dto';
+import { UpdateAlertDetailDto } from './dto/update-alert-detail.dto';
 import { v4 as uuidv4 } from 'uuid';
 import { Server, Socket } from 'socket.io';
 import { JwtService } from '@nestjs/jwt';
@@ -42,20 +43,19 @@ export class AlertDetailsGateway {
       { secret: process.env.JWT_SECRET },
     );
 
-    
     let fileExtension: string;
-    
-    switch(createAlertDetailDto.fileData[0]) {
-      case "/": 
-      fileExtension = 'jpg';
-      break;
-      
-      case "i": 
-      fileExtension = 'png';
-      break;
-      
-      case "U": 
-      fileExtension = 'webp';
+
+    switch (createAlertDetailDto.fileData[0]) {
+      case '/':
+        fileExtension = 'jpg';
+        break;
+
+      case 'i':
+        fileExtension = 'png';
+        break;
+
+      case 'U':
+        fileExtension = 'webp';
     }
     const imageName = `${uuidv4()}.${fileExtension}`;
 
@@ -67,13 +67,49 @@ export class AlertDetailsGateway {
       payload,
       createAlertDetailDto,
       imageName,
-      fileExtension,
       this.server,
     );
   }
 
-  // @SubscribeMessage('updateAlertDetail')
-  // update(@MessageBody() updateAlertDetailDto: UpdateAlertDetailDto) {
-  //   return this.alertDetailsService.update(updateAlertDetailDto.id, updateAlertDetailDto);
-  // }
+  @SubscribeMessage('updateAlertDetail')
+  async update(
+    @MessageBody() updateAlertDetailDto: UpdateAlertDetailDto,
+    @ConnectedSocket() client: Socket,
+  ) {
+    const payload = await this.jwtService.verifyAsync(
+      String(client.handshake.headers.jwt),
+      { secret: process.env.JWT_SECRET },
+    );
+
+    let fileExtension: string;
+    let imageName: string = '';
+
+    if (updateAlertDetailDto.alertDetail_imageName) {
+
+      switch (updateAlertDetailDto.alertDetail_imageName[0]) {
+        case '/':
+          fileExtension = 'jpg';
+          break;
+
+        case 'i':
+          fileExtension = 'png';
+          break;
+
+        case 'U':
+          fileExtension = 'webp';
+      }
+      imageName = `${uuidv4()}.${fileExtension}`;
+
+      const filePath = path.join('src\\images\\people', `${imageName}`);
+      const fileBuffer = Buffer.from(updateAlertDetailDto.alertDetail_imageName, 'base64');
+      fs.writeFileSync(filePath, fileBuffer);
+    }
+
+    return this.alertDetailsService.update(
+      payload,
+      updateAlertDetailDto,
+      imageName,
+      this.server,
+    );
+  }
 }

@@ -1,6 +1,7 @@
-import { CreateAlertDetailDto } from './create-alert-detail.dto';
-declare const UpdateAlertDetailDto_base: import("@nestjs/mapped-types").MappedType<Partial<CreateAlertDetailDto>>;
-export declare class UpdateAlertDetailDto extends UpdateAlertDetailDto_base {
-    id: number;
+export declare class UpdateAlertDetailDto {
+    alertDetail_id: number;
+    alertDetail_bannedPersonId?: number;
+    alertDetail_name?: string;
+    alertDetail_alertReason?: string;
+    alertDetail_imageName?: string;
 }
-export {};

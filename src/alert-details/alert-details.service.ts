@@ -17,7 +17,6 @@ export class AlertDetailsService {
     payload: { sub: number; email: string; iat: number; exp: number },
     createAlertDetailDto: CreateAlertDetailDto & { fileData: string },
     imageName: string,
-    fileExtension: string,
     server: Server,
   ) {
     try {
@@ -44,12 +43,14 @@ export class AlertDetailsService {
         minute = String(dateNow.minute());
       }
 
-      const newAlert = await this.prisma.alertDetail.create({
+      await this.prisma.alertDetail.create({
         data: {
-          alertDetail_bannedPersonId: createAlertDetailDto.alertDetail_bannedPersonId,
+          alertDetail_bannedPersonId:
+            createAlertDetailDto.alertDetail_bannedPersonId,
           alertDetail_name: createAlertDetailDto.alertDetail_name,
           alertDetail_imageName: imageName,
-          alertDetails_alertReason: createAlertDetailDto.alertDetails_alertReason,
+          alertDetails_alertReason:
+            createAlertDetailDto.alertDetails_alertReason,
           alertDetails_startTime: `${dateNow.hour()}:${minute} ${dateNow.date()}-${dateNow.month() + 1}-${dateNow.year()}`,
           alertDetails_alertUploadedBy: requestAccount.account_id,
         },
@@ -57,18 +58,23 @@ export class AlertDetailsService {
 
       const allAlerts = await this.prisma.alertDetail.findMany();
 
-      const alertsWithBase64Image = allAlerts.map((alertDetail: AlertDetail) => {
-        try {
-          const filePath = path.join('src\\images\\people\\', alertDetail.alertDetail_imageName);
-          const fileBuffer = fs.readFileSync(filePath);
-          alertDetail.alertDetail_imageName = fileBuffer.toString('base64');
-          return alertDetail;
-        } catch (error: unknown) {
-          if(error instanceof Error) {
-            console.log(error.message);
+      const alertsWithBase64Image = allAlerts.map(
+        (alertDetail: AlertDetail) => {
+          try {
+            const filePath = path.join(
+              'src\\images\\people\\',
+              alertDetail.alertDetail_imageName,
+            );
+            const fileBuffer = fs.readFileSync(filePath);
+            alertDetail.alertDetail_imageName = fileBuffer.toString('base64');
+            return alertDetail;
+          } catch (error: unknown) {
+            if (error instanceof Error) {
+              console.log(error.message);
+            }
           }
-        }
-      });
+        },
+      );
 
       server.emit('onAlertCreate', {
         allAlerts: alertsWithBase64Image,
@@ -79,10 +85,57 @@ export class AlertDetailsService {
   }
 
   // do the same as create, but just update instead
-  
-  // update(id: number, updateAlertDetailDto: UpdateAlertDetailDto) {
-  //   return `This action updates a #${id} alertDetail`;
-  // }
+
+  async update(
+    payload: { sub: number; email: string; iat: number; exp: number },
+    updateAlertDetailDto: UpdateAlertDetailDto,
+    imageName: string,
+    server: Server,
+  ) {
+    try {
+      console.log(updateAlertDetailDto);
+
+      if (!payload.sub) {
+        return 'There was an unspecified error';
+      }
+
+      const requestAccount = await getAccountInfoFromId(
+        this.prisma,
+        payload.sub,
+      );
+
+      if (typeof requestAccount === 'string') {
+        return 'there was an error with requestAccount';
+      }
+
+      await this.prisma.alertDetail.update({
+        where: {
+          alertDetail_id: updateAlertDetailDto.alertDetail_id,
+        },
+        data: {
+          alertDetail_name: updateAlertDetailDto.alertDetail_name,
+          alertDetail_imageName:
+            imageName === ''
+              ? updateAlertDetailDto.alertDetail_imageName
+              : imageName,
+          alertDetails_alertReason:
+            updateAlertDetailDto.alertDetail_alertReason,
+        },
+      });
+
+      const allAlerts = await this.prisma.alertDetail.findMany();
+
+      console.log(allAlerts);
+
+      server.emit('onAlertUpdate', {
+        allAlerts: allAlerts,
+      });
+    } catch (error: unknown) {
+      return handleError(error);
+    }
+  }
+
+  // need a cronjob to do this instead
 
   // remove(id: number) {
   //   return `This action removes a #${id} alertDetail`;
