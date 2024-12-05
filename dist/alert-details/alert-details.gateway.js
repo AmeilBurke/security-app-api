@@ -95,6 +95,9 @@ let AlertDetailsGateway = class AlertDetailsGateway {
         }
         return this.alertDetailsService.update(payload, updateAlertDetailDto, imageName, this.server);
     }
+    async ReadableStreamDefaultReader(client) {
+        return this.alertDetailsService.remove(this.server);
+    }
 };
 exports.AlertDetailsGateway = AlertDetailsGateway;
 __decorate([
@@ -118,6 +121,13 @@ __decorate([
         socket_io_1.Socket]),
     __metadata("design:returntype", Promise)
 ], AlertDetailsGateway.prototype, "update", null);
+__decorate([
+    (0, websockets_1.SubscribeMessage)('deleteAllAlertDetail'),
+    __param(0, (0, websockets_1.ConnectedSocket)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [socket_io_1.Socket]),
+    __metadata("design:returntype", Promise)
+], AlertDetailsGateway.prototype, "ReadableStreamDefaultReader", null);
 exports.AlertDetailsGateway = AlertDetailsGateway = __decorate([
     (0, websockets_1.WebSocketGateway)({ cors: true }),
     __metadata("design:paramtypes", [alert_details_service_1.AlertDetailsService,

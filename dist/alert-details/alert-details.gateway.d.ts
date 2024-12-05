@@ -13,4 +13,5 @@ export declare class AlertDetailsGateway {
         fileData: string;
     }, client: Socket): Promise<string>;
     update(updateAlertDetailDto: UpdateAlertDetailDto, client: Socket): Promise<string>;
+    ReadableStreamDefaultReader(client: Socket): Promise<string>;
 }

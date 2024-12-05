@@ -40,8 +40,10 @@ const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma.service");
 const utils_1 = require("../utils");
 const dayjs_1 = __importDefault(require("dayjs"));
+const socket_io_1 = require("socket.io");
 const path = __importStar(require("path"));
 const fs = __importStar(require("fs"));
+const schedule_1 = require("@nestjs/schedule");
 let AlertDetailsService = class AlertDetailsService {
     constructor(prisma) {
         this.prisma = prisma;
@@ -118,7 +120,6 @@ let AlertDetailsService = class AlertDetailsService {
                 },
             });
             const allAlerts = await this.prisma.alertDetail.findMany();
-            console.log(allAlerts);
             server.emit('onAlertUpdate', {
                 allAlerts: allAlerts,
             });
@@ -127,8 +128,25 @@ let AlertDetailsService = class AlertDetailsService {
             return (0, utils_1.handleError)(error);
         }
     }
+    async remove(server) {
+        try {
+            await this.prisma.alertDetail.deleteMany();
+            server.emit('onAlertUpdate', {
+                allAlerts: [],
+            });
+        }
+        catch (error) {
+            return (0, utils_1.handleError)(error);
+        }
+    }
 };
 exports.AlertDetailsService = AlertDetailsService;
+__decorate([
+    (0, schedule_1.Cron)('0 6 * * *'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [socket_io_1.Server]),
+    __metadata("design:returntype", Promise)
+], AlertDetailsService.prototype, "remove", null);
 exports.AlertDetailsService = AlertDetailsService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService])

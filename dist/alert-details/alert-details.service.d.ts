@@ -19,4 +19,5 @@ export declare class AlertDetailsService {
         iat: number;
         exp: number;
     }, updateAlertDetailDto: UpdateAlertDetailDto, imageName: string, server: Server): Promise<string>;
+    remove(server: Server): Promise<string>;
 }

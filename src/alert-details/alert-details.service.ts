@@ -8,6 +8,7 @@ import { Server } from 'socket.io';
 import { AlertDetail } from '@prisma/client';
 import * as path from 'path';
 import * as fs from 'fs';
+import { Cron } from '@nestjs/schedule';
 
 @Injectable()
 export class AlertDetailsService {
@@ -125,8 +126,6 @@ export class AlertDetailsService {
 
       const allAlerts = await this.prisma.alertDetail.findMany();
 
-      console.log(allAlerts);
-
       server.emit('onAlertUpdate', {
         allAlerts: allAlerts,
       });
@@ -137,7 +136,16 @@ export class AlertDetailsService {
 
   // need a cronjob to do this instead
 
-  // remove(id: number) {
-  //   return `This action removes a #${id} alertDetail`;
-  // }
+  @Cron('0 6 * * *')
+  async remove(server: Server) {
+    try {
+      await this.prisma.alertDetail.deleteMany();
+
+      server.emit('onAlertUpdate', {
+        allAlerts: [],
+      });
+    } catch (error: unknown) {
+      return handleError(error);
+    }
+  }
 }

@@ -30,8 +30,6 @@ export class AlertDetailsGateway {
     });
   }
 
-  // make is so an uplaod of an alert returns all of them, same for edits & cron job the removes at 6am
-
   @SubscribeMessage('createAlertDetail')
   async create(
     @MessageBody()
@@ -85,7 +83,6 @@ export class AlertDetailsGateway {
     let imageName: string = '';
 
     if (updateAlertDetailDto.alertDetail_imageName) {
-
       switch (updateAlertDetailDto.alertDetail_imageName[0]) {
         case '/':
           fileExtension = 'jpg';
@@ -101,7 +98,10 @@ export class AlertDetailsGateway {
       imageName = `${uuidv4()}.${fileExtension}`;
 
       const filePath = path.join('src\\images\\people', `${imageName}`);
-      const fileBuffer = Buffer.from(updateAlertDetailDto.alertDetail_imageName, 'base64');
+      const fileBuffer = Buffer.from(
+        updateAlertDetailDto.alertDetail_imageName,
+        'base64',
+      );
       fs.writeFileSync(filePath, fileBuffer);
     }
 
@@ -111,5 +111,10 @@ export class AlertDetailsGateway {
       imageName,
       this.server,
     );
+  }
+
+  @SubscribeMessage('deleteAllAlertDetail')
+  async ReadableStreamDefaultReader(@ConnectedSocket() client: Socket) {
+    return this.alertDetailsService.remove(this.server);
   }
 }
