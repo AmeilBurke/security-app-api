@@ -5,6 +5,9 @@ import { PrismaService } from 'src/prisma.service';
 import { getAccountInfoFromId, handleError } from 'src/utils';
 import dayjs from 'dayjs';
 import { Server } from 'socket.io';
+import { AlertDetail } from '@prisma/client';
+import * as path from 'path';
+import * as fs from 'fs';
 
 @Injectable()
 export class AlertDetailsService {
@@ -33,12 +36,12 @@ export class AlertDetailsService {
 
       const dateNow = dayjs();
 
-      let minute;
+      let minute: string;
 
-      if(dateNow.minute() <= 9) {
+      if (dateNow.minute() <= 9) {
         minute = `0${dateNow.minute()}`;
       } else {
-        minute = dateNow.minute();
+        minute = String(dateNow.minute());
       }
 
       const newAlert = await this.prisma.alertDetail.create({
@@ -52,26 +55,31 @@ export class AlertDetailsService {
         },
       });
 
-      console.log(newAlert);
+      const allAlerts = await this.prisma.alertDetail.findMany();
+
+      const alertsWithBase64Image = allAlerts.map((alertDetail: AlertDetail) => {
+        try {
+          const filePath = path.join('src\\images\\people\\', alertDetail.alertDetail_imageName);
+          const fileBuffer = fs.readFileSync(filePath);
+          alertDetail.alertDetail_imageName = fileBuffer.toString('base64');
+          return alertDetail;
+        } catch (error: unknown) {
+          if(error instanceof Error) {
+            console.log(error.message);
+          }
+        }
+      });
 
       server.emit('onAlertCreate', {
-        alertDetail: newAlert,
-        imageName: createAlertDetailDto.fileData,
-        fileExtension: fileExtension,
+        allAlerts: alertsWithBase64Image,
       });
     } catch (error: unknown) {
       return handleError(error);
     }
   }
 
-  // findAll() {
-  //   return `This action returns all alertDetails`;
-  // }
-
-  // findOne(id: number) {
-  //   return `This action returns a #${id} alertDetail`;
-  // }
-
+  // do the same as create, but just update instead
+  
   // update(id: number, updateAlertDetailDto: UpdateAlertDetailDto) {
   //   return `This action updates a #${id} alertDetail`;
   // }

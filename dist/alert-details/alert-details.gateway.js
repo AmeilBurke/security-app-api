@@ -67,10 +67,9 @@ let AlertDetailsGateway = class AlertDetailsGateway {
                 fileExtension = 'webp';
         }
         const imageName = `${(0, uuid_1.v4)()}.${fileExtension}`;
-        const filePath = path.join('src\\images\\people', `${imageName}.${fileExtension}`);
+        const filePath = path.join('src\\images\\people', `${imageName}`);
         const fileBuffer = Buffer.from(createAlertDetailDto.fileData, 'base64');
         fs.writeFileSync(filePath, fileBuffer);
-        console.log(filePath);
         return this.alertDetailsService.create(payload, createAlertDetailDto, imageName, fileExtension, this.server);
     }
 };

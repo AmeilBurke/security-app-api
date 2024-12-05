@@ -7,14 +7,8 @@ import {
 } from '@nestjs/websockets';
 import { AlertDetailsService } from './alert-details.service';
 import { CreateAlertDetailDto } from './dto/create-alert-detail.dto';
-import { UpdateAlertDetailDto } from './dto/update-alert-detail.dto';
-import { Req, UploadedFile, UseInterceptors } from '@nestjs/common';
-import { RequestWithAccount } from 'src/types';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
 import { v4 as uuidv4 } from 'uuid';
 import { Server, Socket } from 'socket.io';
-import { AuthenticationGuard } from 'src/authentication/authentication.guard';
 import { JwtService } from '@nestjs/jwt';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -34,6 +28,8 @@ export class AlertDetailsGateway {
       console.log(`${socket.id} - connected`);
     });
   }
+
+  // make is so an uplaod of an alert returns all of them, same for edits & cron job the removes at 6am
 
   @SubscribeMessage('createAlertDetail')
   async create(
@@ -63,11 +59,9 @@ export class AlertDetailsGateway {
     }
     const imageName = `${uuidv4()}.${fileExtension}`;
 
-    const filePath = path.join('src\\images\\people', `${imageName}.${fileExtension}`);
+    const filePath = path.join('src\\images\\people', `${imageName}`);
     const fileBuffer = Buffer.from(createAlertDetailDto.fileData, 'base64');
     fs.writeFileSync(filePath, fileBuffer);
-
-    console.log(filePath);
 
     return this.alertDetailsService.create(
       payload,
@@ -78,23 +72,8 @@ export class AlertDetailsGateway {
     );
   }
 
-  // @SubscribeMessage('findAllAlertDetails')
-  // findAll() {
-  //   return this.alertDetailsService.findAll();
-  // }
-
-  // @SubscribeMessage('findOneAlertDetail')
-  // findOne(@MessageBody() id: number) {
-  //   return this.alertDetailsService.findOne(id);
-  // }
-
   // @SubscribeMessage('updateAlertDetail')
   // update(@MessageBody() updateAlertDetailDto: UpdateAlertDetailDto) {
   //   return this.alertDetailsService.update(updateAlertDetailDto.id, updateAlertDetailDto);
-  // }
-
-  // @SubscribeMessage('removeAlertDetail')
-  // remove(@MessageBody() id: number) {
-  //   return this.alertDetailsService.remove(id);
   // }
 }
