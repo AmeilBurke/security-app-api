@@ -36,6 +36,10 @@ export class AlertDetailsGateway {
     createAlertDetailDto: CreateAlertDetailDto & { fileData: string },
     @ConnectedSocket() client: Socket,
   ) {
+    if (!client.handshake.headers.jwt) {
+      return 'no valid JWT token found';
+    }
+    
     const payload = await this.jwtService.verifyAsync(
       String(client.handshake.headers.jwt),
       { secret: process.env.JWT_SECRET },
@@ -113,6 +117,7 @@ export class AlertDetailsGateway {
     );
   }
 
+  // needs to be tested
   @SubscribeMessage('deleteAllAlertDetail')
   async ReadableStreamDefaultReader(@ConnectedSocket() client: Socket) {
     return this.alertDetailsService.remove(this.server);

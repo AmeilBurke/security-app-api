@@ -46,12 +46,10 @@ export class AlertDetailsService {
 
       await this.prisma.alertDetail.create({
         data: {
-          alertDetail_bannedPersonId:
-            createAlertDetailDto.alertDetail_bannedPersonId,
+          alertDetail_bannedPersonId: createAlertDetailDto.alertDetail_bannedPersonId,
           alertDetail_name: createAlertDetailDto.alertDetail_name,
           alertDetail_imageName: imageName,
-          alertDetails_alertReason:
-            createAlertDetailDto.alertDetails_alertReason,
+          alertDetails_alertReason: createAlertDetailDto.alertDetails_alertReason,
           alertDetails_startTime: `${dateNow.hour()}:${minute} ${dateNow.date()}-${dateNow.month() + 1}-${dateNow.year()}`,
           alertDetails_alertUploadedBy: requestAccount.account_id,
         },
@@ -85,8 +83,6 @@ export class AlertDetailsService {
     }
   }
 
-  // do the same as create, but just update instead
-
   async update(
     payload: { sub: number; email: string; iat: number; exp: number },
     updateAlertDetailDto: UpdateAlertDetailDto,
@@ -94,7 +90,6 @@ export class AlertDetailsService {
     server: Server,
   ) {
     try {
-      console.log(updateAlertDetailDto);
 
       if (!payload.sub) {
         return 'There was an unspecified error';
@@ -134,7 +129,7 @@ export class AlertDetailsService {
     }
   }
 
-  // need a cronjob to do this instead
+  // needs testing
 
   @Cron('0 6 * * *')
   async remove(server: Server) {

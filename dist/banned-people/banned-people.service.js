@@ -1,9 +1,32 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
 };
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
@@ -17,18 +40,18 @@ const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma.service");
 const utils_1 = require("../utils");
 const dayjs_1 = __importDefault(require("dayjs"));
-const fs_1 = require("fs");
 const path_1 = __importDefault(require("path"));
+const fs = __importStar(require("fs"));
 let BannedPeopleService = class BannedPeopleService {
     constructor(prisma) {
         this.prisma = prisma;
     }
-    async create(request, file, createBannedPersonDto) {
+    async create(payload, createBannedPersonDto, imageName, server) {
         try {
-            if (!request.account) {
+            if (!payload.sub) {
                 return 'There was an unspecified error';
             }
-            const requestAccount = await (0, utils_1.getAccountInfoFromId)(this.prisma, request.account.sub);
+            const requestAccount = await (0, utils_1.getAccountInfoFromId)(this.prisma, payload.sub);
             if (typeof requestAccount === 'string') {
                 return 'there was an error with requestAccount';
             }
@@ -37,12 +60,12 @@ let BannedPeopleService = class BannedPeopleService {
                     bannedPerson_name: createBannedPersonDto.bannedPerson_name
                         .toLocaleLowerCase()
                         .trim(),
-                    bannedPerson_imageName: file.filename,
+                    bannedPerson_imageName: imageName,
                 },
             });
             const isBanPending = await (0, utils_1.isAccountAdminRole)(this.prisma, requestAccount);
-            const [banEndDay, banEndMonth, banEndYear] = createBannedPersonDto.banDetails_banEndDate.split('-');
-            const venueIds = createBannedPersonDto.banDetails_venueBanIds
+            const [banEndDay, banEndMonth, banEndYear] = createBannedPersonDto.banDetails.banDetails_banEndDate.split('-');
+            const venueIds = createBannedPersonDto.banDetails.banDetails_venueBanIds
                 .split(',')
                 .map((ids) => {
                 return Number(ids);
@@ -52,7 +75,7 @@ let BannedPeopleService = class BannedPeopleService {
                 await this.prisma.banDetail.create({
                     data: {
                         banDetails_bannedPersonId: newBanProfile.bannedPerson_id,
-                        banDetails_reason: createBannedPersonDto.banDetails_reason
+                        banDetails_reason: createBannedPersonDto.banDetails.banDetails_reason
                             .toLocaleLowerCase()
                             .trim(),
                         banDetails_banStartDate: `${dateNow.date()}-${dateNow.month() + 1}-${dateNow.year()}`,
@@ -67,22 +90,30 @@ let BannedPeopleService = class BannedPeopleService {
                 data: {
                     alertDetail_bannedPersonId: newBanProfile.bannedPerson_id,
                     alertDetail_name: newBanProfile.bannedPerson_name,
-                    alertDetail_imageName: file.filename,
-                    alertDetails_alertReason: createBannedPersonDto.banDetails_reason
+                    alertDetail_imageName: imageName,
+                    alertDetails_alertReason: createBannedPersonDto.banDetails.banDetails_reason
                         .toLocaleLowerCase()
                         .trim(),
                     alertDetails_startTime: `${dateNow.hour()}:${dateNow.minute()}:${dateNow.second()}`,
                     alertDetails_alertUploadedBy: requestAccount.account_id,
                 },
             });
-            return this.prisma.bannedPerson.findFirstOrThrow({
-                where: {
-                    bannedPerson_id: newBanProfile.bannedPerson_id,
-                },
-                include: {
-                    BanDetail: true,
-                    AlertDetail: true,
-                },
+            const allAlerts = await this.prisma.alertDetail.findMany();
+            const alertsWithBase64Image = allAlerts.map((alertDetail) => {
+                try {
+                    const filePath = path_1.default.join('src\\images\\people\\', alertDetail.alertDetail_imageName);
+                    const fileBuffer = fs.readFileSync(filePath);
+                    alertDetail.alertDetail_imageName = fileBuffer.toString('base64');
+                    return alertDetail;
+                }
+                catch (error) {
+                    if (error instanceof Error) {
+                        console.log(error.message);
+                    }
+                }
+            });
+            server.emit('onBanCreate', {
+                allAlerts: alertsWithBase64Image,
             });
         }
         catch (error) {
@@ -152,7 +183,7 @@ let BannedPeopleService = class BannedPeopleService {
                     bannedPerson_id: id,
                 },
             });
-            const file = (0, fs_1.createReadStream)(`src\\images\\people\\${bannedPersonProfile.bannedPerson_imageName}`);
+            const file = fs.createReadStream(`src\\images\\people\\${bannedPersonProfile.bannedPerson_imageName}`);
             response.set({
                 'Content-Type': `image/${bannedPersonProfile.bannedPerson_imageName.split('.')[1]}`,
             });
@@ -203,7 +234,7 @@ let BannedPeopleService = class BannedPeopleService {
             }
             if (file !== undefined) {
                 const filePath = path_1.default.join('src\\images\\people', bannedPersonDetails.bannedPerson_imageName);
-                await fs_1.promises.unlink(filePath);
+                await fs.unlink(filePath, () => { });
             }
             return this.prisma.bannedPerson.update({
                 where: {

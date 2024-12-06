@@ -23,9 +23,6 @@ let BannedPeopleController = class BannedPeopleController {
     constructor(bannedPeopleService) {
         this.bannedPeopleService = bannedPeopleService;
     }
-    create(request, file, createBannedPersonDto) {
-        return this.bannedPeopleService.create(request, file, createBannedPersonDto);
-    }
     findAll(request) {
         return this.bannedPeopleService.findAll(request);
     }
@@ -40,24 +37,6 @@ let BannedPeopleController = class BannedPeopleController {
     }
 };
 exports.BannedPeopleController = BannedPeopleController;
-__decorate([
-    (0, common_1.Post)(),
-    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file', {
-        storage: (0, multer_1.diskStorage)({
-            destination: 'src\\images\\people',
-            filename: (req, file, cb) => {
-                const fileType = file.mimetype.split('/')[1];
-                cb(null, `${(0, uuid_1.v4)()}.${fileType}`);
-            },
-        }),
-    })),
-    __param(0, (0, common_1.Req)()),
-    __param(1, (0, common_1.UploadedFile)()),
-    __param(2, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object, Object]),
-    __metadata("design:returntype", void 0)
-], BannedPeopleController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)(),
     __param(0, (0, common_1.Req)()),

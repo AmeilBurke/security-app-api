@@ -35,18 +35,17 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AlertDetailsGateway = void 0;
+exports.BannedPeopleGateway = void 0;
 const websockets_1 = require("@nestjs/websockets");
-const alert_details_service_1 = require("./alert-details.service");
-const update_alert_detail_dto_1 = require("./dto/update-alert-detail.dto");
-const uuid_1 = require("uuid");
 const socket_io_1 = require("socket.io");
 const jwt_1 = require("@nestjs/jwt");
+const banned_people_service_1 = require("./banned-people.service");
+const uuid_1 = require("uuid");
 const path = __importStar(require("path"));
 const fs = __importStar(require("fs"));
-let AlertDetailsGateway = class AlertDetailsGateway {
-    constructor(alertDetailsService, jwtService) {
-        this.alertDetailsService = alertDetailsService;
+let BannedPeopleGateway = class BannedPeopleGateway {
+    constructor(bannedPeopleService, jwtService) {
+        this.bannedPeopleService = bannedPeopleService;
         this.jwtService = jwtService;
     }
     onModuleInit() {
@@ -54,13 +53,14 @@ let AlertDetailsGateway = class AlertDetailsGateway {
             console.log(`${socket.id} - connected`);
         });
     }
-    async create(createAlertDetailDto, client) {
+    async create(createBannedPerson, client) {
+        console.log(createBannedPerson);
         if (!client.handshake.headers.jwt) {
             return 'no valid JWT token found';
         }
         const payload = await this.jwtService.verifyAsync(String(client.handshake.headers.jwt), { secret: process.env.JWT_SECRET });
         let fileExtension;
-        switch (createAlertDetailDto.fileData[0]) {
+        switch (createBannedPerson.fileData[0]) {
             case '/':
                 fileExtension = 'jpg';
                 break;
@@ -72,68 +72,27 @@ let AlertDetailsGateway = class AlertDetailsGateway {
         }
         const imageName = `${(0, uuid_1.v4)()}.${fileExtension}`;
         const filePath = path.join('src\\images\\people', `${imageName}`);
-        const fileBuffer = Buffer.from(createAlertDetailDto.fileData, 'base64');
+        const fileBuffer = Buffer.from(createBannedPerson.fileData, 'base64');
         fs.writeFileSync(filePath, fileBuffer);
-        return this.alertDetailsService.create(payload, createAlertDetailDto, imageName, this.server);
-    }
-    async update(updateAlertDetailDto, client) {
-        const payload = await this.jwtService.verifyAsync(String(client.handshake.headers.jwt), { secret: process.env.JWT_SECRET });
-        let fileExtension;
-        let imageName = '';
-        if (updateAlertDetailDto.alertDetail_imageName) {
-            switch (updateAlertDetailDto.alertDetail_imageName[0]) {
-                case '/':
-                    fileExtension = 'jpg';
-                    break;
-                case 'i':
-                    fileExtension = 'png';
-                    break;
-                case 'U':
-                    fileExtension = 'webp';
-            }
-            imageName = `${(0, uuid_1.v4)()}.${fileExtension}`;
-            const filePath = path.join('src\\images\\people', `${imageName}`);
-            const fileBuffer = Buffer.from(updateAlertDetailDto.alertDetail_imageName, 'base64');
-            fs.writeFileSync(filePath, fileBuffer);
-        }
-        return this.alertDetailsService.update(payload, updateAlertDetailDto, imageName, this.server);
-    }
-    async ReadableStreamDefaultReader(client) {
-        return this.alertDetailsService.remove(this.server);
+        return this.bannedPeopleService.create(payload, createBannedPerson, imageName, this.server);
     }
 };
-exports.AlertDetailsGateway = AlertDetailsGateway;
+exports.BannedPeopleGateway = BannedPeopleGateway;
 __decorate([
     (0, websockets_1.WebSocketServer)(),
     __metadata("design:type", socket_io_1.Server)
-], AlertDetailsGateway.prototype, "server", void 0);
+], BannedPeopleGateway.prototype, "server", void 0);
 __decorate([
-    (0, websockets_1.SubscribeMessage)('createAlertDetail'),
+    (0, websockets_1.SubscribeMessage)('addBannedPerson'),
     __param(0, (0, websockets_1.MessageBody)()),
     __param(1, (0, websockets_1.ConnectedSocket)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, socket_io_1.Socket]),
     __metadata("design:returntype", Promise)
-], AlertDetailsGateway.prototype, "create", null);
-__decorate([
-    (0, websockets_1.SubscribeMessage)('updateAlertDetail'),
-    __param(0, (0, websockets_1.MessageBody)()),
-    __param(1, (0, websockets_1.ConnectedSocket)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [update_alert_detail_dto_1.UpdateAlertDetailDto,
-        socket_io_1.Socket]),
-    __metadata("design:returntype", Promise)
-], AlertDetailsGateway.prototype, "update", null);
-__decorate([
-    (0, websockets_1.SubscribeMessage)('deleteAllAlertDetail'),
-    __param(0, (0, websockets_1.ConnectedSocket)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [socket_io_1.Socket]),
-    __metadata("design:returntype", Promise)
-], AlertDetailsGateway.prototype, "ReadableStreamDefaultReader", null);
-exports.AlertDetailsGateway = AlertDetailsGateway = __decorate([
+], BannedPeopleGateway.prototype, "create", null);
+exports.BannedPeopleGateway = BannedPeopleGateway = __decorate([
     (0, websockets_1.WebSocketGateway)({ cors: true }),
-    __metadata("design:paramtypes", [alert_details_service_1.AlertDetailsService,
+    __metadata("design:paramtypes", [banned_people_service_1.BannedPeopleService,
         jwt_1.JwtService])
-], AlertDetailsGateway);
-//# sourceMappingURL=alert-details.gateway.js.map
+], BannedPeopleGateway);
+//# sourceMappingURL=banned-people.gateway.js.map

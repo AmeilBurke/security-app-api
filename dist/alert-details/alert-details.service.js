@@ -99,7 +99,6 @@ let AlertDetailsService = class AlertDetailsService {
     }
     async update(payload, updateAlertDetailDto, imageName, server) {
         try {
-            console.log(updateAlertDetailDto);
             if (!payload.sub) {
                 return 'There was an unspecified error';
             }

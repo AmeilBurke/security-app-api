@@ -5,7 +5,6 @@ import {
   Body,
   Patch,
   Param,
-  Delete,
   Req,
   UseInterceptors,
   UploadedFile,
@@ -23,29 +22,29 @@ import type { Response as ExpressResponse } from 'express';
 export class BannedPeopleController {
   constructor(private readonly bannedPeopleService: BannedPeopleService) {}
 
-  @Post()
-  @UseInterceptors(
-    FileInterceptor('file', {
-      storage: diskStorage({
-        destination: 'src\\images\\people',
-        filename: (req, file, cb) => {
-          const fileType = file.mimetype.split('/')[1];
-          cb(null, `${uuidv4()}.${fileType}`);
-        },
-      }),
-    }),
-  )
-  create(
-    @Req() request: RequestWithAccount,
-    @UploadedFile() file: Express.Multer.File,
-    @Body() createBannedPersonDto: BannedPersonWithSomeBanDetails,
-  ) {
-    return this.bannedPeopleService.create(
-      request,
-      file,
-      createBannedPersonDto,
-    );
-  }
+  // @Post()
+  // @UseInterceptors(
+  //   FileInterceptor('file', {
+  //     storage: diskStorage({
+  //       destination: 'src\\images\\people',
+  //       filename: (req, file, cb) => {
+  //         const fileType = file.mimetype.split('/')[1];
+  //         cb(null, `${uuidv4()}.${fileType}`);
+  //       },
+  //     }),
+  //   }),
+  // )
+  // create(
+  //   @Req() request: RequestWithAccount,
+  //   @UploadedFile() file: Express.Multer.File,
+  //   @Body() createBannedPersonDto: BannedPersonWithSomeBanDetails,
+  // ) {
+  //   return this.bannedPeopleService.create(
+  //     request,
+  //     file,
+  //     createBannedPersonDto,
+  //   );
+  // }
 
   @Get()
   findAll(@Req() request: RequestWithAccount) {
@@ -65,8 +64,6 @@ export class BannedPeopleController {
   ) {
     return this.bannedPeopleService.findOnePhoto(request, response, Number(id));
   }
-
-  // just this one to do then either venues or look into websockets for alertDetails
 
   @Patch(':id')
   @UseInterceptors(
