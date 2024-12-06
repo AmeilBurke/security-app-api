@@ -54,7 +54,6 @@ let BannedPeopleGateway = class BannedPeopleGateway {
         });
     }
     async create(createBannedPerson, client) {
-        console.log(createBannedPerson);
         if (!client.handshake.headers.jwt) {
             return 'no valid JWT token found';
         }

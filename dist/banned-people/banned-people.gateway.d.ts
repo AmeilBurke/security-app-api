@@ -15,5 +15,5 @@ export declare class BannedPeopleGateway {
             banDetails_banEndDate: string;
             banDetails_venueBanIds: string;
         };
-    }, client: Socket): Promise<string>;
+    }, client: Socket): Promise<string | void>;
 }

@@ -29,7 +29,7 @@ export class BannedPeopleGateway {
     });
   }
 
-  // need to test if this works on an upload
+  // need to create update
   
   @SubscribeMessage('addBannedPerson')
   async create(
@@ -44,8 +44,6 @@ export class BannedPeopleGateway {
     },
     @ConnectedSocket() client: Socket,
   ) {
-
-    console.log(createBannedPerson);
 
     if (!client.handshake.headers.jwt) {
       return 'no valid JWT token found';

@@ -35,7 +35,7 @@ export class BannedPeopleService {
     },
     imageName: string,
     server: Server,
-  ) {
+  ): Promise<string | void> {
     try {
       if (!payload.sub) {
         return 'There was an unspecified error';
