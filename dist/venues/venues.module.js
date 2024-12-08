@@ -10,13 +10,14 @@ exports.VenuesModule = void 0;
 const common_1 = require("@nestjs/common");
 const venues_service_1 = require("./venues.service");
 const venues_controller_1 = require("./venues.controller");
+const prisma_service_1 = require("../prisma.service");
 let VenuesModule = class VenuesModule {
 };
 exports.VenuesModule = VenuesModule;
 exports.VenuesModule = VenuesModule = __decorate([
     (0, common_1.Module)({
         controllers: [venues_controller_1.VenuesController],
-        providers: [venues_service_1.VenuesService],
+        providers: [venues_service_1.VenuesService, prisma_service_1.PrismaService],
     })
 ], VenuesModule);
 //# sourceMappingURL=venues.module.js.map

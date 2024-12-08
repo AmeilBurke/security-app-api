@@ -17,12 +17,15 @@ const common_1 = require("@nestjs/common");
 const venues_service_1 = require("./venues.service");
 const create_venue_dto_1 = require("./dto/create-venue.dto");
 const update_venue_dto_1 = require("./dto/update-venue.dto");
+const platform_express_1 = require("@nestjs/platform-express");
+const multer_1 = require("multer");
+const uuid_1 = require("uuid");
 let VenuesController = class VenuesController {
     constructor(venuesService) {
         this.venuesService = venuesService;
     }
-    create(createVenueDto) {
-        return this.venuesService.create(createVenueDto);
+    create(request, file, createVenueDto) {
+        return this.venuesService.create(request, file, createVenueDto);
     }
     findAll() {
         return this.venuesService.findAll();
@@ -40,9 +43,20 @@ let VenuesController = class VenuesController {
 exports.VenuesController = VenuesController;
 __decorate([
     (0, common_1.Post)(),
-    __param(0, (0, common_1.Body)()),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file', {
+        storage: (0, multer_1.diskStorage)({
+            destination: 'src\\images\\people',
+            filename: (req, file, cb) => {
+                const fileType = file.mimetype.split('/')[1];
+                cb(null, `${(0, uuid_1.v4)()}.${fileType}`);
+            },
+        }),
+    })),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.UploadedFile)()),
+    __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [create_venue_dto_1.CreateVenueDto]),
+    __metadata("design:paramtypes", [Object, Object, create_venue_dto_1.CreateVenueDto]),
     __metadata("design:returntype", void 0)
 ], VenuesController.prototype, "create", null);
 __decorate([

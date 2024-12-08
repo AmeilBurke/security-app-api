@@ -1,7 +1,6 @@
 import {
   Controller,
   Get,
-  Post,
   Body,
   Patch,
   Param,
@@ -21,30 +20,6 @@ import type { Response as ExpressResponse } from 'express';
 @Controller('banned-people')
 export class BannedPeopleController {
   constructor(private readonly bannedPeopleService: BannedPeopleService) {}
-
-  // @Post()
-  // @UseInterceptors(
-  //   FileInterceptor('file', {
-  //     storage: diskStorage({
-  //       destination: 'src\\images\\people',
-  //       filename: (req, file, cb) => {
-  //         const fileType = file.mimetype.split('/')[1];
-  //         cb(null, `${uuidv4()}.${fileType}`);
-  //       },
-  //     }),
-  //   }),
-  // )
-  // create(
-  //   @Req() request: RequestWithAccount,
-  //   @UploadedFile() file: Express.Multer.File,
-  //   @Body() createBannedPersonDto: BannedPersonWithSomeBanDetails,
-  // ) {
-  //   return this.bannedPeopleService.create(
-  //     request,
-  //     file,
-  //     createBannedPersonDto,
-  //   );
-  // }
 
   @Get()
   findAll(@Req() request: RequestWithAccount) {
