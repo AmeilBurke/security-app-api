@@ -52,10 +52,26 @@ export class VenuesController {
     return this.venuesService.findAllBansForVenue(request, Number(id));
   }
 
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateVenueDto: UpdateVenueDto) {
-  //   return this.venuesService.update(+id, updateVenueDto);
-  // }
+  @Patch(':id')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: 'src\\images\\venues',
+        filename: (req, file, cb) => {
+          const fileType = file.mimetype.split('/')[1];
+          cb(null, `${uuidv4()}.${fileType}`);
+        },
+      }),
+    }),
+  )
+  update(
+    @Req() request: RequestWithAccount,
+    @UploadedFile() file: Express.Multer.File,
+    @Param('id') id: string,
+    @Body() updateVenueDto: UpdateVenueDto,
+  ) {
+    return this.venuesService.update(request, file, Number(id), updateVenueDto);
+  }
 
   // @Delete(':id')
   // remove(@Param('id') id: string) {

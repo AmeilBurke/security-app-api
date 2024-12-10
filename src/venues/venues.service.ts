@@ -153,8 +153,57 @@ export class VenuesService {
     }
   }
 
-  update(id: number, updateVenueDto: UpdateVenueDto) {
-    return `This action updates a #${id} venue`;
+  async update(
+    request: RequestWithAccount,
+    file: Express.Multer.File,
+    id: number,
+    updateVenueDto: UpdateVenueDto,
+  ) {
+    try {
+      if (!request.account) {
+        return 'There was an unspecified error';
+      }
+
+      const requestAccount = await getAccountInfoFromId(
+        this.prisma,
+        request.account.sub,
+      );
+
+      if (typeof requestAccount === 'string') {
+        return 'there was an error with requestAccount';
+      }
+
+      const accountRole = await this.prisma.role.findFirstOrThrow({
+        where: {
+          role_id: requestAccount.account_roleId,
+        },
+      });
+
+      if (!(await isAccountAdminRole(this.prisma, requestAccount))) {
+        const venueManagers = await this.prisma.venueManager.findMany({
+          where: {
+            venueManager_accountId: requestAccount.account_id,
+          },
+        });
+
+        if (venueManagers.length === 0) {
+          return 'you do not have permission to access this';
+        }
+      }
+
+      return await this.prisma.venue.update({
+        where: {
+          venue_id: id,
+        },
+        data: {
+          venue_name: updateVenueDto.venue_name,
+          venue_imagePath:
+            file !== undefined ? file.filename : updateVenueDto.venue_imagePath,
+        },
+      });
+    } catch (error: unknown) {
+      return handleError(error);
+    }
   }
 
   remove(id: number) {

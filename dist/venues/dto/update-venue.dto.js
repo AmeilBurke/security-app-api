@@ -19,4 +19,9 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateVenueDto.prototype, "venue_name", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateVenueDto.prototype, "venue_imagePath", void 0);
 //# sourceMappingURL=update-venue.dto.js.map

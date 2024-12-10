@@ -143,8 +143,43 @@ let VenuesService = class VenuesService {
             return (0, utils_1.handleError)(error);
         }
     }
-    update(id, updateVenueDto) {
-        return `This action updates a #${id} venue`;
+    async update(request, file, id, updateVenueDto) {
+        try {
+            if (!request.account) {
+                return 'There was an unspecified error';
+            }
+            const requestAccount = await (0, utils_1.getAccountInfoFromId)(this.prisma, request.account.sub);
+            if (typeof requestAccount === 'string') {
+                return 'there was an error with requestAccount';
+            }
+            const accountRole = await this.prisma.role.findFirstOrThrow({
+                where: {
+                    role_id: requestAccount.account_roleId,
+                },
+            });
+            if (!(await (0, utils_1.isAccountAdminRole)(this.prisma, requestAccount))) {
+                const venueManagers = await this.prisma.venueManager.findMany({
+                    where: {
+                        venueManager_accountId: requestAccount.account_id,
+                    },
+                });
+                if (venueManagers.length === 0) {
+                    return 'you do not have permission to access this';
+                }
+            }
+            return await this.prisma.venue.update({
+                where: {
+                    venue_id: id,
+                },
+                data: {
+                    venue_name: updateVenueDto.venue_name,
+                    venue_imagePath: file !== undefined ? file.filename : updateVenueDto.venue_imagePath,
+                },
+            });
+        }
+        catch (error) {
+            return (0, utils_1.handleError)(error);
+        }
     }
     remove(id) {
         return `This action removes a #${id} venue`;

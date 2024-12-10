@@ -16,6 +16,7 @@ exports.VenuesController = void 0;
 const common_1 = require("@nestjs/common");
 const venues_service_1 = require("./venues.service");
 const create_venue_dto_1 = require("./dto/create-venue.dto");
+const update_venue_dto_1 = require("./dto/update-venue.dto");
 const platform_express_1 = require("@nestjs/platform-express");
 const multer_1 = require("multer");
 const uuid_1 = require("uuid");
@@ -31,6 +32,9 @@ let VenuesController = class VenuesController {
     }
     findOne(request, id) {
         return this.venuesService.findAllBansForVenue(request, Number(id));
+    }
+    update(request, file, id, updateVenueDto) {
+        return this.venuesService.update(request, file, Number(id), updateVenueDto);
     }
 };
 exports.VenuesController = VenuesController;
@@ -67,6 +71,25 @@ __decorate([
     __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", void 0)
 ], VenuesController.prototype, "findOne", null);
+__decorate([
+    (0, common_1.Patch)(':id'),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file', {
+        storage: (0, multer_1.diskStorage)({
+            destination: 'src\\images\\venues',
+            filename: (req, file, cb) => {
+                const fileType = file.mimetype.split('/')[1];
+                cb(null, `${(0, uuid_1.v4)()}.${fileType}`);
+            },
+        }),
+    })),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.UploadedFile)()),
+    __param(2, (0, common_1.Param)('id')),
+    __param(3, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object, String, update_venue_dto_1.UpdateVenueDto]),
+    __metadata("design:returntype", void 0)
+], VenuesController.prototype, "update", null);
 exports.VenuesController = VenuesController = __decorate([
     (0, common_1.Controller)('venues'),
     __metadata("design:paramtypes", [venues_service_1.VenuesService])
