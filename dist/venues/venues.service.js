@@ -208,9 +208,9 @@ let VenuesService = class VenuesService {
                     venueAccess_venueId: id,
                 },
             });
-            console.log(`${deletedBanDetails.count} ban details deleted`);
-            console.log(`${deletedVenueBans.count} venue bans deleted`);
-            console.log(`${deletedVenueAccess.count} venue access deleted`);
+            console.log(`${deletedBanDetails.count} related ban details deleted`);
+            console.log(`${deletedVenueBans.count} related venue bans deleted`);
+            console.log(`${deletedVenueAccess.count} related venue access deleted`);
             return await this.prisma.venue.delete({
                 where: {
                     venue_id: id,
