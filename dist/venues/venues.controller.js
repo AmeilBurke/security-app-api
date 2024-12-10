@@ -36,6 +36,9 @@ let VenuesController = class VenuesController {
     update(request, file, id, updateVenueDto) {
         return this.venuesService.update(request, file, Number(id), updateVenueDto);
     }
+    remove(request, id) {
+        return this.venuesService.remove(request, Number(id));
+    }
 };
 exports.VenuesController = VenuesController;
 __decorate([
@@ -90,6 +93,14 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object, String, update_venue_dto_1.UpdateVenueDto]),
     __metadata("design:returntype", void 0)
 ], VenuesController.prototype, "update", null);
+__decorate([
+    (0, common_1.Delete)(':id'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", void 0)
+], VenuesController.prototype, "remove", null);
 exports.VenuesController = VenuesController = __decorate([
     (0, common_1.Controller)('venues'),
     __metadata("design:paramtypes", [venues_service_1.VenuesService])

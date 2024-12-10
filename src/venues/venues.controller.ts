@@ -73,8 +73,8 @@ export class VenuesController {
     return this.venuesService.update(request, file, Number(id), updateVenueDto);
   }
 
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.venuesService.remove(+id);
-  // }
+  @Delete(':id')
+  remove(@Req() request: RequestWithAccount, @Param('id') id: string) {
+    return this.venuesService.remove(request, Number(id));
+  }
 }

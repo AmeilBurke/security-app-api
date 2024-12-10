@@ -181,8 +181,45 @@ let VenuesService = class VenuesService {
             return (0, utils_1.handleError)(error);
         }
     }
-    remove(id) {
-        return `This action removes a #${id} venue`;
+    async remove(request, id) {
+        try {
+            if (!request.account) {
+                return 'There was an unspecified error';
+            }
+            const requestAccount = await (0, utils_1.getAccountInfoFromId)(this.prisma, request.account.sub);
+            if (typeof requestAccount === 'string') {
+                return 'there was an error with requestAccount';
+            }
+            if (!(await (0, utils_1.isAccountAdminRole)(this.prisma, requestAccount))) {
+                return 'you do not have permission to access this';
+            }
+            const deletedBanDetails = await this.prisma.banDetail.deleteMany({
+                where: {
+                    banDetails_venueBanId: id,
+                },
+            });
+            const deletedVenueBans = await this.prisma.venueBan.deleteMany({
+                where: {
+                    venueBan_venueId: id,
+                },
+            });
+            const deletedVenueAccess = await this.prisma.venueAccess.deleteMany({
+                where: {
+                    venueAccess_venueId: id,
+                },
+            });
+            console.log(`${deletedBanDetails.count} ban details deleted`);
+            console.log(`${deletedVenueBans.count} venue bans deleted`);
+            console.log(`${deletedVenueAccess.count} venue access deleted`);
+            return await this.prisma.venue.delete({
+                where: {
+                    venue_id: id,
+                },
+            });
+        }
+        catch (error) {
+            return (0, utils_1.handleError)(error);
+        }
     }
 };
 exports.VenuesService = VenuesService;

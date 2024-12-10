@@ -206,7 +206,54 @@ export class VenuesService {
     }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} venue`;
+  async remove(request: RequestWithAccount, id: number) {
+    try {
+      if (!request.account) {
+        return 'There was an unspecified error';
+      }
+
+      const requestAccount = await getAccountInfoFromId(
+        this.prisma,
+        request.account.sub,
+      );
+
+      if (typeof requestAccount === 'string') {
+        return 'there was an error with requestAccount';
+      }
+
+      if (!(await isAccountAdminRole(this.prisma, requestAccount))) {
+        return 'you do not have permission to access this';
+      }
+
+      const deletedBanDetails = await this.prisma.banDetail.deleteMany({
+        where: {
+          banDetails_venueBanId: id,
+        },
+      });
+
+      const deletedVenueBans = await this.prisma.venueBan.deleteMany({
+        where: {
+          venueBan_venueId: id,
+        },
+      });
+
+      const deletedVenueAccess = await this.prisma.venueAccess.deleteMany({
+        where: {
+          venueAccess_venueId: id,
+        },
+      });
+
+      console.log(`${deletedBanDetails.count} ban details deleted`);
+      console.log(`${deletedVenueBans.count} venue bans deleted`);
+      console.log(`${deletedVenueAccess.count} venue access deleted`);
+
+      return await this.prisma.venue.delete({
+        where: {
+          venue_id: id,
+        },
+      });
+    } catch (error: unknown) {
+      return handleError(error);
+    }
   }
 }

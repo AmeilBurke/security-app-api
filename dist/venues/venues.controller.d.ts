@@ -25,4 +25,9 @@ export declare class VenuesController {
         venue_name: string;
         venue_imagePath: string;
     }>;
+    remove(request: RequestWithAccount, id: string): Promise<string | {
+        venue_id: number;
+        venue_name: string;
+        venue_imagePath: string;
+    }>;
 }

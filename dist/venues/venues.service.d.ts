@@ -18,5 +18,9 @@ export declare class VenuesService {
         venue_name: string;
         venue_imagePath: string;
     }>;
-    remove(id: number): string;
+    remove(request: RequestWithAccount, id: number): Promise<string | {
+        venue_id: number;
+        venue_name: string;
+        venue_imagePath: string;
+    }>;
 }
