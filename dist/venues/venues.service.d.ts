@@ -7,8 +7,12 @@ export declare class VenuesService {
     private prisma;
     constructor(prisma: PrismaService);
     create(request: RequestWithAccount, file: Express.Multer.File, createVenueDto: CreateVenueDto): Promise<string | Venue>;
-    findAll(): string;
-    findOne(id: number): string;
+    findAllVenues(request: RequestWithAccount): Promise<string | Venue[]>;
+    findAllBansForVenue(request: RequestWithAccount, id: number): Promise<string | {
+        bannedPerson_id: number;
+        bannedPerson_name: string;
+        bannedPerson_imageName: string;
+    }[]>;
     update(id: number, updateVenueDto: UpdateVenueDto): string;
     remove(id: number): string;
 }

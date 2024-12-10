@@ -31,14 +31,14 @@ export class BannedPeopleController {
     return this.bannedPeopleService.findOneInfo(request, Number(id));
   }
 
-  @Get('/photo/:id')
-  findOneWithPhoto(
-    @Req() request: RequestWithAccount,
-    @Res({ passthrough: true }) response: ExpressResponse,
-    @Param('id') id: string,
-  ) {
-    return this.bannedPeopleService.findOnePhoto(request, response, Number(id));
-  }
+  // @Get('/photo/:id')
+  // findOneWithPhoto(
+  //   @Req() request: RequestWithAccount,
+  //   @Res({ passthrough: true }) response: ExpressResponse,
+  //   @Param('id') id: string,
+  // ) {
+  //   return this.bannedPeopleService.findOnePhoto(request, response, Number(id));
+  // }
 
   @Patch(':id')
   @UseInterceptors(

@@ -1,7 +1,6 @@
 import { BannedPeopleService } from './banned-people.service';
 import { UpdateBannedPersonDto } from './dto/update-banned-person.dto';
 import { RequestWithAccount } from 'src/types';
-import type { Response as ExpressResponse } from 'express';
 export declare class BannedPeopleController {
     private readonly bannedPeopleService;
     constructor(bannedPeopleService: BannedPeopleService);
@@ -21,7 +20,6 @@ export declare class BannedPeopleController {
         BanDetail: import(".prisma/client").BanDetail[];
         AlertDetail: import(".prisma/client").AlertDetail[];
     })>;
-    findOneWithPhoto(request: RequestWithAccount, response: ExpressResponse, id: string): Promise<string | import("@nestjs/common").StreamableFile>;
     update(request: RequestWithAccount, file: Express.Multer.File, id: string, updateBannedPersonDto: UpdateBannedPersonDto): Promise<string | {
         bannedPerson_id: number;
         bannedPerson_name: string;

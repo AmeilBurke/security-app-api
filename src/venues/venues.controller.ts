@@ -26,7 +26,7 @@ export class VenuesController {
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({
-        destination: 'src\\images\\people',
+        destination: 'src\\images\\venues',
         filename: (req, file, cb) => {
           const fileType = file.mimetype.split('/')[1];
           cb(null, `${uuidv4()}.${fileType}`);
@@ -43,22 +43,22 @@ export class VenuesController {
   }
 
   @Get()
-  findAll() {
-    return this.venuesService.findAll();
+  findAllVenues(@Req() request: RequestWithAccount) {
+    return this.venuesService.findAllVenues(request);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.venuesService.findOne(+id);
+  findOne(@Req() request: RequestWithAccount, @Param('id') id: string) {
+    return this.venuesService.findAllBansForVenue(request, Number(id));
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateVenueDto: UpdateVenueDto) {
-    return this.venuesService.update(+id, updateVenueDto);
-  }
+  // @Patch(':id')
+  // update(@Param('id') id: string, @Body() updateVenueDto: UpdateVenueDto) {
+  //   return this.venuesService.update(+id, updateVenueDto);
+  // }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.venuesService.remove(+id);
-  }
+  // @Delete(':id')
+  // remove(@Param('id') id: string) {
+  //   return this.venuesService.remove(+id);
+  // }
 }

@@ -1,6 +1,5 @@
 import { VenuesService } from './venues.service';
 import { CreateVenueDto } from './dto/create-venue.dto';
-import { UpdateVenueDto } from './dto/update-venue.dto';
 import { RequestWithAccount } from 'src/types';
 export declare class VenuesController {
     private readonly venuesService;
@@ -10,8 +9,14 @@ export declare class VenuesController {
         venue_name: string;
         venue_imagePath: string;
     }>;
-    findAll(): string;
-    findOne(id: string): string;
-    update(id: string, updateVenueDto: UpdateVenueDto): string;
-    remove(id: string): string;
+    findAllVenues(request: RequestWithAccount): Promise<string | {
+        venue_id: number;
+        venue_name: string;
+        venue_imagePath: string;
+    }[]>;
+    findOne(request: RequestWithAccount, id: string): Promise<string | {
+        bannedPerson_id: number;
+        bannedPerson_name: string;
+        bannedPerson_imageName: string;
+    }[]>;
 }

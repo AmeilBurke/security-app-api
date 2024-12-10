@@ -16,7 +16,6 @@ exports.VenuesController = void 0;
 const common_1 = require("@nestjs/common");
 const venues_service_1 = require("./venues.service");
 const create_venue_dto_1 = require("./dto/create-venue.dto");
-const update_venue_dto_1 = require("./dto/update-venue.dto");
 const platform_express_1 = require("@nestjs/platform-express");
 const multer_1 = require("multer");
 const uuid_1 = require("uuid");
@@ -27,17 +26,11 @@ let VenuesController = class VenuesController {
     create(request, file, createVenueDto) {
         return this.venuesService.create(request, file, createVenueDto);
     }
-    findAll() {
-        return this.venuesService.findAll();
+    findAllVenues(request) {
+        return this.venuesService.findAllVenues(request);
     }
-    findOne(id) {
-        return this.venuesService.findOne(+id);
-    }
-    update(id, updateVenueDto) {
-        return this.venuesService.update(+id, updateVenueDto);
-    }
-    remove(id) {
-        return this.venuesService.remove(+id);
+    findOne(request, id) {
+        return this.venuesService.findAllBansForVenue(request, Number(id));
     }
 };
 exports.VenuesController = VenuesController;
@@ -45,7 +38,7 @@ __decorate([
     (0, common_1.Post)(),
     (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file', {
         storage: (0, multer_1.diskStorage)({
-            destination: 'src\\images\\people',
+            destination: 'src\\images\\venues',
             filename: (req, file, cb) => {
                 const fileType = file.mimetype.split('/')[1];
                 cb(null, `${(0, uuid_1.v4)()}.${fileType}`);
@@ -61,32 +54,19 @@ __decorate([
 ], VenuesController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)(),
+    __param(0, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
-], VenuesController.prototype, "findAll", null);
+], VenuesController.prototype, "findAllVenues", null);
 __decorate([
     (0, common_1.Get)(':id'),
-    __param(0, (0, common_1.Param)('id')),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", void 0)
 ], VenuesController.prototype, "findOne", null);
-__decorate([
-    (0, common_1.Patch)(':id'),
-    __param(0, (0, common_1.Param)('id')),
-    __param(1, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, update_venue_dto_1.UpdateVenueDto]),
-    __metadata("design:returntype", void 0)
-], VenuesController.prototype, "update", null);
-__decorate([
-    (0, common_1.Delete)(':id'),
-    __param(0, (0, common_1.Param)('id')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
-], VenuesController.prototype, "remove", null);
 exports.VenuesController = VenuesController = __decorate([
     (0, common_1.Controller)('venues'),
     __metadata("design:paramtypes", [venues_service_1.VenuesService])

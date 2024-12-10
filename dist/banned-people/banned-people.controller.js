@@ -29,9 +29,6 @@ let BannedPeopleController = class BannedPeopleController {
     findOneInfo(request, id) {
         return this.bannedPeopleService.findOneInfo(request, Number(id));
     }
-    findOneWithPhoto(request, response, id) {
-        return this.bannedPeopleService.findOnePhoto(request, response, Number(id));
-    }
     update(request, file, id, updateBannedPersonDto) {
         return this.bannedPeopleService.update(request, file, Number(id), updateBannedPersonDto);
     }
@@ -52,15 +49,6 @@ __decorate([
     __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", void 0)
 ], BannedPeopleController.prototype, "findOneInfo", null);
-__decorate([
-    (0, common_1.Get)('/photo/:id'),
-    __param(0, (0, common_1.Req)()),
-    __param(1, (0, common_1.Res)({ passthrough: true })),
-    __param(2, (0, common_1.Param)('id')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object, String]),
-    __metadata("design:returntype", void 0)
-], BannedPeopleController.prototype, "findOneWithPhoto", null);
 __decorate([
     (0, common_1.Patch)(':id'),
     (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file', {

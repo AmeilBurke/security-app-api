@@ -134,19 +134,33 @@ let BannedPeopleService = class BannedPeopleService {
                     BanDetail: true,
                 },
             });
-            const bannedPeopleWithActiveBans = allBannedPeople.filter((bannedPerson) => {
+            const allBannedPeopleWithImages = allBannedPeople.map((bannedPerson) => {
+                try {
+                    const filePath = path_1.default.join('src\\images\\people\\', bannedPerson.bannedPerson_imageName);
+                    const fileBuffer = fs.readFileSync(filePath);
+                    bannedPerson.bannedPerson_imageName = fileBuffer.toString('base64');
+                }
+                catch (error) {
+                    if (error instanceof Error) {
+                        console.log(error.message);
+                        bannedPerson.bannedPerson_imageName === 'undefined';
+                    }
+                }
+                return bannedPerson;
+            });
+            const bannedPeopleWithActiveBans = allBannedPeopleWithImages.filter((bannedPerson) => {
                 return bannedPerson.BanDetail.some((banDetail) => {
                     return (0, dayjs_1.default)(banDetail.banDetails_banEndDate, 'DD-MM-YYYY').isAfter((0, dayjs_1.default)(), 'day');
                 });
             });
-            const bannedPeeopleWithNonActiveBans = allBannedPeople.filter((bannedPerson) => {
+            const bannedPeopleWithNonActiveBans = allBannedPeople.filter((bannedPerson) => {
                 return bannedPerson.BanDetail.some((banDetail) => {
                     return (0, dayjs_1.default)(banDetail.banDetails_banEndDate, 'DD-MM-YYYY').isBefore((0, dayjs_1.default)(), 'day');
                 });
             });
             return {
                 active_bans: bannedPeopleWithActiveBans,
-                non_active_bans: bannedPeeopleWithNonActiveBans,
+                non_active_bans: bannedPeopleWithNonActiveBans,
             };
         }
         catch (error) {
@@ -162,7 +176,7 @@ let BannedPeopleService = class BannedPeopleService {
             if (typeof requestAccount === 'string') {
                 return 'there was an error with requestAccount';
             }
-            return await this.prisma.bannedPerson.findFirstOrThrow({
+            const bannedPersonDetails = await this.prisma.bannedPerson.findFirstOrThrow({
                 where: {
                     bannedPerson_id: id,
                 },
@@ -171,23 +185,17 @@ let BannedPeopleService = class BannedPeopleService {
                     AlertDetail: true,
                 },
             });
-        }
-        catch (error) {
-            return (0, utils_1.handleError)(error);
-        }
-    }
-    async findOnePhoto(request, response, id) {
-        try {
-            const bannedPersonProfile = await this.prisma.bannedPerson.findFirstOrThrow({
-                where: {
-                    bannedPerson_id: id,
-                },
-            });
-            const file = fs.createReadStream(`src\\images\\people\\${bannedPersonProfile.bannedPerson_imageName}`);
-            response.set({
-                'Content-Type': `image/${bannedPersonProfile.bannedPerson_imageName.split('.')[1]}`,
-            });
-            return new common_1.StreamableFile(file);
+            try {
+                const filePath = path_1.default.join('src\\images\\people\\', bannedPersonDetails.bannedPerson_imageName);
+                const fileBuffer = fs.readFileSync(filePath);
+                bannedPersonDetails.bannedPerson_imageName = fileBuffer.toString('base64');
+            }
+            catch (error) {
+                if (error instanceof Error) {
+                    console.log(error.message);
+                }
+            }
+            return bannedPersonDetails;
         }
         catch (error) {
             return (0, utils_1.handleError)(error);
@@ -234,7 +242,7 @@ let BannedPeopleService = class BannedPeopleService {
             }
             if (file !== undefined) {
                 const filePath = path_1.default.join('src\\images\\people', bannedPersonDetails.bannedPerson_imageName);
-                await fs.unlink(filePath, () => { });
+                fs.unlink(filePath, () => { });
             }
             return this.prisma.bannedPerson.update({
                 where: {
