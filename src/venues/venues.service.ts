@@ -8,7 +8,7 @@ import {
   handleError,
   isAccountAdminRole,
 } from 'src/utils';
-import { BannedPerson, Venue, VenueBan } from '@prisma/client';
+import { Account, BannedPerson, Venue } from '@prisma/client';
 import * as path from 'path';
 import * as fs from 'fs';
 
@@ -43,12 +43,55 @@ export class VenuesService {
         return 'you do not have permission to access this';
       }
 
-      return await this.prisma.venue.create({
+      const newVenue = await this.prisma.venue.create({
         data: {
           venue_name: createVenueDto.venue_name.toLocaleLowerCase().trim(),
           venue_imagePath: file.filename,
         },
       });
+
+      const adminAndSecurityRole = await this.prisma.role.findMany({
+        select: {
+          role_id: true,
+        },
+        where: {
+          OR: [
+            {
+              role_name: 'admin',
+            },
+            {
+              role_name: 'security',
+            },
+          ],
+        },
+      });
+
+      const adminAndSecurityRoleIds = adminAndSecurityRole.map(
+        (roleId: { role_id: number }) => roleId.role_id,
+      );
+
+      const adminAndSecurityAccounts = await this.prisma.account.findMany({
+        where: {
+          account_roleId: {
+            in: adminAndSecurityRoleIds,
+          },
+        },
+      });
+
+      const venueAccessData = adminAndSecurityAccounts.map(
+        (account: Account) => {
+          return {
+            venueAccess_venueId: newVenue.venue_id,
+            venueAccess_accountId: account.account_id,
+          };
+        },
+      );
+
+      await this.prisma.venueAccess.createMany({
+        data: venueAccessData,
+      });
+
+      return newVenue;
     } catch (error: unknown) {
       return handleError(error);
     }
