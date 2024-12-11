@@ -29,7 +29,7 @@ export class BannedPeopleService {
       banDetails: {
         banDetails_reason: string;
         banDetails_banEndDate: string;
-        banDetails_venueBanIds: string;
+        banDetails_venueBanIds: number[];
       };
     },
     imageName: string,
@@ -66,30 +66,43 @@ export class BannedPeopleService {
       const [banEndDay, banEndMonth, banEndYear] =
         createBannedPersonDto.banDetails.banDetails_banEndDate.split('-');
 
-      const venueIds = createBannedPersonDto.banDetails.banDetails_venueBanIds
-        .split(',')
-        .map((ids: string) => {
-          return Number(ids);
-        });
+      // const venueIds = createBannedPersonDto.banDetails.banDetails_venueBanIds
+      //   .split(',')
+      //   .map((ids: string) => {
+      //     return Number(ids);
+      //   });
 
       const dateNow = dayjs();
 
-      venueIds.map(async (venueId: number) => {
-        await this.prisma.banDetail.create({
-          data: {
-            banDetails_bannedPersonId: newBanProfile.bannedPerson_id,
-            banDetails_reason:
-              createBannedPersonDto.banDetails.banDetails_reason
-                .toLocaleLowerCase()
-                .trim(),
-            banDetails_banStartDate: `${dateNow.date()}-${dateNow.month() + 1}-${dateNow.year()}`,
-            banDetails_banEndDate: `${banEndDay}-${banEndMonth}-${banEndYear}`,
-            banDetails_venueBanId: venueId,
-            banDetails_isBanPending: !isBanPending,
-            banDetails_banUploadedBy: requestAccount.account_id,
-          },
-        });
-      });
+      createBannedPersonDto.banDetails.banDetails_venueBanIds.map(
+        async (venueId: number) => {
+          await this.prisma.banDetail.create({
+            data: {
+              banDetails_bannedPersonId: newBanProfile.bannedPerson_id,
+              banDetails_reason:
+                createBannedPersonDto.banDetails.banDetails_reason
+                  .toLocaleLowerCase()
+                  .trim(),
+              banDetails_banStartDate: `${dateNow.date()}-${dateNow.month() + 1}-${dateNow.year()}`,
+              banDetails_banEndDate: `${banEndDay}-${banEndMonth}-${banEndYear}`,
+              banDetails_venueBanId: venueId,
+              banDetails_isBanPending: !isBanPending,
+              banDetails_banUploadedBy: requestAccount.account_id,
+            },
+          });
+        },
+      );
+
+      createBannedPersonDto.banDetails.banDetails_venueBanIds.map(
+        async (venueIds: number) => {
+          await this.prisma.venueBan.create({
+            data: {
+              venueBan_bannedPersonId: newBanProfile.bannedPerson_id,
+              venueBan_venueId: venueIds,
+            },
+          });
+        },
+      );
 
       await this.prisma.alertDetail.create({
         data: {
@@ -258,7 +271,8 @@ export class BannedPeopleService {
           bannedPersonDetails.bannedPerson_imageName,
         );
         const fileBuffer = fs.readFileSync(filePath);
-        bannedPersonDetails.bannedPerson_imageName = fileBuffer.toString('base64');
+        bannedPersonDetails.bannedPerson_imageName =
+          fileBuffer.toString('base64');
       } catch (error: unknown) {
         if (error instanceof Error) {
           console.log(error.message);
@@ -266,7 +280,6 @@ export class BannedPeopleService {
       }
 
       return bannedPersonDetails;
-
     } catch (error: unknown) {
       return handleError(error);
     }

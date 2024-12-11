@@ -17,7 +17,7 @@ export declare class BannedPeopleService {
         banDetails: {
             banDetails_reason: string;
             banDetails_banEndDate: string;
-            banDetails_venueBanIds: string;
+            banDetails_venueBanIds: number[];
         };
     }, imageName: string, server: Server): Promise<string | void>;
     findAll(request: RequestWithAccount): Promise<string | {

@@ -28,8 +28,6 @@ export class BannedPeopleGateway {
       console.log(`${socket.id} - connected`);
     });
   }
-
-  // need to create update
   
   @SubscribeMessage('addBannedPerson')
   async create(
@@ -39,7 +37,7 @@ export class BannedPeopleGateway {
       banDetails: {
         banDetails_reason: string;
         banDetails_banEndDate: string;
-        banDetails_venueBanIds: string;
+        banDetails_venueBanIds: number[];
       };
     },
     @ConnectedSocket() client: Socket,

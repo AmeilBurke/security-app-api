@@ -13,7 +13,7 @@ export declare class BannedPeopleGateway {
         banDetails: {
             banDetails_reason: string;
             banDetails_banEndDate: string;
-            banDetails_venueBanIds: string;
+            banDetails_venueBanIds: number[];
         };
     }, client: Socket): Promise<string | void>;
 }

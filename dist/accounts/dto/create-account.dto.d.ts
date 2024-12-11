@@ -4,4 +4,5 @@ export declare class CreateAccountDto {
     account_name: string;
     account_roleId: number;
     account_venueAccessIds?: number[];
+    account_venueManagerIds?: number[];
 }

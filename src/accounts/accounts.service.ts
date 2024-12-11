@@ -54,15 +54,55 @@ export class AccountsService {
         if (createAccountDto.account_venueAccessIds) {
           createAccountDto.account_venueAccessIds.map(
             async (venueId: number) => {
-              await this.prisma.venueAccess.create({
-                data: {
-                  venueAccess_accountId: newAccount.account_id,
-                  venueAccess_venueId: venueId,
-                },
-              });
+              try {
+                await this.prisma.venueAccess.create({
+                  data: {
+                    venueAccess_accountId: newAccount.account_id,
+                    venueAccess_venueId: venueId,
+                  },
+                });
+              } catch (error: unknown) {
+                console.log(error);
+              }
             },
           );
         }
+
+        if (createAccountDto.account_venueManagerIds) {
+          createAccountDto.account_venueManagerIds.map(
+            async (venueId: number) => {
+              try {
+                await this.prisma.venueManager.create({
+                  data: {
+                    venueManager_accountId: newAccount.account_id,
+                    venueManager_venueId: venueId,
+                  },
+                });
+              } catch (error: unknown) {
+                console.log(error);
+              }
+            },
+          );
+        }
+
+        // if (createAccountDto.account_venueManagerIds) {
+        //   try {
+        //     test = createAccountDto.account_venueManagerIds.map(
+        //       (venueId: number) => {
+        //         return {
+        //           venueManager_venueId: venueId,
+        //           venueManager_accountId: newAccount.account_id,
+        //         };
+        //       },
+        //     );
+        //   } catch (error: unknown) {
+        //     console.log(error);
+        //   }
+
+        //   await this.prisma.venueManager.createMany({
+        //     data: test,
+        //   });
+        // }
 
         return this.prisma.account.findFirstOrThrow({
           where: {
@@ -70,6 +110,7 @@ export class AccountsService {
           },
           include: {
             VenueAccess: true,
+            VenueManager: true,
           },
         });
       } else {

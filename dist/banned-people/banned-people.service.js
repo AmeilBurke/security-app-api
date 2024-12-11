@@ -65,13 +65,8 @@ let BannedPeopleService = class BannedPeopleService {
             });
             const isBanPending = await (0, utils_1.isAccountAdminRole)(this.prisma, requestAccount);
             const [banEndDay, banEndMonth, banEndYear] = createBannedPersonDto.banDetails.banDetails_banEndDate.split('-');
-            const venueIds = createBannedPersonDto.banDetails.banDetails_venueBanIds
-                .split(',')
-                .map((ids) => {
-                return Number(ids);
-            });
             const dateNow = (0, dayjs_1.default)();
-            venueIds.map(async (venueId) => {
+            createBannedPersonDto.banDetails.banDetails_venueBanIds.map(async (venueId) => {
                 await this.prisma.banDetail.create({
                     data: {
                         banDetails_bannedPersonId: newBanProfile.bannedPerson_id,
@@ -83,6 +78,14 @@ let BannedPeopleService = class BannedPeopleService {
                         banDetails_venueBanId: venueId,
                         banDetails_isBanPending: !isBanPending,
                         banDetails_banUploadedBy: requestAccount.account_id,
+                    },
+                });
+            });
+            createBannedPersonDto.banDetails.banDetails_venueBanIds.map(async (venueIds) => {
+                await this.prisma.venueBan.create({
+                    data: {
+                        venueBan_bannedPersonId: newBanProfile.bannedPerson_id,
+                        venueBan_venueId: venueIds,
                     },
                 });
             });
@@ -188,7 +191,8 @@ let BannedPeopleService = class BannedPeopleService {
             try {
                 const filePath = path_1.default.join('src\\images\\people\\', bannedPersonDetails.bannedPerson_imageName);
                 const fileBuffer = fs.readFileSync(filePath);
-                bannedPersonDetails.bannedPerson_imageName = fileBuffer.toString('base64');
+                bannedPersonDetails.bannedPerson_imageName =
+                    fileBuffer.toString('base64');
             }
             catch (error) {
                 if (error instanceof Error) {

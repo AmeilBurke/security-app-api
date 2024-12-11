@@ -19,4 +19,8 @@ export class CreateAccountDto {
   @IsOptional()
   @IsNumber({}, { each: true })
   account_venueAccessIds?: number[];
+
+  @IsOptional()
+  @IsNumber({}, { each: true })
+  account_venueManagerIds?: number[];
 }

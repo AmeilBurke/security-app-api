@@ -8,6 +8,7 @@ import { BannedPeopleModule } from './banned-people/banned-people.module';
 import { AlertDetailsModule } from './alert-details/alert-details.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { VenuesModule } from './venues/venues.module';
+import { BanDetailsModule } from './ban-details/ban-details.module';
 
 @Module({
   imports: [
@@ -19,7 +20,8 @@ import { VenuesModule } from './venues/venues.module';
     BannedPeopleModule,
     AlertDetailsModule,
     ScheduleModule.forRoot(),
-    VenuesModule
+    VenuesModule,
+    BanDetailsModule
   ],
   controllers: [AppController],
   providers: [AppService],

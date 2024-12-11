@@ -43,12 +43,32 @@ let AccountsService = class AccountsService {
                 });
                 if (createAccountDto.account_venueAccessIds) {
                     createAccountDto.account_venueAccessIds.map(async (venueId) => {
-                        await this.prisma.venueAccess.create({
-                            data: {
-                                venueAccess_accountId: newAccount.account_id,
-                                venueAccess_venueId: venueId,
-                            },
-                        });
+                        try {
+                            await this.prisma.venueAccess.create({
+                                data: {
+                                    venueAccess_accountId: newAccount.account_id,
+                                    venueAccess_venueId: venueId,
+                                },
+                            });
+                        }
+                        catch (error) {
+                            console.log(error);
+                        }
+                    });
+                }
+                if (createAccountDto.account_venueManagerIds) {
+                    createAccountDto.account_venueManagerIds.map(async (venueId) => {
+                        try {
+                            await this.prisma.venueManager.create({
+                                data: {
+                                    venueManager_accountId: newAccount.account_id,
+                                    venueManager_venueId: venueId,
+                                },
+                            });
+                        }
+                        catch (error) {
+                            console.log(error);
+                        }
                     });
                 }
                 return this.prisma.account.findFirstOrThrow({
@@ -57,6 +77,7 @@ let AccountsService = class AccountsService {
                     },
                     include: {
                         VenueAccess: true,
+                        VenueManager: true,
                     },
                 });
             }
