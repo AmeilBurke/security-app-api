@@ -7,6 +7,11 @@ import { UpdateBanDetailDto } from './dto/update-ban-detail.dto';
 export class BanDetailsController {
   constructor(private readonly banDetailsService: BanDetailsService) {}
 
+  // get all active bans
+  // get all past bans
+  // update bans
+  // create new bans
+  // testing 
   @Post()
   create(@Body() createBanDetailDto: CreateBanDetailDto) {
     return this.banDetailsService.create(createBanDetailDto);

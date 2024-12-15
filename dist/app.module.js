@@ -17,6 +17,7 @@ const banned_people_module_1 = require("./banned-people/banned-people.module");
 const alert_details_module_1 = require("./alert-details/alert-details.module");
 const schedule_1 = require("@nestjs/schedule");
 const venues_module_1 = require("./venues/venues.module");
+const ban_details_module_1 = require("./ban-details/ban-details.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -31,7 +32,8 @@ exports.AppModule = AppModule = __decorate([
             banned_people_module_1.BannedPeopleModule,
             alert_details_module_1.AlertDetailsModule,
             schedule_1.ScheduleModule.forRoot(),
-            venues_module_1.VenuesModule
+            venues_module_1.VenuesModule,
+            ban_details_module_1.BanDetailsModule
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],
