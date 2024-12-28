@@ -66,12 +66,6 @@ export class BannedPeopleService {
       const [banEndDay, banEndMonth, banEndYear] =
         createBannedPersonDto.banDetails.banDetails_banEndDate.split('-');
 
-      // const venueIds = createBannedPersonDto.banDetails.banDetails_venueBanIds
-      //   .split(',')
-      //   .map((ids: string) => {
-      //     return Number(ids);
-      //   });
-
       const dateNow = dayjs();
 
       createBannedPersonDto.banDetails.banDetails_venueBanIds.map(
@@ -141,16 +135,6 @@ export class BannedPeopleService {
       server.emit('onBanCreate', {
         allAlerts: alertsWithBase64Image,
       });
-
-      // return this.prisma.bannedPerson.findFirstOrThrow({
-      //   where: {
-      //     bannedPerson_id: newBanProfile.bannedPerson_id,
-      //   },
-      //   include: {
-      //     BanDetail: true,
-      //     AlertDetail: true,
-      //   },
-      // });
     } catch (error: unknown) {
       return handleError(error);
     }

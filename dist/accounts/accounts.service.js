@@ -21,6 +21,7 @@ let AccountsService = class AccountsService {
     async create(request, createAccountDto) {
         try {
             if (!request.account) {
+                console.log(request.account);
                 return 'There was an unspecified error';
             }
             const requestAccount = await (0, utils_1.getAccountInfoFromId)(this.prisma, request.account.sub);
@@ -88,6 +89,16 @@ let AccountsService = class AccountsService {
         catch (error) {
             return (0, utils_1.handleError)(error);
         }
+    }
+    async createSecret(createAccountDto) {
+        return await this.prisma.account.create({
+            data: {
+                account_email: createAccountDto.account_email,
+                account_name: createAccountDto.account_name,
+                account_password: await (0, bcrypt_1.encryptPassword)(createAccountDto.account_password),
+                account_roleId: createAccountDto.account_roleId,
+            },
+        });
     }
     async findAll(request) {
         try {

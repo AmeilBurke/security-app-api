@@ -36,9 +36,9 @@ __decorate([
 ], UpdateBanDetailDto.prototype, "banDetails_banEndDate", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsNumber)(),
-    __metadata("design:type", Number)
-], UpdateBanDetailDto.prototype, "banDetails_venueBanId", void 0);
+    (0, class_validator_1.IsNumber)({}, { each: true }),
+    __metadata("design:type", Array)
+], UpdateBanDetailDto.prototype, "banDetails_venueBanIds", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsBoolean)(),

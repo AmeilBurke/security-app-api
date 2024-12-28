@@ -27,12 +27,7 @@ __decorate([
     __metadata("design:type", String)
 ], CreateBanDetailDto.prototype, "banDetails_banEndDate", void 0);
 __decorate([
-    (0, class_validator_1.IsNumber)(),
     (0, class_validator_1.IsNumber)({}, { each: true }),
     __metadata("design:type", Array)
 ], CreateBanDetailDto.prototype, "banDetails_venueBanIds", void 0);
-__decorate([
-    (0, class_validator_1.IsBoolean)(),
-    __metadata("design:type", Boolean)
-], CreateBanDetailDto.prototype, "banDetails_isBanPending", void 0);
 //# sourceMappingURL=create-ban-detail.dto.js.map

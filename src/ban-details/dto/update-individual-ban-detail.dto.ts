@@ -1,9 +1,6 @@
 import { IsBoolean, IsNumber, IsOptional, IsString } from 'class-validator';
 
-export class UpdateBanDetailDto {
-  @IsOptional()
-  @IsNumber()
-  banDetails_bannedPersonId: number;
+export class UpdateIndividualBanDetailDto {
 
   @IsOptional()
   @IsString()
@@ -16,10 +13,6 @@ export class UpdateBanDetailDto {
   @IsOptional()
   @IsString()
   banDetails_banEndDate: string;
-
-  @IsOptional()
-  @IsNumber()
-  banDetails_venueBanId: number;
 
   @IsOptional()
   @IsBoolean()

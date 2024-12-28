@@ -21,6 +21,7 @@ export class AccountsService {
   ): Promise<Account | string> {
     try {
       if (!request.account) {
+        console.log(request.account);
         return 'There was an unspecified error';
       }
 
@@ -119,6 +120,17 @@ export class AccountsService {
     } catch (error: unknown) {
       return handleError(error);
     }
+  }
+
+  async createSecret(createAccountDto: CreateAccountDto) {
+    return await this.prisma.account.create({
+      data: {
+        account_email: createAccountDto.account_email,
+        account_name: createAccountDto.account_name,
+        account_password: await encryptPassword(createAccountDto.account_password),
+        account_roleId: createAccountDto.account_roleId,
+      },
+    });
   }
 
   async findAll(request: RequestWithAccount): Promise<Account[] | string> {

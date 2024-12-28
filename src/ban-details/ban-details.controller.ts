@@ -1,35 +1,54 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Req,
+} from '@nestjs/common';
 import { BanDetailsService } from './ban-details.service';
 import { CreateBanDetailDto } from './dto/create-ban-detail.dto';
-import { UpdateBanDetailDto } from './dto/update-ban-detail.dto';
+import { UpdateIndividualBanDetailDto } from './dto/update-individual-ban-detail.dto';
+import { RequestWithAccount } from 'src/types';
 
 @Controller('ban-details')
 export class BanDetailsController {
   constructor(private readonly banDetailsService: BanDetailsService) {}
 
-  // get all active bans
-  // get all past bans
-  // update bans
-  // create new bans
-  // testing 
   @Post()
-  create(@Body() createBanDetailDto: CreateBanDetailDto) {
-    return this.banDetailsService.create(createBanDetailDto);
+  create(
+    @Req() request: RequestWithAccount,
+    @Body() createBanDetailDto: CreateBanDetailDto,
+  ) {
+    return this.banDetailsService.create(request, createBanDetailDto);
   }
 
   @Get()
-  findAll() {
-    return this.banDetailsService.findAll();
+  findAll(@Req() request: RequestWithAccount) {
+    return this.banDetailsService.findAll(request);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.banDetailsService.findOne(+id);
+  findOne(@Req() request: RequestWithAccount, @Param('id') accountId: string) {
+    return this.banDetailsService.findBanDetailsByAccountId(
+      request,
+      Number(accountId),
+    );
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateBanDetailDto: UpdateBanDetailDto) {
-    return this.banDetailsService.update(+id, updateBanDetailDto);
+  update(
+    @Req() request: RequestWithAccount,
+    @Param('id') id: string,
+    @Body() updateBanDetailDto: UpdateIndividualBanDetailDto,
+  ) {
+    return this.banDetailsService.updateIndividualBanDetail(
+      request,
+      Number(id),
+      updateBanDetailDto,
+    );
   }
 
   @Delete(':id')

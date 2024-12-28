@@ -16,22 +16,22 @@ exports.BanDetailsController = void 0;
 const common_1 = require("@nestjs/common");
 const ban_details_service_1 = require("./ban-details.service");
 const create_ban_detail_dto_1 = require("./dto/create-ban-detail.dto");
-const update_ban_detail_dto_1 = require("./dto/update-ban-detail.dto");
+const update_individual_ban_detail_dto_1 = require("./dto/update-individual-ban-detail.dto");
 let BanDetailsController = class BanDetailsController {
     constructor(banDetailsService) {
         this.banDetailsService = banDetailsService;
     }
-    create(createBanDetailDto) {
-        return this.banDetailsService.create(createBanDetailDto);
+    create(request, createBanDetailDto) {
+        return this.banDetailsService.create(request, createBanDetailDto);
     }
-    findAll() {
-        return this.banDetailsService.findAll();
+    findAll(request) {
+        return this.banDetailsService.findAll(request);
     }
-    findOne(id) {
-        return this.banDetailsService.findOne(+id);
+    findOne(request, accountId) {
+        return this.banDetailsService.findBanDetailsByAccountId(request, Number(accountId));
     }
-    update(id, updateBanDetailDto) {
-        return this.banDetailsService.update(+id, updateBanDetailDto);
+    update(request, id, updateBanDetailDto) {
+        return this.banDetailsService.updateIndividualBanDetail(request, Number(id), updateBanDetailDto);
     }
     remove(id) {
         return this.banDetailsService.remove(+id);
@@ -40,30 +40,34 @@ let BanDetailsController = class BanDetailsController {
 exports.BanDetailsController = BanDetailsController;
 __decorate([
     (0, common_1.Post)(),
-    __param(0, (0, common_1.Body)()),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [create_ban_detail_dto_1.CreateBanDetailDto]),
+    __metadata("design:paramtypes", [Object, create_ban_detail_dto_1.CreateBanDetailDto]),
     __metadata("design:returntype", void 0)
 ], BanDetailsController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)(),
+    __param(0, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], BanDetailsController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)(':id'),
-    __param(0, (0, common_1.Param)('id')),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", void 0)
 ], BanDetailsController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Patch)(':id'),
-    __param(0, (0, common_1.Param)('id')),
-    __param(1, (0, common_1.Body)()),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)('id')),
+    __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, update_ban_detail_dto_1.UpdateBanDetailDto]),
+    __metadata("design:paramtypes", [Object, String, update_individual_ban_detail_dto_1.UpdateIndividualBanDetailDto]),
     __metadata("design:returntype", void 0)
 ], BanDetailsController.prototype, "update", null);
 __decorate([

@@ -3,5 +3,4 @@ export declare class CreateBanDetailDto {
     banDetails_reason: string;
     banDetails_banEndDate: string;
     banDetails_venueBanIds: number[];
-    banDetails_isBanPending: boolean;
 }

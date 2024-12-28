@@ -9,6 +9,7 @@ import { AlertDetailsModule } from './alert-details/alert-details.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { VenuesModule } from './venues/venues.module';
 import { BanDetailsModule } from './ban-details/ban-details.module';
+import { VenueManagersModule } from './venue-managers/venue-managers.module';
 
 @Module({
   imports: [
@@ -21,7 +22,8 @@ import { BanDetailsModule } from './ban-details/ban-details.module';
     AlertDetailsModule,
     ScheduleModule.forRoot(),
     VenuesModule,
-    BanDetailsModule
+    BanDetailsModule,
+    VenueManagersModule
   ],
   controllers: [AppController],
   providers: [AppService],

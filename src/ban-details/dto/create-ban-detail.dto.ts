@@ -13,10 +13,6 @@ export class CreateBanDetailDto {
   @IsString()
   banDetails_banEndDate: string;
 
-  @IsNumber()
   @IsNumber({}, { each: true })
   banDetails_venueBanIds: number[];
-
-  @IsBoolean()
-  banDetails_isBanPending: boolean;
 }

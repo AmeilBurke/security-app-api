@@ -7,6 +7,13 @@ export declare class AccountsService {
     private prisma;
     constructor(prisma: PrismaService);
     create(request: RequestWithAccount, createAccountDto: CreateAccountDto): Promise<Account | string>;
+    createSecret(createAccountDto: CreateAccountDto): Promise<{
+        account_email: string;
+        account_password: string;
+        account_name: string;
+        account_roleId: number;
+        account_id: number;
+    }>;
     findAll(request: RequestWithAccount): Promise<Account[] | string>;
     findOne(request: RequestWithAccount, id: number): Promise<Account | string>;
     findOneByEmail(email: string): Promise<Account | string>;

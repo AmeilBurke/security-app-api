@@ -12,6 +12,13 @@ export declare class AccountsController {
         account_roleId: number;
         account_id: number;
     }>;
+    createSecret(createAccountDto: CreateAccountDto): Promise<{
+        account_email: string;
+        account_password: string;
+        account_name: string;
+        account_roleId: number;
+        account_id: number;
+    }>;
     findAll(request: RequestWithAccount): Promise<string | {
         account_email: string;
         account_password: string;

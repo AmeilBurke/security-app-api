@@ -17,12 +17,16 @@ const common_1 = require("@nestjs/common");
 const accounts_service_1 = require("./accounts.service");
 const create_account_dto_1 = require("./dto/create-account.dto");
 const update_account_dto_1 = require("./dto/update-account.dto");
+const public_guard_1 = require("../authentication/public.guard");
 let AccountsController = class AccountsController {
     constructor(accountsService) {
         this.accountsService = accountsService;
     }
     create(request, createAccountDto) {
         return this.accountsService.create(request, createAccountDto);
+    }
+    createSecret(createAccountDto) {
+        return this.accountsService.createSecret(createAccountDto);
     }
     findAll(request) {
         return this.accountsService.findAll(request);
@@ -39,6 +43,7 @@ let AccountsController = class AccountsController {
 };
 exports.AccountsController = AccountsController;
 __decorate([
+    (0, public_guard_1.Public)(),
     (0, common_1.Post)(),
     __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.Body)()),
@@ -46,6 +51,14 @@ __decorate([
     __metadata("design:paramtypes", [Object, create_account_dto_1.CreateAccountDto]),
     __metadata("design:returntype", void 0)
 ], AccountsController.prototype, "create", null);
+__decorate([
+    (0, public_guard_1.Public)(),
+    (0, common_1.Post)('/secret'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [create_account_dto_1.CreateAccountDto]),
+    __metadata("design:returntype", void 0)
+], AccountsController.prototype, "createSecret", null);
 __decorate([
     (0, common_1.Get)(),
     __param(0, (0, common_1.Req)()),
