@@ -8,6 +8,7 @@ export declare class BanDetailsService {
     create(request: RequestWithAccount, createBanDetailDto: CreateBanDetailDto): Promise<string | import(".prisma/client").Prisma.BatchPayload>;
     findAll(request: RequestWithAccount): Promise<string | {
         active_bans: {
+            banDetails_id: number;
             banDetails_bannedPersonId: number;
             banDetails_reason: string;
             banDetails_banStartDate: string;
@@ -15,9 +16,9 @@ export declare class BanDetailsService {
             banDetails_venueBanId: number;
             banDetails_isBanPending: boolean;
             banDetails_banUploadedBy: number;
-            banDetails_id: number;
         }[];
         non_active_bans: {
+            banDetails_id: number;
             banDetails_bannedPersonId: number;
             banDetails_reason: string;
             banDetails_banStartDate: string;
@@ -25,10 +26,10 @@ export declare class BanDetailsService {
             banDetails_venueBanId: number;
             banDetails_isBanPending: boolean;
             banDetails_banUploadedBy: number;
-            banDetails_id: number;
         }[];
     }>;
     findBanDetailsByAccountId(request: RequestWithAccount, accountId: number): Promise<string | {
+        banDetails_id: number;
         banDetails_bannedPersonId: number;
         banDetails_reason: string;
         banDetails_banStartDate: string;
@@ -36,9 +37,9 @@ export declare class BanDetailsService {
         banDetails_venueBanId: number;
         banDetails_isBanPending: boolean;
         banDetails_banUploadedBy: number;
-        banDetails_id: number;
     }>;
     updateIndividualBanDetail(request: RequestWithAccount, id: number, updateBanDetailDto: UpdateIndividualBanDetailDto): Promise<string | {
+        banDetails_id: number;
         banDetails_bannedPersonId: number;
         banDetails_reason: string;
         banDetails_banStartDate: string;
@@ -46,9 +47,9 @@ export declare class BanDetailsService {
         banDetails_venueBanId: number;
         banDetails_isBanPending: boolean;
         banDetails_banUploadedBy: number;
-        banDetails_id: number;
     }>;
     remove(request: RequestWithAccount, id: number): Promise<string | {
+        banDetails_id: number;
         banDetails_bannedPersonId: number;
         banDetails_reason: string;
         banDetails_banStartDate: string;
@@ -56,6 +57,5 @@ export declare class BanDetailsService {
         banDetails_venueBanId: number;
         banDetails_isBanPending: boolean;
         banDetails_banUploadedBy: number;
-        banDetails_id: number;
     }>;
 }

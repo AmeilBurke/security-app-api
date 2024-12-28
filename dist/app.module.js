@@ -19,6 +19,7 @@ const schedule_1 = require("@nestjs/schedule");
 const venues_module_1 = require("./venues/venues.module");
 const ban_details_module_1 = require("./ban-details/ban-details.module");
 const venue_managers_module_1 = require("./venue-managers/venue-managers.module");
+const venue_bans_module_1 = require("./venue-bans/venue-bans.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -35,7 +36,8 @@ exports.AppModule = AppModule = __decorate([
             schedule_1.ScheduleModule.forRoot(),
             venues_module_1.VenuesModule,
             ban_details_module_1.BanDetailsModule,
-            venue_managers_module_1.VenueManagersModule
+            venue_managers_module_1.VenueManagersModule,
+            venue_bans_module_1.VenueBansModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],
