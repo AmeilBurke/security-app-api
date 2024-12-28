@@ -33,8 +33,8 @@ let BanDetailsController = class BanDetailsController {
     update(request, id, updateBanDetailDto) {
         return this.banDetailsService.updateIndividualBanDetail(request, Number(id), updateBanDetailDto);
     }
-    remove(id) {
-        return this.banDetailsService.remove(+id);
+    remove(request, id) {
+        return this.banDetailsService.remove(request, Number(id));
     }
 };
 exports.BanDetailsController = BanDetailsController;
@@ -72,9 +72,10 @@ __decorate([
 ], BanDetailsController.prototype, "update", null);
 __decorate([
     (0, common_1.Delete)(':id'),
-    __param(0, (0, common_1.Param)('id')),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", void 0)
 ], BanDetailsController.prototype, "remove", null);
 exports.BanDetailsController = BanDetailsController = __decorate([

@@ -43,7 +43,9 @@ let BanDetailsService = class BanDetailsService {
             const banDetailsData = createBanDetailDto.banDetails_venueBanIds.map((venueId) => {
                 return {
                     banDetails_bannedPersonId: createBanDetailDto.banDetails_bannedPersonId,
-                    banDetails_reason: createBanDetailDto.banDetails_reason.toLocaleLowerCase().trim(),
+                    banDetails_reason: createBanDetailDto.banDetails_reason
+                        .toLocaleLowerCase()
+                        .trim(),
                     banDetails_banStartDate: `${dateNow.date()}-${dateNow.month() + 1}-${dateNow.year()}`,
                     banDetails_banEndDate: `${banEndDay}-${banEndMonth}-${banEndYear}`,
                     banDetails_venueBanId: venueId,
@@ -128,7 +130,9 @@ let BanDetailsService = class BanDetailsService {
                     banDetails_id: id,
                 },
                 data: {
-                    banDetails_reason: updateBanDetailDto.banDetails_reason.toLocaleLowerCase().trim(),
+                    banDetails_reason: updateBanDetailDto.banDetails_reason
+                        .toLocaleLowerCase()
+                        .trim(),
                     banDetails_banStartDate: updateBanDetailDto.banDetails_banStartDate,
                     banDetails_banEndDate: updateBanDetailDto.banDetails_banEndDate,
                     banDetails_isBanPending: (await (0, utils_1.isAccountAdminRole)(this.prisma, requestAccount))
@@ -141,8 +145,30 @@ let BanDetailsService = class BanDetailsService {
             return (0, utils_1.handleError)(error);
         }
     }
-    remove(id) {
-        return `This action removes a #${id} banDetail`;
+    async remove(request, id) {
+        try {
+            if (!request.account) {
+                console.log(request.account);
+                return 'There was an unspecified error';
+            }
+            const requestAccount = await (0, utils_1.getAccountInfoFromId)(this.prisma, request.account.sub);
+            if (typeof requestAccount === 'string') {
+                return 'there was an error with requestAccount';
+            }
+            if (await (0, utils_1.isAccountAdminRole)(this.prisma, requestAccount)) {
+                return await this.prisma.banDetail.delete({
+                    where: {
+                        banDetails_id: id,
+                    },
+                });
+            }
+            else {
+                return 'you do not have permission to access this';
+            }
+        }
+        catch (error) {
+            return (0, utils_1.handleError)(error);
+        }
     }
 };
 exports.BanDetailsService = BanDetailsService;

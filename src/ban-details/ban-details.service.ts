@@ -51,7 +51,9 @@ export class BanDetailsService {
           return {
             banDetails_bannedPersonId:
               createBanDetailDto.banDetails_bannedPersonId,
-            banDetails_reason: createBanDetailDto.banDetails_reason.toLocaleLowerCase().trim(),
+            banDetails_reason: createBanDetailDto.banDetails_reason
+              .toLocaleLowerCase()
+              .trim(),
             banDetails_banStartDate: `${dateNow.date()}-${dateNow.month() + 1}-${dateNow.year()}`,
             banDetails_banEndDate: `${banEndDay}-${banEndMonth}-${banEndYear}`,
             banDetails_venueBanId: venueId,
@@ -165,7 +167,9 @@ export class BanDetailsService {
           banDetails_id: id,
         },
         data: {
-          banDetails_reason: updateBanDetailDto.banDetails_reason.toLocaleLowerCase().trim(),
+          banDetails_reason: updateBanDetailDto.banDetails_reason
+            .toLocaleLowerCase()
+            .trim(),
           banDetails_banStartDate: updateBanDetailDto.banDetails_banStartDate,
           banDetails_banEndDate: updateBanDetailDto.banDetails_banEndDate,
           banDetails_isBanPending: (await isAccountAdminRole(
@@ -181,7 +185,33 @@ export class BanDetailsService {
     }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} banDetail`;
+  async remove(request: RequestWithAccount, id: number) {
+    try {
+      if (!request.account) {
+        console.log(request.account);
+        return 'There was an unspecified error';
+      }
+
+      const requestAccount = await getAccountInfoFromId(
+        this.prisma,
+        request.account.sub,
+      );
+
+      if (typeof requestAccount === 'string') {
+        return 'there was an error with requestAccount';
+      }
+
+      if (await isAccountAdminRole(this.prisma, requestAccount)) {
+        return await this.prisma.banDetail.delete({
+          where: {
+            banDetails_id: id,
+          },
+        });
+      } else {
+        return 'you do not have permission to access this';
+      }
+    } catch (error: unknown) {
+      return handleError(error);
+    }
   }
 }

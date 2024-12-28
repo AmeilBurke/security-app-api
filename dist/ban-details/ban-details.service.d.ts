@@ -48,5 +48,14 @@ export declare class BanDetailsService {
         banDetails_banUploadedBy: number;
         banDetails_id: number;
     }>;
-    remove(id: number): string;
+    remove(request: RequestWithAccount, id: number): Promise<string | {
+        banDetails_bannedPersonId: number;
+        banDetails_reason: string;
+        banDetails_banStartDate: string;
+        banDetails_banEndDate: string;
+        banDetails_venueBanId: number;
+        banDetails_isBanPending: boolean;
+        banDetails_banUploadedBy: number;
+        banDetails_id: number;
+    }>;
 }

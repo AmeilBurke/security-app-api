@@ -52,7 +52,7 @@ export class BanDetailsController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.banDetailsService.remove(+id);
+  remove(@Req() request: RequestWithAccount, @Param('id') id: string) {
+    return this.banDetailsService.remove(request, Number(id));
   }
 }
