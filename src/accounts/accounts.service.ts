@@ -86,25 +86,6 @@ export class AccountsService {
           );
         }
 
-        // if (createAccountDto.account_venueManagerIds) {
-        //   try {
-        //     test = createAccountDto.account_venueManagerIds.map(
-        //       (venueId: number) => {
-        //         return {
-        //           venueManager_venueId: venueId,
-        //           venueManager_accountId: newAccount.account_id,
-        //         };
-        //       },
-        //     );
-        //   } catch (error: unknown) {
-        //     console.log(error);
-        //   }
-
-        //   await this.prisma.venueManager.createMany({
-        //     data: test,
-        //   });
-        // }
-
         return this.prisma.account.findFirstOrThrow({
           where: {
             account_id: newAccount.account_id,
@@ -122,16 +103,17 @@ export class AccountsService {
     }
   }
 
-  async createSecret(createAccountDto: CreateAccountDto) {
-    return await this.prisma.account.create({
-      data: {
-        account_email: createAccountDto.account_email,
-        account_name: createAccountDto.account_name,
-        account_password: await encryptPassword(createAccountDto.account_password),
-        account_roleId: createAccountDto.account_roleId,
-      },
-    });
-  }
+  // Used if the database is wiped to create accounts without admin privileges
+  // async createSecret(createAccountDto: CreateAccountDto): Promise<Account> {
+  //   return await this.prisma.account.create({
+  //     data: {
+  //       account_email: createAccountDto.account_email,
+  //       account_name: createAccountDto.account_name,
+  //       account_password: await encryptPassword(createAccountDto.account_password),
+  //       account_roleId: createAccountDto.account_roleId,
+  //     },
+  //   });
+  // }
 
   async findAll(request: RequestWithAccount): Promise<Account[] | string> {
     try {

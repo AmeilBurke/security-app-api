@@ -143,7 +143,17 @@ export class VenuesService {
     }
   }
 
-  async findAllBansForVenue(request: RequestWithAccount, id: number) {
+  async findAllBansForVenue(
+    request: RequestWithAccount,
+    id: number,
+  ): Promise<
+    | string
+    | {
+        bannedPerson_id: number;
+        bannedPerson_name: string;
+        bannedPerson_imageName: string;
+      }[]
+  > {
     try {
       if (!request.account) {
         return 'There was an unspecified error';
@@ -201,7 +211,7 @@ export class VenuesService {
     file: Express.Multer.File,
     id: number,
     updateVenueDto: UpdateVenueDto,
-  ) {
+  ): Promise<string | Venue> {
     try {
       if (!request.account) {
         return 'There was an unspecified error';

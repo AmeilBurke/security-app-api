@@ -8,6 +8,7 @@ import {
   handleError,
   isAccountAdminRole,
 } from 'src/utils';
+import { VenueManager } from '@prisma/client';
 
 @Injectable()
 export class VenueManagersService {
@@ -16,7 +17,7 @@ export class VenueManagersService {
   async create(
     request: RequestWithAccount,
     createVenueManagerDto: CreateVenueManagerDto,
-  ) {
+  ): Promise<string | VenueManager> {
     try {
       if (!request.account) {
         console.log(request.account);
@@ -48,7 +49,7 @@ export class VenueManagersService {
     }
   }
 
-  async findAll(request: RequestWithAccount) {
+  async findAll(request: RequestWithAccount): Promise<string | VenueManager[]> {
     try {
       if (!request.account) {
         console.log(request.account);
@@ -69,7 +70,10 @@ export class VenueManagersService {
     }
   }
 
-  async findOne(request: RequestWithAccount, id: number) {
+  async findOne(
+    request: RequestWithAccount,
+    id: number,
+  ): Promise<string | VenueManager> {
     try {
       if (!request.account) {
         console.log(request.account);
@@ -99,7 +103,7 @@ export class VenueManagersService {
     request: RequestWithAccount,
     id: number,
     updateVenueManagerDto: UpdateVenueManagerDto,
-  ) {
+  ): Promise<string | VenueManager> {
     try {
       if (!request.account) {
         console.log(request.account);
@@ -129,7 +133,10 @@ export class VenueManagersService {
     }
   }
 
-  async remove(request: RequestWithAccount, id: number) {
+  async remove(
+    request: RequestWithAccount,
+    id: number,
+  ): Promise<string | VenueManager> {
     try {
       if (!request.account) {
         console.log(request.account);

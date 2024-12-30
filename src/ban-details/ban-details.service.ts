@@ -9,7 +9,7 @@ import {
 } from 'src/utils';
 import { PrismaService } from 'src/prisma.service';
 import dayjs from 'dayjs';
-import { BanDetail } from '@prisma/client';
+import { BanDetail, Prisma, PrismaPromise } from '@prisma/client';
 
 @Injectable()
 export class BanDetailsService {
@@ -18,7 +18,7 @@ export class BanDetailsService {
   async create(
     request: RequestWithAccount,
     createBanDetailDto: CreateBanDetailDto,
-  ) {
+  ): Promise<string | Prisma.PrismaPromise<Prisma.BatchPayload>> {
     try {
       if (!request.account) {
         console.log(request.account);
@@ -71,7 +71,11 @@ export class BanDetailsService {
     }
   }
 
-  async findAll(request: RequestWithAccount) {
+  async findAll(
+    request: RequestWithAccount,
+  ): Promise<
+    string | { active_bans: BanDetail[]; non_active_bans: BanDetail[] | null }
+  > {
     try {
       if (!request.account) {
         console.log(request.account);
@@ -116,7 +120,7 @@ export class BanDetailsService {
   async findBanDetailsByAccountId(
     request: RequestWithAccount,
     accountId: number,
-  ) {
+  ): Promise<string | BanDetail> {
     try {
       if (!request.account) {
         console.log(request.account);
@@ -146,7 +150,7 @@ export class BanDetailsService {
     request: RequestWithAccount,
     id: number,
     updateBanDetailDto: UpdateIndividualBanDetailDto,
-  ) {
+  ): Promise<string | BanDetail> {
     try {
       if (!request.account) {
         console.log(request.account);
@@ -185,7 +189,10 @@ export class BanDetailsService {
     }
   }
 
-  async remove(request: RequestWithAccount, id: number) {
+  async remove(
+    request: RequestWithAccount,
+    id: number,
+  ): Promise<string | BanDetail> {
     try {
       if (!request.account) {
         console.log(request.account);

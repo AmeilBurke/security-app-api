@@ -7,6 +7,7 @@ import {
   handleError,
 } from 'src/utils';
 import { PrismaService } from 'src/prisma.service';
+import { VenueBan } from '@prisma/client';
 
 @Injectable()
 export class VenueBansService {
@@ -15,7 +16,7 @@ export class VenueBansService {
   async create(
     request: RequestWithAccount,
     createVenueBanDto: CreateVenueBanDto,
-  ) {
+  ): Promise<string | VenueBan> {
     try {
       if (!request.account) {
         console.log(request.account);
@@ -46,7 +47,7 @@ export class VenueBansService {
     }
   }
 
-  async findAll(request: RequestWithAccount) {
+  async findAll(request: RequestWithAccount): Promise<string | VenueBan[]> {
     try {
       if (!request.account) {
         console.log(request.account);
@@ -67,7 +68,7 @@ export class VenueBansService {
     }
   }
 
-  async findOne(request: RequestWithAccount, id: number) {
+  async findOne(request: RequestWithAccount, id: number): Promise<string | VenueBan> {
     try {
       if (!request.account) {
         console.log(request.account);
@@ -92,7 +93,7 @@ export class VenueBansService {
     }
   }
 
-  async remove(request: RequestWithAccount, id: number) {
+  async remove(request: RequestWithAccount, id: number): Promise<string | VenueBan> {
     try {
       if (!request.account) {
         console.log(request.account);

@@ -19,7 +19,7 @@ export class AlertDetailsService {
     createAlertDetailDto: CreateAlertDetailDto & { fileData: string },
     imageName: string,
     server: Server,
-  ) {
+  ): Promise<string | void> {
     try {
       if (!payload.sub) {
         return 'There was an unspecified error';
@@ -46,10 +46,12 @@ export class AlertDetailsService {
 
       await this.prisma.alertDetail.create({
         data: {
-          alertDetail_bannedPersonId: createAlertDetailDto.alertDetail_bannedPersonId,
+          alertDetail_bannedPersonId:
+            createAlertDetailDto.alertDetail_bannedPersonId,
           alertDetail_name: createAlertDetailDto.alertDetail_name,
           alertDetail_imageName: imageName,
-          alertDetails_alertReason: createAlertDetailDto.alertDetails_alertReason,
+          alertDetails_alertReason:
+            createAlertDetailDto.alertDetails_alertReason,
           alertDetails_startTime: `${dateNow.hour()}:${minute} ${dateNow.date()}-${dateNow.month() + 1}-${dateNow.year()}`,
           alertDetails_alertUploadedBy: requestAccount.account_id,
         },
@@ -88,9 +90,8 @@ export class AlertDetailsService {
     updateAlertDetailDto: UpdateAlertDetailDto,
     imageName: string,
     server: Server,
-  ) {
+  ): Promise<string | void> {
     try {
-
       if (!payload.sub) {
         return 'There was an unspecified error';
       }
@@ -132,7 +133,7 @@ export class AlertDetailsService {
   // needs testing
 
   @Cron('0 6 * * *')
-  async remove(server: Server) {
+  async remove(server: Server): Promise<string | void> {
     try {
       await this.prisma.alertDetail.deleteMany();
 

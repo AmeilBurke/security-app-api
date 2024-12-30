@@ -7,6 +7,7 @@ import {
   isAccountAdminRole,
 } from 'src/utils';
 import { PrismaService } from 'src/prisma.service';
+import { VenueAccess } from '@prisma/client';
 
 @Injectable()
 export class VenueAccessService {
@@ -15,7 +16,7 @@ export class VenueAccessService {
   async create(
     request: RequestWithAccount,
     createVenueAccessDto: CreateVenueAccessDto,
-  ) {
+  ): Promise<string | VenueAccess> {
     try {
       if (!request.account) {
         console.log(request.account);
@@ -46,7 +47,7 @@ export class VenueAccessService {
     }
   }
 
-  async findAll(request: RequestWithAccount) {
+  async findAll(request: RequestWithAccount): Promise<string | VenueAccess[]> {
     try {
       if (!request.account) {
         console.log(request.account);
@@ -72,7 +73,10 @@ export class VenueAccessService {
     }
   }
 
-  async findOne(request: RequestWithAccount, id: number) {
+  async findOne(
+    request: RequestWithAccount,
+    id: number,
+  ): Promise<string | VenueAccess> {
     try {
       if (!request.account) {
         console.log(request.account);
@@ -102,7 +106,10 @@ export class VenueAccessService {
     }
   }
 
-  async remove(request: RequestWithAccount, id: number) {
+  async remove(
+    request: RequestWithAccount,
+    id: number,
+  ): Promise<string | VenueAccess> {
     try {
       if (!request.account) {
         console.log(request.account);
