@@ -21,56 +21,61 @@ let VenueManagersController = class VenueManagersController {
     constructor(venueManagersService) {
         this.venueManagersService = venueManagersService;
     }
-    create(createVenueManagerDto) {
-        return this.venueManagersService.create(createVenueManagerDto);
+    create(request, createVenueManagerDto) {
+        return this.venueManagersService.create(request, createVenueManagerDto);
     }
-    findAll() {
-        return this.venueManagersService.findAll();
+    findAll(request) {
+        return this.venueManagersService.findAll(request);
     }
-    findOne(id) {
-        return this.venueManagersService.findOne(+id);
+    findOne(request, id) {
+        return this.venueManagersService.findOne(request, Number(id));
     }
-    update(id, updateVenueManagerDto) {
-        return this.venueManagersService.update(+id, updateVenueManagerDto);
+    update(request, id, updateVenueManagerDto) {
+        return this.venueManagersService.update(request, Number(id), updateVenueManagerDto);
     }
-    remove(id) {
-        return this.venueManagersService.remove(+id);
+    remove(request, id) {
+        return this.venueManagersService.remove(request, Number(id));
     }
 };
 exports.VenueManagersController = VenueManagersController;
 __decorate([
     (0, common_1.Post)(),
-    __param(0, (0, common_1.Body)()),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [create_venue_manager_dto_1.CreateVenueManagerDto]),
+    __metadata("design:paramtypes", [Object, create_venue_manager_dto_1.CreateVenueManagerDto]),
     __metadata("design:returntype", void 0)
 ], VenueManagersController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)(),
+    __param(0, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], VenueManagersController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)(':id'),
-    __param(0, (0, common_1.Param)('id')),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", void 0)
 ], VenueManagersController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Patch)(':id'),
-    __param(0, (0, common_1.Param)('id')),
-    __param(1, (0, common_1.Body)()),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)('id')),
+    __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, update_venue_manager_dto_1.UpdateVenueManagerDto]),
+    __metadata("design:paramtypes", [Object, String, update_venue_manager_dto_1.UpdateVenueManagerDto]),
     __metadata("design:returntype", void 0)
 ], VenueManagersController.prototype, "update", null);
 __decorate([
     (0, common_1.Delete)(':id'),
-    __param(0, (0, common_1.Param)('id')),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", void 0)
 ], VenueManagersController.prototype, "remove", null);
 exports.VenueManagersController = VenueManagersController = __decorate([

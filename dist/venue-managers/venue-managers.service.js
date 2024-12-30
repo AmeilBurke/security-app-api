@@ -5,28 +5,130 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.VenueManagersService = void 0;
 const common_1 = require("@nestjs/common");
+const prisma_service_1 = require("../prisma.service");
+const utils_1 = require("../utils");
 let VenueManagersService = class VenueManagersService {
-    create(createVenueManagerDto) {
-        return 'This action adds a new venueManager';
+    constructor(prisma) {
+        this.prisma = prisma;
     }
-    findAll() {
-        return `This action returns all venueManagers`;
+    async create(request, createVenueManagerDto) {
+        try {
+            if (!request.account) {
+                console.log(request.account);
+                return 'There was an unspecified error';
+            }
+            const requestAccount = await (0, utils_1.getAccountInfoFromId)(this.prisma, request.account.sub);
+            if (typeof requestAccount === 'string') {
+                return 'there was an error with requestAccount';
+            }
+            if (await (0, utils_1.isAccountAdminRole)(this.prisma, requestAccount)) {
+                return await this.prisma.venueManager.create({
+                    data: {
+                        venueManager_accountId: createVenueManagerDto.venueManager_accountId,
+                        venueManager_venueId: createVenueManagerDto.venueManager_venueId,
+                    },
+                });
+            }
+            else {
+                return 'you do not have permission to access this';
+            }
+        }
+        catch (error) {
+            return (0, utils_1.handleError)(error);
+        }
     }
-    findOne(id) {
-        return `This action returns a #${id} venueManager`;
+    async findAll(request) {
+        try {
+            if (!request.account) {
+                console.log(request.account);
+                return 'There was an unspecified error';
+            }
+            const requestAccount = await (0, utils_1.getAccountInfoFromId)(this.prisma, request.account.sub);
+            if (typeof requestAccount === 'string') {
+                return 'there was an error with requestAccount';
+            }
+            return await this.prisma.venueManager.findMany();
+        }
+        catch (error) {
+            return (0, utils_1.handleError)(error);
+        }
     }
-    update(id, updateVenueManagerDto) {
-        return `This action updates a #${id} venueManager`;
+    async findOne(request, id) {
+        try {
+            if (!request.account) {
+                console.log(request.account);
+                return 'There was an unspecified error';
+            }
+            const requestAccount = await (0, utils_1.getAccountInfoFromId)(this.prisma, request.account.sub);
+            if (typeof requestAccount === 'string') {
+                return 'there was an error with requestAccount';
+            }
+            return await this.prisma.venueManager.findFirstOrThrow({
+                where: {
+                    venueManager_id: id,
+                },
+            });
+        }
+        catch (error) {
+            return (0, utils_1.handleError)(error);
+        }
     }
-    remove(id) {
-        return `This action removes a #${id} venueManager`;
+    async update(request, id, updateVenueManagerDto) {
+        try {
+            if (!request.account) {
+                console.log(request.account);
+                return 'There was an unspecified error';
+            }
+            const requestAccount = await (0, utils_1.getAccountInfoFromId)(this.prisma, request.account.sub);
+            if (typeof requestAccount === 'string') {
+                return 'there was an error with requestAccount';
+            }
+            return await this.prisma.venueManager.update({
+                where: {
+                    venueManager_id: id,
+                },
+                data: {
+                    venueManager_accountId: updateVenueManagerDto.venueManager_accountId,
+                    venueManager_venueId: updateVenueManagerDto.venueManager_venueId,
+                },
+            });
+        }
+        catch (error) {
+            return (0, utils_1.handleError)(error);
+        }
+    }
+    async remove(request, id) {
+        try {
+            if (!request.account) {
+                console.log(request.account);
+                return 'There was an unspecified error';
+            }
+            const requestAccount = await (0, utils_1.getAccountInfoFromId)(this.prisma, request.account.sub);
+            if (typeof requestAccount === 'string') {
+                return 'there was an error with requestAccount';
+            }
+            if (await (0, utils_1.isAccountAdminRole)(this.prisma, requestAccount)) {
+                return await this.prisma.venueManager.delete({
+                    where: {
+                        venueManager_id: id,
+                    },
+                });
+            }
+        }
+        catch (error) {
+            return (0, utils_1.handleError)(error);
+        }
     }
 };
 exports.VenueManagersService = VenueManagersService;
 exports.VenueManagersService = VenueManagersService = __decorate([
-    (0, common_1.Injectable)()
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
 ], VenueManagersService);
 //# sourceMappingURL=venue-managers.service.js.map

@@ -1,4 +1,11 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateVenueManagerDto } from './create-venue-manager.dto';
+import { IsOptional, IsNumber } from 'class-validator';
 
-export class UpdateVenueManagerDto extends PartialType(CreateVenueManagerDto) {}
+export class UpdateVenueManagerDto {
+  @IsOptional()
+  @IsNumber()
+  venueManager_venueId: number;
+
+  @IsOptional()
+  @IsNumber()
+  venueManager_accountId: number;
+}

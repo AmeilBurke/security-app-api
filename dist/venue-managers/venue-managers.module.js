@@ -10,13 +10,14 @@ exports.VenueManagersModule = void 0;
 const common_1 = require("@nestjs/common");
 const venue_managers_service_1 = require("./venue-managers.service");
 const venue_managers_controller_1 = require("./venue-managers.controller");
+const prisma_service_1 = require("../prisma.service");
 let VenueManagersModule = class VenueManagersModule {
 };
 exports.VenueManagersModule = VenueManagersModule;
 exports.VenueManagersModule = VenueManagersModule = __decorate([
     (0, common_1.Module)({
         controllers: [venue_managers_controller_1.VenueManagersController],
-        providers: [venue_managers_service_1.VenueManagersService],
+        providers: [venue_managers_service_1.VenueManagersService, prisma_service_1.PrismaService],
     })
 ], VenueManagersModule);
 //# sourceMappingURL=venue-managers.module.js.map
