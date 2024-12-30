@@ -20,6 +20,7 @@ const venues_module_1 = require("./venues/venues.module");
 const ban_details_module_1 = require("./ban-details/ban-details.module");
 const venue_managers_module_1 = require("./venue-managers/venue-managers.module");
 const venue_bans_module_1 = require("./venue-bans/venue-bans.module");
+const venue_access_module_1 = require("./venue-access/venue-access.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -38,6 +39,7 @@ exports.AppModule = AppModule = __decorate([
             ban_details_module_1.BanDetailsModule,
             venue_managers_module_1.VenueManagersModule,
             venue_bans_module_1.VenueBansModule,
+            venue_access_module_1.VenueAccessModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],

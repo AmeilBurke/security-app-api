@@ -1,20 +1,20 @@
 import { Injectable } from '@nestjs/common';
-import { CreateVenueBanDto } from './dto/create-venue-ban.dto';
+import { CreateVenueAccessDto } from './dto/create-venue-access.dto';
 import { RequestWithAccount } from 'src/types';
 import {
   getAccountInfoFromId,
-  isAccountAdminRole,
   handleError,
+  isAccountAdminRole,
 } from 'src/utils';
 import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
-export class VenueBansService {
+export class VenueAccessService {
   constructor(private prisma: PrismaService) {}
 
   async create(
     request: RequestWithAccount,
-    createVenueBanDto: CreateVenueBanDto,
+    createVenueAccessDto: CreateVenueAccessDto,
   ) {
     try {
       if (!request.account) {
@@ -32,10 +32,10 @@ export class VenueBansService {
       }
 
       if (await isAccountAdminRole(this.prisma, requestAccount)) {
-        return await this.prisma.venueBan.create({
+        return await this.prisma.venueAccess.create({
           data: {
-            venueBan_bannedPersonId: createVenueBanDto.venueBan_bannedPersonId,
-            venueBan_venueId: createVenueBanDto.venueBan_venueId,
+            venueAccess_accountId: createVenueAccessDto.venueAccess_accountId,
+            venueAccess_venueId: createVenueAccessDto.venueAccess_venueId,
           },
         });
       } else {
@@ -61,7 +61,12 @@ export class VenueBansService {
       if (typeof requestAccount === 'string') {
         return 'there was an error with requestAccount';
       }
-      return await this.prisma.venueBan.findMany();
+
+      if (await isAccountAdminRole(this.prisma, requestAccount)) {
+        return await this.prisma.venueAccess.findMany();
+      } else {
+        return 'you do not have permission to access this';
+      }
     } catch (error: unknown) {
       return handleError(error);
     }
@@ -82,11 +87,16 @@ export class VenueBansService {
       if (typeof requestAccount === 'string') {
         return 'there was an error with requestAccount';
       }
-      return await this.prisma.venueBan.findFirstOrThrow({
-        where: {
-          venueBan_venueId: id,
-        },
-      });
+
+      if (await isAccountAdminRole(this.prisma, requestAccount)) {
+        return await this.prisma.venueAccess.findFirstOrThrow({
+          where: {
+            venueAccess_id: id,
+          },
+        });
+      } else {
+        return 'you do not have permission to access this';
+      }
     } catch (error: unknown) {
       return handleError(error);
     }
@@ -107,11 +117,16 @@ export class VenueBansService {
       if (typeof requestAccount === 'string') {
         return 'there was an error with requestAccount';
       }
-      return await this.prisma.venueBan.delete({
-        where: {
-          venueBan_id: id,
-        },
-      });
+
+      if (await isAccountAdminRole(this.prisma, requestAccount)) {
+        return await this.prisma.venueAccess.delete({
+          where: {
+            venueAccess_id: id,
+          },
+        });
+      } else {
+        return 'you do not have permission to access this';
+      }
     } catch (error: unknown) {
       return handleError(error);
     }

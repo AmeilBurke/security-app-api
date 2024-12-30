@@ -9,15 +9,15 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.VenueBansService = void 0;
+exports.VenueAccessService = void 0;
 const common_1 = require("@nestjs/common");
 const utils_1 = require("../utils");
 const prisma_service_1 = require("../prisma.service");
-let VenueBansService = class VenueBansService {
+let VenueAccessService = class VenueAccessService {
     constructor(prisma) {
         this.prisma = prisma;
     }
-    async create(request, createVenueBanDto) {
+    async create(request, createVenueAccessDto) {
         try {
             if (!request.account) {
                 console.log(request.account);
@@ -28,10 +28,10 @@ let VenueBansService = class VenueBansService {
                 return 'there was an error with requestAccount';
             }
             if (await (0, utils_1.isAccountAdminRole)(this.prisma, requestAccount)) {
-                return await this.prisma.venueBan.create({
+                return await this.prisma.venueAccess.create({
                     data: {
-                        venueBan_bannedPersonId: createVenueBanDto.venueBan_bannedPersonId,
-                        venueBan_venueId: createVenueBanDto.venueBan_venueId,
+                        venueAccess_accountId: createVenueAccessDto.venueAccess_accountId,
+                        venueAccess_venueId: createVenueAccessDto.venueAccess_venueId,
                     },
                 });
             }
@@ -53,7 +53,12 @@ let VenueBansService = class VenueBansService {
             if (typeof requestAccount === 'string') {
                 return 'there was an error with requestAccount';
             }
-            return await this.prisma.venueBan.findMany();
+            if (await (0, utils_1.isAccountAdminRole)(this.prisma, requestAccount)) {
+                return await this.prisma.venueAccess.findMany();
+            }
+            else {
+                return 'you do not have permission to access this';
+            }
         }
         catch (error) {
             return (0, utils_1.handleError)(error);
@@ -69,11 +74,16 @@ let VenueBansService = class VenueBansService {
             if (typeof requestAccount === 'string') {
                 return 'there was an error with requestAccount';
             }
-            return await this.prisma.venueBan.findFirstOrThrow({
-                where: {
-                    venueBan_venueId: id,
-                },
-            });
+            if (await (0, utils_1.isAccountAdminRole)(this.prisma, requestAccount)) {
+                return await this.prisma.venueAccess.findFirstOrThrow({
+                    where: {
+                        venueAccess_id: id,
+                    },
+                });
+            }
+            else {
+                return 'you do not have permission to access this';
+            }
         }
         catch (error) {
             return (0, utils_1.handleError)(error);
@@ -89,20 +99,25 @@ let VenueBansService = class VenueBansService {
             if (typeof requestAccount === 'string') {
                 return 'there was an error with requestAccount';
             }
-            return await this.prisma.venueBan.delete({
-                where: {
-                    venueBan_id: id,
-                },
-            });
+            if (await (0, utils_1.isAccountAdminRole)(this.prisma, requestAccount)) {
+                return await this.prisma.venueAccess.delete({
+                    where: {
+                        venueAccess_id: id,
+                    },
+                });
+            }
+            else {
+                return 'you do not have permission to access this';
+            }
         }
         catch (error) {
             return (0, utils_1.handleError)(error);
         }
     }
 };
-exports.VenueBansService = VenueBansService;
-exports.VenueBansService = VenueBansService = __decorate([
+exports.VenueAccessService = VenueAccessService;
+exports.VenueAccessService = VenueAccessService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService])
-], VenueBansService);
-//# sourceMappingURL=venue-bans.service.js.map
+], VenueAccessService);
+//# sourceMappingURL=venue-access.service.js.map
