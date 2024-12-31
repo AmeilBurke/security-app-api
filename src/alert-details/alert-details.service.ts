@@ -130,7 +130,7 @@ export class AlertDetailsService {
     }
   }
 
-  // needs testing
+  //TODO: test this
 
   @Cron('0 6 * * *')
   async remove(server: Server): Promise<string | void> {

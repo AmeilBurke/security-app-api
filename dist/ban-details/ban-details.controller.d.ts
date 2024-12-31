@@ -5,28 +5,10 @@ import { RequestWithAccount } from 'src/types';
 export declare class BanDetailsController {
     private readonly banDetailsService;
     constructor(banDetailsService: BanDetailsService);
-    create(request: RequestWithAccount, createBanDetailDto: CreateBanDetailDto): Promise<string | import(".prisma/client").Prisma.BatchPayload>;
+    create(request: RequestWithAccount, createBanDetailDto: CreateBanDetailDto): Promise<string | import(".prisma/client").Prisma.PrismaPromise<import(".prisma/client").Prisma.BatchPayload>>;
     findAll(request: RequestWithAccount): Promise<string | {
-        active_bans: {
-            banDetails_id: number;
-            banDetails_bannedPersonId: number;
-            banDetails_reason: string;
-            banDetails_banStartDate: string;
-            banDetails_banEndDate: string;
-            banDetails_venueBanId: number;
-            banDetails_isBanPending: boolean;
-            banDetails_banUploadedBy: number;
-        }[];
-        non_active_bans: {
-            banDetails_id: number;
-            banDetails_bannedPersonId: number;
-            banDetails_reason: string;
-            banDetails_banStartDate: string;
-            banDetails_banEndDate: string;
-            banDetails_venueBanId: number;
-            banDetails_isBanPending: boolean;
-            banDetails_banUploadedBy: number;
-        }[];
+        active_bans: import(".prisma/client").BanDetail[];
+        non_active_bans: import(".prisma/client").BanDetail[] | null;
     }>;
     findOne(request: RequestWithAccount, accountId: string): Promise<string | {
         banDetails_id: number;

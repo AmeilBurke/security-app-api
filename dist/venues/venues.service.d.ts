@@ -13,11 +13,7 @@ export declare class VenuesService {
         bannedPerson_name: string;
         bannedPerson_imageName: string;
     }[]>;
-    update(request: RequestWithAccount, file: Express.Multer.File, id: number, updateVenueDto: UpdateVenueDto): Promise<string | {
-        venue_id: number;
-        venue_name: string;
-        venue_imagePath: string;
-    }>;
+    update(request: RequestWithAccount, file: Express.Multer.File, id: number, updateVenueDto: UpdateVenueDto): Promise<string | Venue>;
     remove(request: RequestWithAccount, id: number): Promise<string | {
         venue_id: number;
         venue_name: string;

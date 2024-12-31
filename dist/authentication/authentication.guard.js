@@ -14,6 +14,7 @@ const common_1 = require("@nestjs/common");
 const core_1 = require("@nestjs/core");
 const jwt_1 = require("@nestjs/jwt");
 const public_guard_1 = require("./public.guard");
+const bcrypt_1 = require("../bcrypt/bcrypt");
 let AuthenticationGuard = class AuthenticationGuard {
     constructor(jwtService, reflector) {
         this.jwtService = jwtService;
@@ -29,11 +30,12 @@ let AuthenticationGuard = class AuthenticationGuard {
         }
         const request = context.switchToHttp().getRequest();
         const token = this.extractTokenFromHeader(request);
-        if (!token) {
+        const decryptedToken = await (0, bcrypt_1.decryptString)(token);
+        if (!decryptedToken) {
             throw new common_1.UnauthorizedException();
         }
         try {
-            const payload = await this.jwtService.verifyAsync(token, {
+            const payload = await this.jwtService.verifyAsync(decryptedToken, {
                 secret: process.env.JWT_SECRET,
             });
             request['account'] = payload;

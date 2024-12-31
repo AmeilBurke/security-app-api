@@ -29,7 +29,7 @@ let AccountsService = class AccountsService {
                 return 'there was an error with requestAccount';
             }
             if (await (0, utils_1.isAccountAdminRole)(this.prisma, requestAccount)) {
-                createAccountDto.account_password = await (0, bcrypt_1.encryptPassword)(createAccountDto.account_password);
+                createAccountDto.account_password = await (0, bcrypt_1.hashPassword)(createAccountDto.account_password);
                 const newAccount = await this.prisma.account.create({
                     data: {
                         account_name: createAccountDto.account_name
@@ -89,16 +89,6 @@ let AccountsService = class AccountsService {
         catch (error) {
             return (0, utils_1.handleError)(error);
         }
-    }
-    async createSecret(createAccountDto) {
-        return await this.prisma.account.create({
-            data: {
-                account_email: createAccountDto.account_email,
-                account_name: createAccountDto.account_name,
-                account_password: await (0, bcrypt_1.encryptPassword)(createAccountDto.account_password),
-                account_roleId: createAccountDto.account_roleId,
-            },
-        });
     }
     async findAll(request) {
         try {
@@ -183,7 +173,7 @@ let AccountsService = class AccountsService {
                             ? updateAccountDto.account_email.toLocaleLowerCase().trim()
                             : updateAccountDto.account_email,
                         account_password: updateAccountDto.account_password
-                            ? await (0, bcrypt_1.encryptPassword)(updateAccountDto.account_password)
+                            ? await (0, bcrypt_1.hashPassword)(updateAccountDto.account_password)
                             : updateAccountDto.account_password,
                         account_roleId: updateAccountDto.account_roleId,
                     },

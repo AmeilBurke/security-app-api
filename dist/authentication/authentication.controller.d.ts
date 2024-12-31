@@ -5,8 +5,6 @@ export declare class AuthenticationController {
     create(userLogin: {
         user_email: string;
         user_password: string;
-    }): Promise<{
-        access_token: string;
-    } | string>;
+    }): Promise<Buffer | string>;
     getProfile(request: any): any;
 }

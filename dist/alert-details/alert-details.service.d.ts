@@ -12,12 +12,12 @@ export declare class AlertDetailsService {
         exp: number;
     }, createAlertDetailDto: CreateAlertDetailDto & {
         fileData: string;
-    }, imageName: string, server: Server): Promise<string>;
+    }, imageName: string, server: Server): Promise<string | void>;
     update(payload: {
         sub: number;
         email: string;
         iat: number;
         exp: number;
-    }, updateAlertDetailDto: UpdateAlertDetailDto, imageName: string, server: Server): Promise<string>;
-    remove(server: Server): Promise<string>;
+    }, updateAlertDetailDto: UpdateAlertDetailDto, imageName: string, server: Server): Promise<string | void>;
+    remove(server: Server): Promise<string | void>;
 }

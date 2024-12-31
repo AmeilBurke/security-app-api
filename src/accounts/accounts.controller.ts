@@ -27,13 +27,13 @@ export class AccountsController {
     return this.accountsService.create(request, createAccountDto);
   }
 
-  @Public()
-  @Post('/secret')
-  createSecret(
-    @Body() createAccountDto: CreateAccountDto,
-  ) {
-    return this.accountsService.createSecret(createAccountDto);
-  }
+  // @Public()
+  // @Post('/secret')
+  // createSecret(
+  //   @Body() createAccountDto: CreateAccountDto,
+  // ) {
+  //   return this.accountsService.createSecret(createAccountDto);
+  // }
 
 
   @Get()

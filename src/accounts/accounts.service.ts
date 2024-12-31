@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateAccountDto } from './dto/create-account.dto';
 import { UpdateAccountDto } from './dto/update-account.dto';
 import { PrismaService } from 'src/prisma.service';
-import { encryptPassword } from 'src/bcrypt/bcrypt';
+import { hashPassword } from 'src/bcrypt/bcrypt';
 import { Account } from '@prisma/client';
 import {
   getAccountInfoFromId,
@@ -35,7 +35,7 @@ export class AccountsService {
       }
 
       if (await isAccountAdminRole(this.prisma, requestAccount)) {
-        createAccountDto.account_password = await encryptPassword(
+        createAccountDto.account_password = await hashPassword(
           createAccountDto.account_password,
         );
 
@@ -109,7 +109,7 @@ export class AccountsService {
   //     data: {
   //       account_email: createAccountDto.account_email,
   //       account_name: createAccountDto.account_name,
-  //       account_password: await encryptPassword(createAccountDto.account_password),
+  //       account_password: await hashPassword(createAccountDto.account_password),
   //       account_roleId: createAccountDto.account_roleId,
   //     },
   //   });
@@ -223,7 +223,7 @@ export class AccountsService {
               ? updateAccountDto.account_email.toLocaleLowerCase().trim()
               : updateAccountDto.account_email,
             account_password: updateAccountDto.account_password
-              ? await encryptPassword(updateAccountDto.account_password)
+              ? await hashPassword(updateAccountDto.account_password)
               : updateAccountDto.account_password,
             account_roleId: updateAccountDto.account_roleId,
           },

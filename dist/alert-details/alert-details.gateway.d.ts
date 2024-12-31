@@ -11,7 +11,7 @@ export declare class AlertDetailsGateway {
     onModuleInit(): void;
     create(createAlertDetailDto: CreateAlertDetailDto & {
         fileData: string;
-    }, client: Socket): Promise<string>;
-    update(updateAlertDetailDto: UpdateAlertDetailDto, client: Socket): Promise<string>;
-    ReadableStreamDefaultReader(client: Socket): Promise<string>;
+    }, client: Socket): Promise<string | void>;
+    update(updateAlertDetailDto: UpdateAlertDetailDto, client: Socket): Promise<string | void>;
+    ReadableStreamDefaultReader(client: Socket): Promise<string | void>;
 }

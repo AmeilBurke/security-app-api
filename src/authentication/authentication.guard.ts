@@ -8,6 +8,7 @@ import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 import { IS_PUBLIC_KEY } from './public.guard';
+import { decryptString } from 'src/bcrypt/bcrypt';
 
 @Injectable()
 export class AuthenticationGuard implements CanActivate {
@@ -28,13 +29,22 @@ export class AuthenticationGuard implements CanActivate {
 
     const request = context.switchToHttp().getRequest();
     const token = this.extractTokenFromHeader(request);
-    if (!token) {
+    const decryptedToken = await decryptString(token);
+
+    // console.log(await decryptString(token));
+
+    if (!decryptedToken) {
       throw new UnauthorizedException();
     }
     try {
-      const payload = await this.jwtService.verifyAsync(token, {
+      // const payload = await this.jwtService.verifyAsync(token, {
+      //   secret: process.env.JWT_SECRET,
+      // });
+
+      const payload = await this.jwtService.verifyAsync(decryptedToken, {
         secret: process.env.JWT_SECRET,
       });
+
       // 💡 We're assigning the payload to the request object here
       // so that we can access it in our route handlers
       request['account'] = payload;
