@@ -44,6 +44,7 @@ const socket_io_1 = require("socket.io");
 const jwt_1 = require("@nestjs/jwt");
 const path = __importStar(require("path"));
 const fs = __importStar(require("fs"));
+const bcrypt_1 = require("../bcrypt/bcrypt");
 let AlertDetailsGateway = class AlertDetailsGateway {
     constructor(alertDetailsService, jwtService) {
         this.alertDetailsService = alertDetailsService;
@@ -51,14 +52,30 @@ let AlertDetailsGateway = class AlertDetailsGateway {
     }
     onModuleInit() {
         this.server.on('connection', (socket) => {
-            console.log(`${socket.id} - connected`);
+            console.log(`${socket.id} - connected to Alert Details gateway`);
+            socket.on('disconnect', () => {
+                console.log(`${socket.id} - disconnected`);
+            });
+            if (socket.recovered) {
+                console.log(`session ${socket.id} was recovered`);
+            }
         });
     }
     async create(createAlertDetailDto, client) {
         if (!client.handshake.headers.jwt) {
             return 'no valid JWT token found';
         }
-        const payload = await this.jwtService.verifyAsync(String(client.handshake.headers.jwt), { secret: process.env.JWT_SECRET });
+        const decryptedToken = await (0, bcrypt_1.decryptString)(String(client.handshake.headers.jwt));
+        let payload;
+        try {
+            payload = await this.jwtService.verifyAsync(decryptedToken, {
+                secret: process.env.JWT_SECRET,
+            });
+        }
+        catch (error) {
+            console.log(`payload ${error}`);
+            throw new websockets_1.WsException('JWT Token is expired or invalid');
+        }
         let fileExtension;
         switch (createAlertDetailDto.fileData[0]) {
             case '/':
@@ -77,7 +94,13 @@ let AlertDetailsGateway = class AlertDetailsGateway {
         return this.alertDetailsService.create(payload, createAlertDetailDto, imageName, this.server);
     }
     async update(updateAlertDetailDto, client) {
-        const payload = await this.jwtService.verifyAsync(String(client.handshake.headers.jwt), { secret: process.env.JWT_SECRET });
+        if (!client.handshake.headers.jwt) {
+            return 'no valid JWT token found';
+        }
+        const decryptedToken = await (0, bcrypt_1.decryptString)(String(client.handshake.headers.jwt));
+        const payload = await this.jwtService.verifyAsync(decryptedToken, {
+            secret: process.env.JWT_SECRET,
+        });
         let fileExtension;
         let imageName = '';
         if (updateAlertDetailDto.alertDetail_imageName) {
@@ -98,7 +121,7 @@ let AlertDetailsGateway = class AlertDetailsGateway {
         }
         return this.alertDetailsService.update(payload, updateAlertDetailDto, imageName, this.server);
     }
-    async ReadableStreamDefaultReader(client) {
+    async delete(client) {
         return this.alertDetailsService.remove(this.server);
     }
 };
@@ -130,9 +153,15 @@ __decorate([
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [socket_io_1.Socket]),
     __metadata("design:returntype", Promise)
-], AlertDetailsGateway.prototype, "ReadableStreamDefaultReader", null);
+], AlertDetailsGateway.prototype, "delete", null);
 exports.AlertDetailsGateway = AlertDetailsGateway = __decorate([
-    (0, websockets_1.WebSocketGateway)({ cors: true }),
+    (0, websockets_1.WebSocketGateway)({
+        cors: true,
+        connectionStateRecovery: {
+            maxDisconnectionDuration: 1 * 60 * 1000,
+            skipMiddleWares: false,
+        },
+    }),
     __metadata("design:paramtypes", [alert_details_service_1.AlertDetailsService,
         jwt_1.JwtService])
 ], AlertDetailsGateway);

@@ -4,6 +4,7 @@ import {
   MessageBody,
   WebSocketServer,
   ConnectedSocket,
+  WsException,
 } from '@nestjs/websockets';
 import { AlertDetailsService } from './alert-details.service';
 import { CreateAlertDetailDto } from './dto/create-alert-detail.dto';
@@ -13,8 +14,16 @@ import { Server, Socket } from 'socket.io';
 import { JwtService } from '@nestjs/jwt';
 import * as path from 'path';
 import * as fs from 'fs';
+import { decryptString } from 'src/bcrypt/bcrypt';
+import dayjs from 'dayjs';
 
-@WebSocketGateway({ cors: true })
+@WebSocketGateway({
+  cors: true,
+  connectionStateRecovery: {
+    maxDisconnectionDuration: 1 * 60 * 1000,
+    skipMiddleWares: false,
+  },
+})
 export class AlertDetailsGateway {
   constructor(
     private readonly alertDetailsService: AlertDetailsService,
@@ -26,7 +35,16 @@ export class AlertDetailsGateway {
 
   onModuleInit() {
     this.server.on('connection', (socket: Socket) => {
-      console.log(`${socket.id} - connected`);
+      // console.log(`${socket.id} - connected @ ${dayjs()}`);
+      console.log(`${socket.id} - connected to Alert Details gateway`);
+
+      socket.on('disconnect', () => {
+        console.log(`${socket.id} - disconnected`);
+      });
+
+      if (socket.recovered) {
+        console.log(`session ${socket.id} was recovered`);
+      }
     });
   }
 
@@ -39,11 +57,24 @@ export class AlertDetailsGateway {
     if (!client.handshake.headers.jwt) {
       return 'no valid JWT token found';
     }
-    
-    const payload = await this.jwtService.verifyAsync(
+
+    const decryptedToken = await decryptString(
       String(client.handshake.headers.jwt),
-      { secret: process.env.JWT_SECRET },
     );
+
+    let payload: { sub: number; email: string; iat: number; exp: number; };
+    try {
+      payload = await this.jwtService.verifyAsync(decryptedToken, {
+        secret: process.env.JWT_SECRET,
+      });
+    } catch (error: unknown) {
+      // need to look at this in frontend to see what they get
+      console.log(`payload ${error}`)
+      throw new WsException('JWT Token is expired or invalid');
+      // return error;
+    }
+
+    // console.log(`payload: ${payload}`)
 
     let fileExtension: string;
 
@@ -78,10 +109,17 @@ export class AlertDetailsGateway {
     @MessageBody() updateAlertDetailDto: UpdateAlertDetailDto,
     @ConnectedSocket() client: Socket,
   ) {
-    const payload = await this.jwtService.verifyAsync(
+    if (!client.handshake.headers.jwt) {
+      return 'no valid JWT token found';
+    }
+
+    const decryptedToken = await decryptString(
       String(client.handshake.headers.jwt),
-      { secret: process.env.JWT_SECRET },
     );
+
+    const payload = await this.jwtService.verifyAsync(decryptedToken, {
+      secret: process.env.JWT_SECRET,
+    });
 
     let fileExtension: string;
     let imageName: string = '';
@@ -119,7 +157,7 @@ export class AlertDetailsGateway {
 
   // needs to be tested
   @SubscribeMessage('deleteAllAlertDetail')
-  async ReadableStreamDefaultReader(@ConnectedSocket() client: Socket) {
+  async delete(@ConnectedSocket() client: Socket) {
     return this.alertDetailsService.remove(this.server);
   }
 }

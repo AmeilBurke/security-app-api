@@ -10,8 +10,7 @@ export class AuthenticationController {
   @Post('login')
   create(
     @Body() userLogin: { user_email: string; user_password: string },
-  ): Promise< Buffer | string> {
-    // ): Promise<{ access_token: string } | string> {
+  ): Promise<Buffer | string> {
     return this.authenticationService.signIn(
       userLogin.user_email,
       userLogin.user_password,

@@ -115,7 +115,8 @@ export class AccountsService {
   //   });
   // }
 
-  async findAll(request: RequestWithAccount): Promise<Account[] | string> {
+  async findAll(request: RequestWithAccount): Promise<Omit<Account, 'account_password'>[] | string> {
+    // async findAll(request: RequestWithAccount): Promise<Account[] | string> {
     try {
       if (!request.account) {
         return 'There was an unspecified error';
@@ -134,6 +135,12 @@ export class AccountsService {
         return this.prisma.account.findMany({
           orderBy: {
             account_id: 'asc',
+          },
+          select: {
+            account_id: true,
+            account_email: true,
+            account_name: true,
+            account_roleId: true,
           },
         });
       } else {

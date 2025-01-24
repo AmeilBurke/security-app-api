@@ -1,7 +1,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { AccountsService } from 'src/accounts/accounts.service';
-import { encryptString, hashPassword } from 'src/bcrypt/bcrypt';
+import { encryptString } from 'src/bcrypt/bcrypt';
 const bcrypt = require('bcrypt');
 
 @Injectable()

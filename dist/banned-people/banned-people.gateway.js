@@ -50,7 +50,10 @@ let BannedPeopleGateway = class BannedPeopleGateway {
     }
     onModuleInit() {
         this.server.on('connection', (socket) => {
-            console.log(`${socket.id} - connected`);
+            console.log(`${socket.id} - connected to Banned People gateway`);
+            if (socket.recovered) {
+                console.log(`session: ${socket.id} recovered`);
+            }
         });
     }
     async create(createBannedPerson, client) {
@@ -90,7 +93,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], BannedPeopleGateway.prototype, "create", null);
 exports.BannedPeopleGateway = BannedPeopleGateway = __decorate([
-    (0, websockets_1.WebSocketGateway)({ cors: true }),
+    (0, websockets_1.WebSocketGateway)({ cors: true, connectionStateRecovery: true }),
     __metadata("design:paramtypes", [banned_people_service_1.BannedPeopleService,
         jwt_1.JwtService])
 ], BannedPeopleGateway);

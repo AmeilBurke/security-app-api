@@ -65,7 +65,7 @@ let AlertDetailsService = class AlertDetailsService {
             else {
                 minute = String(dateNow.minute());
             }
-            await this.prisma.alertDetail.create({
+            const newAlert = await this.prisma.alertDetail.create({
                 data: {
                     alertDetail_bannedPersonId: createAlertDetailDto.alertDetail_bannedPersonId,
                     alertDetail_name: createAlertDetailDto.alertDetail_name,
@@ -75,22 +75,29 @@ let AlertDetailsService = class AlertDetailsService {
                     alertDetails_alertUploadedBy: requestAccount.account_id,
                 },
             });
-            const allAlerts = await this.prisma.alertDetail.findMany();
-            const alertsWithBase64Image = allAlerts.map((alertDetail) => {
-                try {
-                    const filePath = path.join('src\\images\\people\\', alertDetail.alertDetail_imageName);
-                    const fileBuffer = fs.readFileSync(filePath);
-                    alertDetail.alertDetail_imageName = fileBuffer.toString('base64');
-                    return alertDetail;
-                }
-                catch (error) {
-                    if (error instanceof Error) {
-                        console.log(error.message);
-                    }
-                }
+            const latestAlert = await this.prisma.alertDetail.findUniqueOrThrow({
+                where: {
+                    alertDetail_id: newAlert.alertDetail_id,
+                },
             });
+            console.log(latestAlert);
+            try {
+                const filePath = path.join('src\\images\\people\\', latestAlert.alertDetail_imageName);
+                const fileBuffer = fs.readFileSync(filePath);
+                latestAlert.alertDetail_imageName = fileBuffer.toString('base64');
+            }
+            catch (error) {
+                if (error instanceof Error) {
+                    console.log(error.message);
+                }
+            }
             server.emit('onAlertCreate', {
-                allAlerts: alertsWithBase64Image,
+                latestAlert: latestAlert,
+                latestAlertTime: `${dateNow.date()}/${dateNow.month() + 1}/${dateNow.year()}T${dateNow.hour()}:${dateNow.minute()}:${dateNow.second()}:${dateNow.millisecond()}`,
+            });
+            console.log({
+                latestAlert: latestAlert,
+                latestAlertTime: `${dateNow.date()}/${dateNow.month() + 1}/${dateNow.year()}T${dateNow.hour()}:${dateNow.minute()}:${dateNow.second()}:${dateNow.millisecond()}`,
             });
         }
         catch (error) {
@@ -126,6 +133,16 @@ let AlertDetailsService = class AlertDetailsService {
         catch (error) {
             return (0, utils_1.handleError)(error);
         }
+    }
+    async findAll(request) {
+        if (!request.account) {
+            return 'There was an unspecified error';
+        }
+        const requestAccount = await (0, utils_1.getAccountInfoFromId)(this.prisma, request.account.sub);
+        if (typeof requestAccount === 'string') {
+            return 'there was an error with requestAccount';
+        }
+        return await this.prisma.alertDetail.findMany();
     }
     async remove(server) {
         try {

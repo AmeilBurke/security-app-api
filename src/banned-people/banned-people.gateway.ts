@@ -13,7 +13,7 @@ import { v4 as uuidv4 } from 'uuid';
 import * as path from 'path';
 import * as fs from 'fs';
 
-@WebSocketGateway({ cors: true })
+@WebSocketGateway({ cors: true, connectionStateRecovery: true })
 export class BannedPeopleGateway {
   constructor(
     private bannedPeopleService: BannedPeopleService,
@@ -25,10 +25,13 @@ export class BannedPeopleGateway {
 
   onModuleInit() {
     this.server.on('connection', (socket: Socket) => {
-      console.log(`${socket.id} - connected`);
+      console.log(`${socket.id} - connected to Banned People gateway`);
+      if (socket.recovered) {
+        console.log(`session: ${socket.id} recovered`);
+      }
     });
   }
-  
+
   @SubscribeMessage('addBannedPerson')
   async create(
     @MessageBody()
@@ -42,7 +45,6 @@ export class BannedPeopleGateway {
     },
     @ConnectedSocket() client: Socket,
   ) {
-
     if (!client.handshake.headers.jwt) {
       return 'no valid JWT token found';
     }

@@ -12,6 +12,8 @@ const deriveKey = async (secret: string): Promise<Buffer> => {
   return (await promisify(scrypt)(secret, 'salt', 32)) as Buffer;
 };
 
+// postman request succeeds but not from frontend
+
 // export const encryptString = async (stringToEncrypt: string) => {
 //   const key = await deriveKey();
 //   const iv = randomBytes(16);

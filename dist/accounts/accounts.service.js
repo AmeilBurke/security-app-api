@@ -104,6 +104,12 @@ let AccountsService = class AccountsService {
                     orderBy: {
                         account_id: 'asc',
                     },
+                    select: {
+                        account_id: true,
+                        account_email: true,
+                        account_name: true,
+                        account_roleId: true,
+                    },
                 });
             }
             else {

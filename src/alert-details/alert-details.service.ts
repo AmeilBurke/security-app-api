@@ -9,6 +9,7 @@ import { AlertDetail } from '@prisma/client';
 import * as path from 'path';
 import * as fs from 'fs';
 import { Cron } from '@nestjs/schedule';
+import { RequestWithAccount } from 'src/types';
 
 @Injectable()
 export class AlertDetailsService {
@@ -44,7 +45,7 @@ export class AlertDetailsService {
         minute = String(dateNow.minute());
       }
 
-      await this.prisma.alertDetail.create({
+      const newAlert = await this.prisma.alertDetail.create({
         data: {
           alertDetail_bannedPersonId:
             createAlertDetailDto.alertDetail_bannedPersonId,
@@ -57,29 +58,59 @@ export class AlertDetailsService {
         },
       });
 
-      const allAlerts = await this.prisma.alertDetail.findMany();
-
-      const alertsWithBase64Image = allAlerts.map(
-        (alertDetail: AlertDetail) => {
-          try {
-            const filePath = path.join(
-              'src\\images\\people\\',
-              alertDetail.alertDetail_imageName,
-            );
-            const fileBuffer = fs.readFileSync(filePath);
-            alertDetail.alertDetail_imageName = fileBuffer.toString('base64');
-            return alertDetail;
-          } catch (error: unknown) {
-            if (error instanceof Error) {
-              console.log(error.message);
-            }
-          }
+      const latestAlert = await this.prisma.alertDetail.findUniqueOrThrow({
+        where: {
+          alertDetail_id: newAlert.alertDetail_id,
         },
-      );
+      });
+
+      console.log(latestAlert);
+      try {
+        const filePath = path.join(
+          'src\\images\\people\\',
+          latestAlert.alertDetail_imageName,
+        );
+        const fileBuffer = fs.readFileSync(filePath);
+        latestAlert.alertDetail_imageName = fileBuffer.toString('base64');
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          console.log(error.message);
+        }
+      }
 
       server.emit('onAlertCreate', {
-        allAlerts: alertsWithBase64Image,
+        latestAlert: latestAlert,
+        latestAlertTime: `${dateNow.date()}/${dateNow.month() + 1}/${dateNow.year()}T${dateNow.hour()}:${dateNow.minute()}:${dateNow.second()}:${dateNow.millisecond()}`,
       });
+
+      console.log({
+        latestAlert: latestAlert,
+        latestAlertTime: `${dateNow.date()}/${dateNow.month() + 1}/${dateNow.year()}T${dateNow.hour()}:${dateNow.minute()}:${dateNow.second()}:${dateNow.millisecond()}`,
+      });
+
+      // const allAlerts = await this.prisma.alertDetail.findMany();
+
+      // const alertsWithBase64Image = allAlerts.map(
+      //   (alertDetail: AlertDetail) => {
+      //     try {
+      //       const filePath = path.join(
+      //         'src\\images\\people\\',
+      //         alertDetail.alertDetail_imageName,
+      //       );
+      //       const fileBuffer = fs.readFileSync(filePath);
+      //       alertDetail.alertDetail_imageName = fileBuffer.toString('base64');
+      //       return alertDetail;
+      //     } catch (error: unknown) {
+      //       if (error instanceof Error) {
+      //         console.log(error.message);
+      //       }
+      //     }
+      //   },
+      // );
+
+      // server.emit('onAlertCreate', {
+      //   allAlerts: alertsWithBase64Image,
+      // });
     } catch (error: unknown) {
       return handleError(error);
     }
@@ -130,7 +161,28 @@ export class AlertDetailsService {
     }
   }
 
+  async findAll(request: RequestWithAccount): Promise<AlertDetail[] | string> {
+    if (!request.account) {
+      return 'There was an unspecified error';
+    }
+
+    const requestAccount = await getAccountInfoFromId(
+      this.prisma,
+      request.account.sub,
+    );
+
+    if (typeof requestAccount === 'string') {
+      return 'there was an error with requestAccount';
+    }
+
+    return await this.prisma.alertDetail.findMany();
+  }
+
   //TODO: test this
+  //needs fixing, produces error:
+  //TypeError: Cannot read properties of undefined (reading 'emit')
+  // at AlertDetailsService.remove (C:\Users\ameil\Documents\Github Repositories\security-app-api\src\alert-details\alert-details.service.ts:191:14)
+  // at async CronJob.<anonymous> (C:\Users\ameil\Documents\Github Repositories\security-app-api\node_modules\@nestjs\schedule\dist\schedule.explorer.js:119:17)
 
   @Cron('0 6 * * *')
   async remove(server: Server): Promise<string | void> {

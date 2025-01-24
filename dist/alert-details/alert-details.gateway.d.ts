@@ -13,5 +13,5 @@ export declare class AlertDetailsGateway {
         fileData: string;
     }, client: Socket): Promise<string | void>;
     update(updateAlertDetailDto: UpdateAlertDetailDto, client: Socket): Promise<string | void>;
-    ReadableStreamDefaultReader(client: Socket): Promise<string | void>;
+    delete(client: Socket): Promise<string | void>;
 }

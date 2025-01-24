@@ -30,10 +30,10 @@ let AuthenticationGuard = class AuthenticationGuard {
         }
         const request = context.switchToHttp().getRequest();
         const token = this.extractTokenFromHeader(request);
-        const decryptedToken = await (0, bcrypt_1.decryptString)(token);
-        if (!decryptedToken) {
+        if (token === undefined) {
             throw new common_1.UnauthorizedException();
         }
+        const decryptedToken = await (0, bcrypt_1.decryptString)(token);
         try {
             const payload = await this.jwtService.verifyAsync(decryptedToken, {
                 secret: process.env.JWT_SECRET,
