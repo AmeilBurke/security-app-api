@@ -73,10 +73,10 @@ let BanDetailsService = class BanDetailsService {
             }
             const allBanDetails = await this.prisma.banDetail.findMany();
             const activeBans = allBanDetails.filter((banDetail) => {
-                return banDetail.banDetails_isBanPending === true;
+                return banDetail.banDetails_isBanPending === false;
             });
             const nonActiveBans = allBanDetails.filter((banDetail) => {
-                return banDetail.banDetails_isBanPending === false;
+                return banDetail.banDetails_isBanPending === true;
             });
             if (await (0, utils_1.isAccountAdminRole)(this.prisma, requestAccount)) {
                 return {

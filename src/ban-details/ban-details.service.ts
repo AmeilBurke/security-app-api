@@ -71,21 +71,14 @@ export class BanDetailsService {
     }
   }
 
-  async findAll(
-    request: RequestWithAccount,
-  ): Promise<
-    string | { active_bans: BanDetail[]; non_active_bans: BanDetail[] | null }
-  > {
+  async findAll(request: RequestWithAccount): Promise<string | { active_bans: BanDetail[]; non_active_bans: BanDetail[] | null }> {
     try {
       if (!request.account) {
         console.log(request.account);
         return 'There was an unspecified error';
       }
 
-      const requestAccount = await getAccountInfoFromId(
-        this.prisma,
-        request.account.sub,
-      );
+      const requestAccount = await getAccountInfoFromId(this.prisma, request.account.sub);
 
       if (typeof requestAccount === 'string') {
         return 'there was an error with requestAccount';
@@ -94,11 +87,11 @@ export class BanDetailsService {
       const allBanDetails = await this.prisma.banDetail.findMany();
 
       const activeBans = allBanDetails.filter((banDetail: BanDetail) => {
-        return banDetail.banDetails_isBanPending === true;
+        return banDetail.banDetails_isBanPending === false;
       });
 
       const nonActiveBans = allBanDetails.filter((banDetail: BanDetail) => {
-        return banDetail.banDetails_isBanPending === false;
+        return banDetail.banDetails_isBanPending === true;
       });
 
       if (await isAccountAdminRole(this.prisma, requestAccount)) {
