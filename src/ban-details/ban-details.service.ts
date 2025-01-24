@@ -84,6 +84,7 @@ export class BanDetailsService {
         return 'there was an error with requestAccount';
       }
 
+      // might need to fix this at a later date (might need to do by date to see if it's expired or not)
       const allBanDetails = await this.prisma.banDetail.findMany();
 
       const activeBans = allBanDetails.filter((banDetail: BanDetail) => {
