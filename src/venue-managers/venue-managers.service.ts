@@ -120,16 +120,6 @@ export class VenueManagersService {
       return 'there was an error with requestAccount';
     }
 
-    const venueManagerIds = await this.prisma.venueManager.findMany({
-      where: {
-        venueManager_venueId: venueId,
-      },
-      select: {
-        venueManager_accountId: true,
-        venue_id: true,
-      },
-    });
-
     return await this.prisma.account.findMany({
       where: {
         VenueManager: {
