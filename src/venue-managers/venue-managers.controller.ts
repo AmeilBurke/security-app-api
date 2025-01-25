@@ -35,6 +35,12 @@ export class VenueManagersController {
     return this.venueManagersService.findOne(request, Number(id));
   }
 
+  @Get('/venue/:id')
+  findOneByVenueID(@Req() request: RequestWithAccount, @Param('id') id: string) {
+    return this.venueManagersService.findOneByVenueID(request, Number(id));
+  }
+
+
   @Patch(':id')
   update(
     @Req() request: RequestWithAccount,

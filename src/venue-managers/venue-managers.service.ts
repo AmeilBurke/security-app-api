@@ -99,6 +99,53 @@ export class VenueManagersService {
     }
   }
 
+  async findOneByVenueID(
+    request: RequestWithAccount,
+    venueId: number,
+  ): Promise<
+    | string
+    | { account_id: number; account_email: string; account_name: string }[]
+  > {
+    if (!request.account) {
+      console.log(request.account);
+      return 'There was an unspecified error';
+    }
+
+    const requestAccount = await getAccountInfoFromId(
+      this.prisma,
+      request.account.sub,
+    );
+
+    if (typeof requestAccount === 'string') {
+      return 'there was an error with requestAccount';
+    }
+
+    const venueManagerIds = await this.prisma.venueManager.findMany({
+      where: {
+        venueManager_venueId: venueId,
+      },
+      select: {
+        venueManager_accountId: true,
+        venue_id: true,
+      },
+    });
+
+    return await this.prisma.account.findMany({
+      where: {
+        VenueManager: {
+          some: {
+            venueManager_venueId: venueId,
+          },
+        },
+      },
+      select: {
+        account_id: true,
+        account_email: true,
+        account_name: true,
+      },
+    });
+  }
+
   async update(
     request: RequestWithAccount,
     id: number,

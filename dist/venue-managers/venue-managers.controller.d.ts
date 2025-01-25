@@ -20,6 +20,11 @@ export declare class VenueManagersController {
         venueManager_venueId: number;
         venueManager_accountId: number;
     }>;
+    findOneByVenueID(request: RequestWithAccount, id: string): Promise<string | {
+        account_id: number;
+        account_email: string;
+        account_name: string;
+    }[]>;
     update(request: RequestWithAccount, id: string, updateVenueManagerDto: UpdateVenueManagerDto): Promise<string | {
         venueManager_id: number;
         venueManager_venueId: number;

@@ -79,6 +79,39 @@ let VenueManagersService = class VenueManagersService {
             return (0, utils_1.handleError)(error);
         }
     }
+    async findOneByVenueID(request, venueId) {
+        if (!request.account) {
+            console.log(request.account);
+            return 'There was an unspecified error';
+        }
+        const requestAccount = await (0, utils_1.getAccountInfoFromId)(this.prisma, request.account.sub);
+        if (typeof requestAccount === 'string') {
+            return 'there was an error with requestAccount';
+        }
+        const venueManagerIds = await this.prisma.venueManager.findMany({
+            where: {
+                venueManager_venueId: venueId,
+            },
+            select: {
+                venueManager_accountId: true,
+                venue_id: true,
+            },
+        });
+        return await this.prisma.account.findMany({
+            where: {
+                VenueManager: {
+                    some: {
+                        venueManager_venueId: venueId,
+                    },
+                },
+            },
+            select: {
+                account_id: true,
+                account_email: true,
+                account_name: true,
+            },
+        });
+    }
     async update(request, id, updateVenueManagerDto) {
         try {
             if (!request.account) {
