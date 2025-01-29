@@ -79,6 +79,9 @@ let AlertDetailsService = class AlertDetailsService {
                 where: {
                     alertDetail_id: newAlert.alertDetail_id,
                 },
+                include: {
+                    account_id: true,
+                },
             });
             console.log(latestAlert);
             try {

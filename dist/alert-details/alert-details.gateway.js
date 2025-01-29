@@ -73,7 +73,7 @@ let AlertDetailsGateway = class AlertDetailsGateway {
             });
         }
         catch (error) {
-            console.log(`payload ${error}`);
+            console.log(error);
             throw new websockets_1.WsException('JWT Token is expired or invalid');
         }
         let fileExtension;

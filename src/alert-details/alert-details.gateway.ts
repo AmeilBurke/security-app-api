@@ -62,14 +62,15 @@ export class AlertDetailsGateway {
       String(client.handshake.headers.jwt),
     );
 
-    let payload: { sub: number; email: string; iat: number; exp: number; };
+    let payload: { sub: number; email: string; iat: number; exp: number };
     try {
       payload = await this.jwtService.verifyAsync(decryptedToken, {
         secret: process.env.JWT_SECRET,
       });
     } catch (error: unknown) {
       // need to look at this in frontend to see what they get
-      console.log(`payload ${error}`)
+      console.log(error);
+
       throw new WsException('JWT Token is expired or invalid');
       // return error;
     }
