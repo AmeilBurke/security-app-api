@@ -18,7 +18,7 @@ import { RequestWithAccount } from 'src/types';
 export class AccountsController {
   constructor(private readonly accountsService: AccountsService) {}
 
-  @Public()
+  // @Public()
   @Post()
   create(
     @Req() request: RequestWithAccount,
@@ -27,13 +27,13 @@ export class AccountsController {
     return this.accountsService.create(request, createAccountDto);
   }
 
-  // @Public()
-  // @Post('/secret')
-  // createSecret(
-  //   @Body() createAccountDto: CreateAccountDto,
-  // ) {
-  //   return this.accountsService.createSecret(createAccountDto);
-  // }
+  @Public()
+  @Post('/secret')
+  createSecret(
+    @Body() createAccountDto: CreateAccountDto,
+  ) {
+    return this.accountsService.createSecret(createAccountDto);
+  }
 
 
   @Get()

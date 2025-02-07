@@ -43,6 +43,7 @@ const banned_people_service_1 = require("./banned-people.service");
 const uuid_1 = require("uuid");
 const path = __importStar(require("path"));
 const fs = __importStar(require("fs"));
+const bcrypt_1 = require("../bcrypt/bcrypt");
 let BannedPeopleGateway = class BannedPeopleGateway {
     constructor(bannedPeopleService, jwtService) {
         this.bannedPeopleService = bannedPeopleService;
@@ -60,7 +61,17 @@ let BannedPeopleGateway = class BannedPeopleGateway {
         if (!client.handshake.headers.jwt) {
             return 'no valid JWT token found';
         }
-        const payload = await this.jwtService.verifyAsync(String(client.handshake.headers.jwt), { secret: process.env.JWT_SECRET });
+        const decryptedToken = await (0, bcrypt_1.decryptString)(String(client.handshake.headers.jwt));
+        let payload;
+        try {
+            payload = await this.jwtService.verifyAsync(decryptedToken, {
+                secret: process.env.JWT_SECRET,
+            });
+        }
+        catch (error) {
+            console.log(error);
+            throw new websockets_1.WsException('JWT Token is expired or invalid');
+        }
         let fileExtension;
         switch (createBannedPerson.fileData[0]) {
             case '/':

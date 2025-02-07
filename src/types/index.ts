@@ -1,4 +1,4 @@
-import { BanDetail, BannedPerson } from '@prisma/client';
+import { BannedPerson } from '@prisma/client';
 
 export type RequestWithAccount = Request & {
   account: {

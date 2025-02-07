@@ -68,14 +68,9 @@ export class AlertDetailsGateway {
         secret: process.env.JWT_SECRET,
       });
     } catch (error: unknown) {
-      // need to look at this in frontend to see what they get
       console.log(error);
-
       throw new WsException('JWT Token is expired or invalid');
-      // return error;
     }
-
-    // console.log(`payload: ${payload}`)
 
     let fileExtension: string;
 
@@ -118,9 +113,15 @@ export class AlertDetailsGateway {
       String(client.handshake.headers.jwt),
     );
 
-    const payload = await this.jwtService.verifyAsync(decryptedToken, {
-      secret: process.env.JWT_SECRET,
-    });
+    let payload: { sub: number; email: string; iat: number; exp: number };
+    try {
+      payload = await this.jwtService.verifyAsync(decryptedToken, {
+        secret: process.env.JWT_SECRET,
+      });
+    } catch (error: unknown) {
+      console.log(error);
+      throw new WsException('JWT Token is expired or invalid');
+    }
 
     let fileExtension: string;
     let imageName: string = '';

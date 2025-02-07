@@ -118,7 +118,11 @@ let VenuesService = class VenuesService {
             if (accountRole.role_name === 'venue manager') {
                 return 'you do not have permission to access this';
             }
-            const allVenues = await this.prisma.venue.findMany();
+            const allVenues = await this.prisma.venue.findMany({
+                orderBy: {
+                    venue_name: 'asc',
+                },
+            });
             const allVenuesConvertedImage = allVenues.map((venue) => {
                 try {
                     const filePath = path.join('src\\images\\venues\\', venue.venue_imagePath);

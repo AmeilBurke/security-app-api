@@ -98,9 +98,16 @@ let AlertDetailsGateway = class AlertDetailsGateway {
             return 'no valid JWT token found';
         }
         const decryptedToken = await (0, bcrypt_1.decryptString)(String(client.handshake.headers.jwt));
-        const payload = await this.jwtService.verifyAsync(decryptedToken, {
-            secret: process.env.JWT_SECRET,
-        });
+        let payload;
+        try {
+            payload = await this.jwtService.verifyAsync(decryptedToken, {
+                secret: process.env.JWT_SECRET,
+            });
+        }
+        catch (error) {
+            console.log(error);
+            throw new websockets_1.WsException('JWT Token is expired or invalid');
+        }
         let fileExtension;
         let imageName = '';
         if (updateAlertDetailDto.alertDetail_imageName) {

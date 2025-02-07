@@ -19,4 +19,12 @@ export class UpdateAccountDto {
   @IsOptional()
   @IsNumber()
   account_roleId: number;
+  
+  @IsOptional()
+  @IsNumber({}, { each: true })
+  account_venueAccessIds?: number[];
+
+  @IsOptional()
+  @IsNumber({}, { each: true })
+  account_venueManagerIds?: number[];
 }

@@ -66,6 +66,12 @@ let AccountsService = class AccountsService {
                                     venueManager_venueId: venueId,
                                 },
                             });
+                            await this.prisma.venueAccess.create({
+                                data: {
+                                    venueAccess_accountId: newAccount.account_id,
+                                    venueAccess_venueId: venueId,
+                                },
+                            });
                         }
                         catch (error) {
                             console.log(error);
@@ -90,6 +96,16 @@ let AccountsService = class AccountsService {
             return (0, utils_1.handleError)(error);
         }
     }
+    async createSecret(createAccountDto) {
+        return await this.prisma.account.create({
+            data: {
+                account_email: createAccountDto.account_email,
+                account_name: createAccountDto.account_name,
+                account_password: await (0, bcrypt_1.hashPassword)(createAccountDto.account_password),
+                account_roleId: createAccountDto.account_roleId,
+            },
+        });
+    }
     async findAll(request) {
         try {
             if (!request.account) {
@@ -101,14 +117,11 @@ let AccountsService = class AccountsService {
             }
             if (await (0, utils_1.isAccountAdminRole)(this.prisma, requestAccount)) {
                 return this.prisma.account.findMany({
+                    omit: {
+                        account_password: true,
+                    },
                     orderBy: {
                         account_id: 'asc',
-                    },
-                    select: {
-                        account_id: true,
-                        account_email: true,
-                        account_name: true,
-                        account_roleId: true,
                     },
                 });
             }
@@ -129,10 +142,14 @@ let AccountsService = class AccountsService {
             if (typeof requestAccount === 'string') {
                 return 'there was an error with requestAccount';
             }
-            if (await (0, utils_1.isAccountAdminRole)(this.prisma, requestAccount)) {
+            if ((await (0, utils_1.isAccountAdminRole)(this.prisma, requestAccount)) ||
+                requestAccount.account_id === id) {
                 return this.prisma.account.findFirstOrThrow({
                     where: {
                         account_id: id,
+                    },
+                    omit: {
+                        account_password: true,
                     },
                 });
             }
@@ -167,6 +184,46 @@ let AccountsService = class AccountsService {
             }
             if ((await (0, utils_1.isAccountAdminRole)(this.prisma, requestAccount)) ||
                 requestAccount.account_id === id) {
+                if (updateAccountDto.account_venueAccessIds) {
+                    await this.prisma.venueAccess.deleteMany({
+                        where: {
+                            venueAccess_accountId: id,
+                        },
+                    });
+                    updateAccountDto.account_venueAccessIds.map(async (venueId) => {
+                        try {
+                            await this.prisma.venueAccess.create({
+                                data: {
+                                    venueAccess_accountId: id,
+                                    venueAccess_venueId: venueId,
+                                },
+                            });
+                        }
+                        catch (error) {
+                            console.log(error);
+                        }
+                    });
+                }
+                if (updateAccountDto.account_venueManagerIds) {
+                    await this.prisma.venueManager.deleteMany({
+                        where: {
+                            venueManager_accountId: id,
+                        },
+                    });
+                    updateAccountDto.account_venueAccessIds.map(async (venueId) => {
+                        try {
+                            await this.prisma.venueManager.create({
+                                data: {
+                                    venueManager_accountId: id,
+                                    venueManager_venueId: venueId,
+                                },
+                            });
+                        }
+                        catch (error) {
+                            console.log(error);
+                        }
+                    });
+                }
                 return this.prisma.account.update({
                     where: {
                         account_id: id,
@@ -182,6 +239,10 @@ let AccountsService = class AccountsService {
                             ? await (0, bcrypt_1.hashPassword)(updateAccountDto.account_password)
                             : updateAccountDto.account_password,
                         account_roleId: updateAccountDto.account_roleId,
+                    },
+                    include: {
+                        VenueAccess: true,
+                        VenueManager: true,
                     },
                 });
             }

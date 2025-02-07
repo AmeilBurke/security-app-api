@@ -20,6 +20,8 @@ export class AccountsService {
     createAccountDto: CreateAccountDto,
   ): Promise<Account | string> {
     try {
+      // console.log(request)
+
       if (!request.account) {
         console.log(request.account);
         return 'There was an unspecified error';
@@ -79,6 +81,13 @@ export class AccountsService {
                     venueManager_venueId: venueId,
                   },
                 });
+
+                await this.prisma.venueAccess.create({
+                  data: {
+                    venueAccess_accountId: newAccount.account_id,
+                    venueAccess_venueId: venueId,
+                  },
+                });
               } catch (error: unknown) {
                 console.log(error);
               }
@@ -104,18 +113,20 @@ export class AccountsService {
   }
 
   // Used if the database is wiped to create accounts without admin privileges
-  // async createSecret(createAccountDto: CreateAccountDto): Promise<Account> {
-  //   return await this.prisma.account.create({
-  //     data: {
-  //       account_email: createAccountDto.account_email,
-  //       account_name: createAccountDto.account_name,
-  //       account_password: await hashPassword(createAccountDto.account_password),
-  //       account_roleId: createAccountDto.account_roleId,
-  //     },
-  //   });
-  // }
+  async createSecret(createAccountDto: CreateAccountDto): Promise<Account> {
+    return await this.prisma.account.create({
+      data: {
+        account_email: createAccountDto.account_email,
+        account_name: createAccountDto.account_name,
+        account_password: await hashPassword(createAccountDto.account_password),
+        account_roleId: createAccountDto.account_roleId,
+      },
+    });
+  }
 
-  async findAll(request: RequestWithAccount): Promise<Omit<Account, 'account_password'>[] | string> {
+  async findAll(
+    request: RequestWithAccount,
+  ): Promise<Omit<Account, 'account_password'>[] | string> {
     // async findAll(request: RequestWithAccount): Promise<Account[] | string> {
     try {
       if (!request.account) {
@@ -133,14 +144,11 @@ export class AccountsService {
 
       if (await isAccountAdminRole(this.prisma, requestAccount)) {
         return this.prisma.account.findMany({
+          omit: {
+            account_password: true,
+          },
           orderBy: {
             account_id: 'asc',
-          },
-          select: {
-            account_id: true,
-            account_email: true,
-            account_name: true,
-            account_roleId: true,
           },
         });
       } else {
@@ -154,7 +162,7 @@ export class AccountsService {
   async findOne(
     request: RequestWithAccount,
     id: number,
-  ): Promise<Account | string> {
+  ): Promise<Omit<Account, 'account_password'> | string> {
     try {
       if (!request.account) {
         return 'There was an unspecified error';
@@ -169,10 +177,16 @@ export class AccountsService {
         return 'there was an error with requestAccount';
       }
 
-      if (await isAccountAdminRole(this.prisma, requestAccount)) {
+      if (
+        (await isAccountAdminRole(this.prisma, requestAccount)) ||
+        requestAccount.account_id === id
+      ) {
         return this.prisma.account.findFirstOrThrow({
           where: {
             account_id: id,
+          },
+          omit: {
+            account_password: true,
           },
         });
       } else {
@@ -214,10 +228,64 @@ export class AccountsService {
         return 'there was an error with requestAccount';
       }
 
+      // @IsOptional()
+      // @IsNumber({}, { each: true })
+      // account_venueAccessIds?: number[];
+
+      // @IsOptional()
+      // @IsNumber({}, { each: true })
+      // account_venueManagerIds?: number[];
+
       if (
         (await isAccountAdminRole(this.prisma, requestAccount)) ||
         requestAccount.account_id === id
       ) {
+        if (updateAccountDto.account_venueAccessIds) {
+          await this.prisma.venueAccess.deleteMany({
+            where: {
+              venueAccess_accountId: id,
+            },
+          });
+
+          updateAccountDto.account_venueAccessIds.map(
+            async (venueId: number) => {
+              try {
+                await this.prisma.venueAccess.create({
+                  data: {
+                    venueAccess_accountId: id,
+                    venueAccess_venueId: venueId,
+                  },
+                });
+              } catch (error: unknown) {
+                console.log(error);
+              }
+            },
+          );
+        }
+
+        if (updateAccountDto.account_venueManagerIds) {
+          await this.prisma.venueManager.deleteMany({
+            where: {
+              venueManager_accountId: id,
+            },
+          });
+
+          updateAccountDto.account_venueAccessIds.map(
+            async (venueId: number) => {
+              try {
+                await this.prisma.venueManager.create({
+                  data: {
+                    venueManager_accountId: id,
+                    venueManager_venueId: venueId,
+                  },
+                });
+              } catch (error: unknown) {
+                console.log(error);
+              }
+            },
+          );
+        }
+
         return this.prisma.account.update({
           where: {
             account_id: id,
@@ -233,6 +301,10 @@ export class AccountsService {
               ? await hashPassword(updateAccountDto.account_password)
               : updateAccountDto.account_password,
             account_roleId: updateAccountDto.account_roleId,
+          },
+          include: {
+            VenueAccess: true,
+            VenueManager: true,
           },
         });
       } else {

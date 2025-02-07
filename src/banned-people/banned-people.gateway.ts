@@ -4,6 +4,7 @@ import {
   MessageBody,
   WebSocketServer,
   ConnectedSocket,
+  WsException,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { JwtService } from '@nestjs/jwt';
@@ -12,6 +13,7 @@ import { CreateBannedPersonDto } from './dto/create-banned-person.dto';
 import { v4 as uuidv4 } from 'uuid';
 import * as path from 'path';
 import * as fs from 'fs';
+import { decryptString } from 'src/bcrypt/bcrypt';
 
 @WebSocketGateway({ cors: true, connectionStateRecovery: true })
 export class BannedPeopleGateway {
@@ -49,10 +51,22 @@ export class BannedPeopleGateway {
       return 'no valid JWT token found';
     }
 
-    const payload = await this.jwtService.verifyAsync(
+    const decryptedToken = await decryptString(
       String(client.handshake.headers.jwt),
-      { secret: process.env.JWT_SECRET },
     );
+
+    let payload: { sub: number; email: string; iat: number; exp: number };
+    try {
+      payload = await this.jwtService.verifyAsync(decryptedToken, {
+        secret: process.env.JWT_SECRET,
+      });
+    } catch (error: unknown) {
+      // need to look at this in frontend to see what they get
+      console.log(error);
+
+      throw new WsException('JWT Token is expired or invalid');
+      // return error;
+    }
 
     let fileExtension: string;
 
