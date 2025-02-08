@@ -123,6 +123,9 @@ let AccountsService = class AccountsService {
                     orderBy: {
                         account_id: 'asc',
                     },
+                    include: {
+                        role_name: true,
+                    },
                 });
             }
             else {
@@ -150,6 +153,9 @@ let AccountsService = class AccountsService {
                     },
                     omit: {
                         account_password: true,
+                    },
+                    include: {
+                        role_name: true,
                     },
                 });
             }

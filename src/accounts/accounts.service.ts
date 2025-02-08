@@ -150,6 +150,9 @@ export class AccountsService {
           orderBy: {
             account_id: 'asc',
           },
+          include: {
+            role_name: true,
+          },
         });
       } else {
         return 'you do not have permission to access this';
@@ -187,6 +190,9 @@ export class AccountsService {
           },
           omit: {
             account_password: true,
+          },
+          include: {
+            role_name: true,
           },
         });
       } else {
