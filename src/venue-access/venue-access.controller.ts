@@ -25,18 +25,8 @@ export class VenueAccessController {
     return this.venueAccessService.create(request, createVenueAccessDto);
   }
 
-  @Get()
-  findAll(@Req() request: RequestWithAccount) {
-    return this.venueAccessService.findAll(request);
-  }
-
-  @Get(':id')
-  findOne(@Req() request: RequestWithAccount, @Param('id') id: string) {
-    return this.venueAccessService.findOne(request, Number(id));
-  }
-
   @Delete(':id')
-  remove(@Req() request: RequestWithAccount, @Param('id') id: string) {
-    return this.venueAccessService.remove(request, Number(id));
+  remove(@Req() request: RequestWithAccount, @Param('id') venueAccessid: string) {
+    return this.venueAccessService.remove(request, Number(venueAccessid));
   }
 }

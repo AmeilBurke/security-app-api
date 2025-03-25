@@ -4,11 +4,15 @@ import { UpdateVenueManagerDto } from './dto/update-venue-manager.dto';
 import { PrismaService } from 'src/prisma.service';
 import { RequestWithAccount } from 'src/types';
 import {
+  accountIsUnauthorized,
   getAccountInfoFromId,
   handleError,
   isAccountAdminRole,
+  isPrismaResultError,
+  noRequestAccountError,
 } from 'src/utils';
 import { VenueManager } from '@prisma/client';
+import { PrismaClientRustPanicError } from '@prisma/client/runtime/library';
 
 @Injectable()
 export class VenueManagersService {
@@ -17,11 +21,10 @@ export class VenueManagersService {
   async create(
     request: RequestWithAccount,
     createVenueManagerDto: CreateVenueManagerDto,
-  ): Promise<string | VenueManager> {
+  ): Promise<any> {
     try {
       if (!request.account) {
-        console.log(request.account);
-        return 'There was an unspecified error';
+        return noRequestAccountError();
       }
 
       const requestAccount = await getAccountInfoFromId(
@@ -29,69 +32,18 @@ export class VenueManagersService {
         request.account.sub,
       );
 
-      if (typeof requestAccount === 'string') {
-        return 'there was an error with requestAccount';
+      if (isPrismaResultError(requestAccount)) {
+        return requestAccount;
       }
 
-      if (await isAccountAdminRole(this.prisma, requestAccount)) {
-        return await this.prisma.venueManager.create({
-          data: {
-            venueManager_accountId:
-              createVenueManagerDto.venueManager_accountId,
-            venueManager_venueId: createVenueManagerDto.venueManager_venueId,
-          },
-        });
-      } else {
-        return 'you do not have permission to access this';
-      }
-    } catch (error: unknown) {
-      return handleError(error);
-    }
-  }
-
-  async findAll(request: RequestWithAccount): Promise<string | VenueManager[]> {
-    try {
-      if (!request.account) {
-        console.log(request.account);
-        return 'There was an unspecified error';
+      if (!(await isAccountAdminRole(this.prisma, requestAccount))) {
+        return accountIsUnauthorized();
       }
 
-      const requestAccount = await getAccountInfoFromId(
-        this.prisma,
-        request.account.sub,
-      );
-
-      if (typeof requestAccount === 'string') {
-        return 'there was an error with requestAccount';
-      }
-      return await this.prisma.venueManager.findMany();
-    } catch (error: unknown) {
-      return handleError(error);
-    }
-  }
-
-  async findOne(
-    request: RequestWithAccount,
-    id: number,
-  ): Promise<string | VenueManager> {
-    try {
-      if (!request.account) {
-        console.log(request.account);
-        return 'There was an unspecified error';
-      }
-
-      const requestAccount = await getAccountInfoFromId(
-        this.prisma,
-        request.account.sub,
-      );
-
-      if (typeof requestAccount === 'string') {
-        return 'there was an error with requestAccount';
-      }
-
-      return await this.prisma.venueManager.findFirstOrThrow({
-        where: {
-          venueManager_id: id,
+      return await this.prisma.venueManager.create({
+        data: {
+          venueManager_accountId: createVenueManagerDto.venueManager_accountId,
+          venueManager_venueId: createVenueManagerDto.venueManager_venueId,
         },
       });
     } catch (error: unknown) {
@@ -99,52 +51,10 @@ export class VenueManagersService {
     }
   }
 
-  async findOneByVenueID(
-    request: RequestWithAccount,
-    venueId: number,
-  ): Promise<
-    | string
-    | { account_id: number; account_email: string; account_name: string }[]
-  > {
-    if (!request.account) {
-      console.log(request.account);
-      return 'There was an unspecified error';
-    }
-
-    const requestAccount = await getAccountInfoFromId(
-      this.prisma,
-      request.account.sub,
-    );
-
-    if (typeof requestAccount === 'string') {
-      return 'there was an error with requestAccount';
-    }
-
-    return await this.prisma.account.findMany({
-      where: {
-        VenueManager: {
-          some: {
-            venueManager_venueId: venueId,
-          },
-        },
-      },
-      select: {
-        account_id: true,
-        account_email: true,
-        account_name: true,
-      },
-    });
-  }
-
-  async update(
-    request: RequestWithAccount,
-    id: number,
-    updateVenueManagerDto: UpdateVenueManagerDto,
-  ): Promise<string | VenueManager> {
+  async findAll(request: RequestWithAccount): Promise<any> {
     try {
       if (!request.account) {
-        console.log(request.account);
-        return 'There was an unspecified error';
+        return noRequestAccountError();
       }
 
       const requestAccount = await getAccountInfoFromId(
@@ -152,8 +62,48 @@ export class VenueManagersService {
         request.account.sub,
       );
 
-      if (typeof requestAccount === 'string') {
-        return 'there was an error with requestAccount';
+      if (isPrismaResultError(requestAccount)) {
+        return requestAccount;
+      }
+
+      if (!(await isAccountAdminRole(this.prisma, requestAccount))) {
+        return accountIsUnauthorized();
+      }
+
+      return await this.prisma.venueManager.findMany();
+    } catch (error: unknown) {
+      return handleError(error);
+    }
+  }
+
+  async findOne(request: RequestWithAccount, id: number): Promise<any> {
+    try {
+    } catch (error: unknown) {
+      return handleError(error);
+    }
+  }
+
+  async update(
+    request: RequestWithAccount,
+    id: number,
+    updateVenueManagerDto: UpdateVenueManagerDto,
+  ): Promise<any> {
+    try {
+      if (!request.account) {
+        return noRequestAccountError();
+      }
+
+      const requestAccount = await getAccountInfoFromId(
+        this.prisma,
+        request.account.sub,
+      );
+
+      if (isPrismaResultError(requestAccount)) {
+        return requestAccount;
+      }
+
+      if (!(await isAccountAdminRole(this.prisma, requestAccount))) {
+        return accountIsUnauthorized();
       }
 
       return await this.prisma.venueManager.update({
@@ -170,14 +120,10 @@ export class VenueManagersService {
     }
   }
 
-  async remove(
-    request: RequestWithAccount,
-    id: number,
-  ): Promise<string | VenueManager> {
+  async remove(request: RequestWithAccount, id: number): Promise<any> {
     try {
       if (!request.account) {
-        console.log(request.account);
-        return 'There was an unspecified error';
+        return noRequestAccountError();
       }
 
       const requestAccount = await getAccountInfoFromId(
@@ -185,16 +131,19 @@ export class VenueManagersService {
         request.account.sub,
       );
 
-      if (typeof requestAccount === 'string') {
-        return 'there was an error with requestAccount';
+      if (isPrismaResultError(requestAccount)) {
+        return requestAccount;
       }
-      if (await isAccountAdminRole(this.prisma, requestAccount)) {
-        return await this.prisma.venueManager.delete({
-          where: {
-            venueManager_id: id,
-          },
-        });
+
+      if (!(await isAccountAdminRole(this.prisma, requestAccount))) {
+        return accountIsUnauthorized();
       }
+
+      return await this.prisma.venueManager.delete({
+        where: {
+          venueManager_id: id,
+        },
+      });
     } catch (error: unknown) {
       return handleError(error);
     }

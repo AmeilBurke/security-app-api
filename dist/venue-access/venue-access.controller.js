@@ -23,14 +23,8 @@ let VenueAccessController = class VenueAccessController {
     create(request, createVenueAccessDto) {
         return this.venueAccessService.create(request, createVenueAccessDto);
     }
-    findAll(request) {
-        return this.venueAccessService.findAll(request);
-    }
-    findOne(request, id) {
-        return this.venueAccessService.findOne(request, Number(id));
-    }
-    remove(request, id) {
-        return this.venueAccessService.remove(request, Number(id));
+    remove(request, venueAccessid) {
+        return this.venueAccessService.remove(request, Number(venueAccessid));
     }
 };
 exports.VenueAccessController = VenueAccessController;
@@ -42,21 +36,6 @@ __decorate([
     __metadata("design:paramtypes", [Object, create_venue_access_dto_1.CreateVenueAccessDto]),
     __metadata("design:returntype", void 0)
 ], VenueAccessController.prototype, "create", null);
-__decorate([
-    (0, common_1.Get)(),
-    __param(0, (0, common_1.Req)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", void 0)
-], VenueAccessController.prototype, "findAll", null);
-__decorate([
-    (0, common_1.Get)(':id'),
-    __param(0, (0, common_1.Req)()),
-    __param(1, (0, common_1.Param)('id')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, String]),
-    __metadata("design:returntype", void 0)
-], VenueAccessController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Delete)(':id'),
     __param(0, (0, common_1.Req)()),

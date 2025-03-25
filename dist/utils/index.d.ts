@@ -1,5 +1,13 @@
 import { Account } from '@prisma/client';
 import { PrismaService } from 'src/prisma.service';
-export declare const handleError: (error: unknown) => string;
-export declare const getAccountInfoFromId: (prisma: PrismaService, id: number) => Promise<Account | string>;
+import { PrismaResultError } from 'src/types';
+export declare const handleError: (error: unknown) => PrismaResultError;
+export declare const isPrismaResultError: (object: any) => object is PrismaResultError;
+export declare const noRequestAccountError: () => PrismaResultError;
+export declare const noFileReceivedError: () => PrismaResultError;
+export declare const accountIsUnauthorized: () => PrismaResultError;
+export declare const invalidDayJsDate: () => PrismaResultError;
+export declare const getAccountInfoFromId: (prisma: PrismaService, id: number) => Promise<Account | PrismaResultError>;
 export declare const isAccountAdminRole: (prisma: PrismaService, account: Account) => Promise<boolean>;
+export declare const isAccountSecurityRole: (prisma: PrismaService, account: Account) => Promise<boolean>;
+export declare const isAccountVenueManagerRole: (prisma: PrismaService, account: Account) => Promise<boolean>;

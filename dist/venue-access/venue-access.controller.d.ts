@@ -4,22 +4,12 @@ import { RequestWithAccount } from 'src/types';
 export declare class VenueAccessController {
     private readonly venueAccessService;
     constructor(venueAccessService: VenueAccessService);
-    create(request: RequestWithAccount, createVenueAccessDto: CreateVenueAccessDto): Promise<string | {
+    create(request: RequestWithAccount, createVenueAccessDto: CreateVenueAccessDto): Promise<import("src/types").PrismaResultError | {
         venueAccess_id: number;
         venueAccess_accountId: number;
         venueAccess_venueId: number;
     }>;
-    findAll(request: RequestWithAccount): Promise<string | {
-        venueAccess_id: number;
-        venueAccess_accountId: number;
-        venueAccess_venueId: number;
-    }[]>;
-    findOne(request: RequestWithAccount, id: string): Promise<string | {
-        venueAccess_id: number;
-        venueAccess_accountId: number;
-        venueAccess_venueId: number;
-    }>;
-    remove(request: RequestWithAccount, id: string): Promise<string | {
+    remove(request: RequestWithAccount, venueAccessid: string): Promise<import("src/types").PrismaResultError | {
         venueAccess_id: number;
         venueAccess_accountId: number;
         venueAccess_venueId: number;

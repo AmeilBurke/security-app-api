@@ -4,6 +4,7 @@ import { BannedPeopleController } from './banned-people.controller';
 import { PrismaService } from 'src/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import { BannedPeopleGateway } from './banned-people.gateway';
+import { AuthenticationService } from 'src/authentication/authentication.service';
 
 @Module({
   controllers: [BannedPeopleController],

@@ -40,97 +40,37 @@ const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma.service");
 const utils_1 = require("../utils");
 const dayjs_1 = __importDefault(require("dayjs"));
-const socket_io_1 = require("socket.io");
-const path = __importStar(require("path"));
 const fs = __importStar(require("fs"));
 const schedule_1 = require("@nestjs/schedule");
 let AlertDetailsService = class AlertDetailsService {
     constructor(prisma) {
         this.prisma = prisma;
     }
-    async create(payload, createAlertDetailDto, imageName, server) {
+    async create(request, createAlertDetail, file) {
         try {
-            if (!payload.sub) {
-                return 'There was an unspecified error';
+            if (!request.account) {
+                return (0, utils_1.noRequestAccountError)();
             }
-            const requestAccount = await (0, utils_1.getAccountInfoFromId)(this.prisma, payload.sub);
-            if (typeof requestAccount === 'string') {
-                return 'there was an error with requestAccount';
+            const requestAccount = await (0, utils_1.getAccountInfoFromId)(this.prisma, request.account.sub);
+            if ((0, utils_1.isPrismaResultError)(requestAccount)) {
+                return requestAccount;
             }
-            const dateNow = (0, dayjs_1.default)();
-            let minute;
-            if (dateNow.minute() <= 9) {
-                minute = `0${dateNow.minute()}`;
+            if (!file) {
+                return (0, utils_1.noFileReceivedError)();
             }
-            else {
-                minute = String(dateNow.minute());
-            }
-            const newAlert = await this.prisma.alertDetail.create({
+            return await this.prisma.alertDetail.create({
                 data: {
-                    alertDetail_bannedPersonId: createAlertDetailDto.alertDetail_bannedPersonId,
-                    alertDetail_name: createAlertDetailDto.alertDetail_name,
-                    alertDetail_imageName: imageName,
-                    alertDetails_alertReason: createAlertDetailDto.alertDetails_alertReason,
-                    alertDetails_startTime: `${dateNow.hour()}:${minute} ${dateNow.date()}-${dateNow.month() + 1}-${dateNow.year()}`,
+                    alertDetail_bannedPersonId: createAlertDetail.alertDetail_bannedPersonId,
+                    alertDetail_name: createAlertDetail.alertDetail_name
+                        .toLocaleLowerCase()
+                        .trim(),
+                    alertDetail_imagePath: file.path,
+                    alertDetails_alertReason: createAlertDetail.alertDetails_alertReason
+                        .toLocaleLowerCase()
+                        .trim(),
+                    alertDetails_startTime: (0, dayjs_1.default)().toISOString(),
                     alertDetails_alertUploadedBy: requestAccount.account_id,
                 },
-            });
-            const latestAlert = await this.prisma.alertDetail.findUniqueOrThrow({
-                where: {
-                    alertDetail_id: newAlert.alertDetail_id,
-                },
-                include: {
-                    account_id: true,
-                },
-            });
-            console.log(latestAlert);
-            try {
-                const filePath = path.join('src\\images\\people\\', latestAlert.alertDetail_imageName);
-                const fileBuffer = fs.readFileSync(filePath);
-                latestAlert.alertDetail_imageName = fileBuffer.toString('base64');
-            }
-            catch (error) {
-                if (error instanceof Error) {
-                    console.log(error.message);
-                }
-            }
-            server.emit('onAlertCreate', {
-                latestAlert: latestAlert,
-                latestAlertTime: `${dateNow.date()}/${dateNow.month() + 1}/${dateNow.year()}T${dateNow.hour()}:${dateNow.minute()}:${dateNow.second()}:${dateNow.millisecond()}`,
-            });
-            console.log({
-                latestAlert: latestAlert,
-                latestAlertTime: `${dateNow.date()}/${dateNow.month() + 1}/${dateNow.year()}T${dateNow.hour()}:${dateNow.minute()}:${dateNow.second()}:${dateNow.millisecond()}`,
-            });
-        }
-        catch (error) {
-            return (0, utils_1.handleError)(error);
-        }
-    }
-    async update(payload, updateAlertDetailDto, imageName, server) {
-        try {
-            if (!payload.sub) {
-                return 'There was an unspecified error';
-            }
-            const requestAccount = await (0, utils_1.getAccountInfoFromId)(this.prisma, payload.sub);
-            if (typeof requestAccount === 'string') {
-                return 'there was an error with requestAccount';
-            }
-            await this.prisma.alertDetail.update({
-                where: {
-                    alertDetail_id: updateAlertDetailDto.alertDetail_id,
-                },
-                data: {
-                    alertDetail_name: updateAlertDetailDto.alertDetail_name,
-                    alertDetail_imageName: imageName === ''
-                        ? updateAlertDetailDto.alertDetail_imageName
-                        : imageName,
-                    alertDetails_alertReason: updateAlertDetailDto.alertDetail_alertReason,
-                },
-            });
-            const allAlerts = await this.prisma.alertDetail.findMany();
-            server.emit('onAlertUpdate', {
-                allAlerts: allAlerts,
             });
         }
         catch (error) {
@@ -138,34 +78,130 @@ let AlertDetailsService = class AlertDetailsService {
         }
     }
     async findAll(request) {
-        if (!request.account) {
-            return 'There was an unspecified error';
-        }
-        const requestAccount = await (0, utils_1.getAccountInfoFromId)(this.prisma, request.account.sub);
-        if (typeof requestAccount === 'string') {
-            return 'there was an error with requestAccount';
-        }
-        return await this.prisma.alertDetail.findMany();
-    }
-    async remove(server) {
         try {
-            await this.prisma.alertDetail.deleteMany();
-            server.emit('onAlertUpdate', {
-                allAlerts: [],
+            if (!request.account) {
+                return (0, utils_1.noRequestAccountError)();
+            }
+            const requestAccount = await (0, utils_1.getAccountInfoFromId)(this.prisma, request.account.sub);
+            if ((0, utils_1.isPrismaResultError)(requestAccount)) {
+                return requestAccount;
+            }
+            return await this.prisma.alertDetail.findMany({
+                include: {
+                    Account: {
+                        select: {
+                            account_name: true,
+                        },
+                    },
+                },
             });
         }
         catch (error) {
             return (0, utils_1.handleError)(error);
         }
     }
+    async update(request, updateAlertDetailDto, alertDetailId, file) {
+        try {
+            if (!request.account) {
+                return (0, utils_1.noRequestAccountError)();
+            }
+            const requestAccount = await (0, utils_1.getAccountInfoFromId)(this.prisma, request.account.sub);
+            if ((0, utils_1.isPrismaResultError)(requestAccount)) {
+                return requestAccount;
+            }
+            if (file) {
+                const alertDetailToBeDeleted = await this.prisma.alertDetail.findFirstOrThrow({
+                    where: {
+                        alertDetail_id: alertDetailId,
+                    },
+                });
+                await fs.promises.unlink(alertDetailToBeDeleted.alertDetail_imagePath);
+            }
+            return await this.prisma.alertDetail.update({
+                where: {
+                    alertDetail_id: alertDetailId,
+                },
+                data: {
+                    alertDetail_bannedPersonId: Number(updateAlertDetailDto.alertDetail_bannedPersonId),
+                    alertDetail_name: updateAlertDetailDto.alertDetail_name,
+                    alertDetail_imagePath: file
+                        ? file.path
+                        : updateAlertDetailDto.alertDetail_imagePath,
+                    alertDetails_alertReason: updateAlertDetailDto.alertDetail_alertReason,
+                    alertDetails_startTime: (0, dayjs_1.default)().toISOString(),
+                    alertDetails_alertUploadedBy: requestAccount.account_id,
+                },
+            });
+        }
+        catch (error) {
+            return (0, utils_1.handleError)(error);
+        }
+    }
+    async deleteAll(request) {
+        try {
+            if (!request.account) {
+                return (0, utils_1.noRequestAccountError)();
+            }
+            const requestAccount = await (0, utils_1.getAccountInfoFromId)(this.prisma, request.account.sub);
+            if ((0, utils_1.isPrismaResultError)(requestAccount)) {
+                return requestAccount;
+            }
+            const allAlertDetails = await this.prisma.alertDetail.findMany();
+            const filePaths = allAlertDetails.map((alertDetail) => {
+                return alertDetail.alertDetail_imagePath;
+            });
+            filePaths.map(async (filePath) => {
+                await fs.promises.unlink(filePath);
+            });
+            return await this.prisma.alertDetail.deleteMany();
+        }
+        catch (error) {
+            return (0, utils_1.handleError)(error);
+        }
+    }
+    async deleteOne(request, alertDetailId) {
+        try {
+            if (!request.account) {
+                return (0, utils_1.noRequestAccountError)();
+            }
+            const requestAccount = await (0, utils_1.getAccountInfoFromId)(this.prisma, request.account.sub);
+            if ((0, utils_1.isPrismaResultError)(requestAccount)) {
+                return requestAccount;
+            }
+            const alertDetailToDelete = await this.prisma.alertDetail.findFirstOrThrow({
+                where: {
+                    alertDetail_id: alertDetailId,
+                },
+            });
+            await fs.promises.unlink(alertDetailToDelete.alertDetail_imagePath);
+            return await this.prisma.alertDetail.delete({
+                where: {
+                    alertDetail_id: alertDetailId,
+                },
+            });
+        }
+        catch (error) {
+            return (0, utils_1.handleError)(error);
+        }
+    }
+    async cronDeleteAll() {
+        try {
+            console.log('cron run');
+            await this.prisma.alertDetail.deleteMany();
+        }
+        catch (error) {
+            console.log('Cron Error: ');
+            console.log(error);
+        }
+    }
 };
 exports.AlertDetailsService = AlertDetailsService;
 __decorate([
-    (0, schedule_1.Cron)('0 6 * * *'),
+    (0, schedule_1.Cron)('0 0 6 * * *'),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [socket_io_1.Server]),
+    __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
-], AlertDetailsService.prototype, "remove", null);
+], AlertDetailsService.prototype, "cronDeleteAll", null);
 exports.AlertDetailsService = AlertDetailsService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService])

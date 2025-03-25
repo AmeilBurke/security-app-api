@@ -1,6 +1,7 @@
-import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateBannedPersonDto {
   @IsString()
+  @IsNotEmpty()
   bannedPerson_name: string;
 }

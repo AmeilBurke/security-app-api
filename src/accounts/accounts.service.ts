@@ -3,13 +3,24 @@ import { CreateAccountDto } from './dto/create-account.dto';
 import { UpdateAccountDto } from './dto/update-account.dto';
 import { PrismaService } from 'src/prisma.service';
 import { hashPassword } from 'src/bcrypt/bcrypt';
-import { Account } from '@prisma/client';
 import {
+  Account,
+  Prisma,
+  Role,
+  VenueAccess,
+  VenueManager,
+} from '@prisma/client';
+import {
+  accountIsUnauthorized,
   getAccountInfoFromId,
   handleError,
   isAccountAdminRole,
+  isAccountSecurityRole,
+  isAccountVenueManagerRole,
+  isPrismaResultError,
+  noRequestAccountError,
 } from 'src/utils';
-import { RequestWithAccount } from 'src/types';
+import { PrismaResultError, RequestWithAccount } from 'src/types';
 
 @Injectable()
 export class AccountsService {
@@ -18,13 +29,19 @@ export class AccountsService {
   async create(
     request: RequestWithAccount,
     createAccountDto: CreateAccountDto,
-  ): Promise<Account | string> {
+  ): Promise<
+    | Prisma.AccountGetPayload<{
+        include: {
+          VenueAccess: true;
+          VenueManager: true;
+          Role: true;
+        };
+      }>
+    | PrismaResultError
+  > {
     try {
-      // console.log(request)
-
       if (!request.account) {
-        console.log(request.account);
-        return 'There was an unspecified error';
+        return noRequestAccountError();
       }
 
       const requestAccount = await getAccountInfoFromId(
@@ -32,8 +49,8 @@ export class AccountsService {
         request.account.sub,
       );
 
-      if (typeof requestAccount === 'string') {
-        return 'there was an error with requestAccount';
+      if (isPrismaResultError(requestAccount)) {
+        return requestAccount;
       }
 
       if (await isAccountAdminRole(this.prisma, requestAccount)) {
@@ -54,45 +71,41 @@ export class AccountsService {
           },
         });
 
-        if (createAccountDto.account_venueAccessIds) {
-          createAccountDto.account_venueAccessIds.map(
-            async (venueId: number) => {
-              try {
-                await this.prisma.venueAccess.create({
-                  data: {
-                    venueAccess_accountId: newAccount.account_id,
-                    venueAccess_venueId: venueId,
-                  },
-                });
-              } catch (error: unknown) {
-                console.log(error);
-              }
-            },
-          );
+        const allVenueIds = await this.prisma.venue.findMany({
+          select: {
+            venue_id: true,
+          },
+        });
+
+        if (
+          (await isAccountAdminRole(this.prisma, newAccount)) ||
+          (await isAccountSecurityRole(this.prisma, newAccount))
+        ) {
+          allVenueIds.map(async (venueId) => {
+            await this.prisma.venueAccess.create({
+              data: {
+                venueAccess_venueId: venueId.venue_id,
+                venueAccess_accountId: newAccount.account_id,
+              },
+            });
+          });
         }
 
-        if (createAccountDto.account_venueManagerIds) {
-          createAccountDto.account_venueManagerIds.map(
-            async (venueId: number) => {
-              try {
-                await this.prisma.venueManager.create({
-                  data: {
-                    venueManager_accountId: newAccount.account_id,
-                    venueManager_venueId: venueId,
-                  },
-                });
-
-                await this.prisma.venueAccess.create({
-                  data: {
-                    venueAccess_accountId: newAccount.account_id,
-                    venueAccess_venueId: venueId,
-                  },
-                });
-              } catch (error: unknown) {
-                console.log(error);
-              }
-            },
-          );
+        if (await isAccountVenueManagerRole(this.prisma, newAccount)) {
+          createAccountDto.account_venueManagerIds.map(async (venueIds) => {
+            await this.prisma.venueAccess.create({
+              data: {
+                venueAccess_venueId: venueIds,
+                venueAccess_accountId: newAccount.account_id,
+              },
+            });
+            await this.prisma.venueManager.create({
+              data: {
+                venueManager_venueId: venueIds,
+                venueManager_accountId: newAccount.account_id,
+              },
+            });
+          });
         }
 
         return this.prisma.account.findFirstOrThrow({
@@ -102,10 +115,11 @@ export class AccountsService {
           include: {
             VenueAccess: true,
             VenueManager: true,
+            Role: true,
           },
         });
       } else {
-        return 'you do not have permission to access this';
+        return accountIsUnauthorized();
       }
     } catch (error: unknown) {
       return handleError(error);
@@ -124,13 +138,16 @@ export class AccountsService {
     });
   }
 
-  async findAll(
-    request: RequestWithAccount,
-  ): Promise<Omit<Account, 'account_password'>[] | string> {
-    // async findAll(request: RequestWithAccount): Promise<Account[] | string> {
+  async findAll(request: RequestWithAccount): Promise<
+    | Prisma.AccountGetPayload<{
+        omit: { account_password: true };
+        include: { Role: true };
+      }>[]
+    | PrismaResultError
+  > {
     try {
       if (!request.account) {
-        return 'There was an unspecified error';
+        return noRequestAccountError();
       }
 
       const requestAccount = await getAccountInfoFromId(
@@ -138,25 +155,21 @@ export class AccountsService {
         request.account.sub,
       );
 
-      if (typeof requestAccount === 'string') {
-        return 'there was an error with requestAccount';
+      if (isPrismaResultError(requestAccount)) {
+        return requestAccount;
       }
 
-      if (await isAccountAdminRole(this.prisma, requestAccount)) {
-        return this.prisma.account.findMany({
-          omit: {
-            account_password: true,
-          },
-          orderBy: {
-            account_id: 'asc',
-          },
-          include: {
-            role_name: true,
-          },
-        });
-      } else {
-        return 'you do not have permission to access this';
-      }
+      return this.prisma.account.findMany({
+        omit: {
+          account_password: true,
+        },
+        orderBy: {
+          account_id: 'asc',
+        },
+        include: {
+          Role: true,
+        },
+      });
     } catch (error: unknown) {
       return handleError(error);
     }
@@ -165,10 +178,16 @@ export class AccountsService {
   async findOne(
     request: RequestWithAccount,
     id: number,
-  ): Promise<Omit<Account, 'account_password'> | string> {
+  ): Promise<
+    | Prisma.AccountGetPayload<{
+        omit: { account_password: true };
+        include: { Role: true };
+      }>
+    | PrismaResultError
+  > {
     try {
       if (!request.account) {
-        return 'There was an unspecified error';
+        return noRequestAccountError();
       }
 
       const requestAccount = await getAccountInfoFromId(
@@ -176,8 +195,8 @@ export class AccountsService {
         request.account.sub,
       );
 
-      if (typeof requestAccount === 'string') {
-        return 'there was an error with requestAccount';
+      if (isPrismaResultError(requestAccount)) {
+        return requestAccount;
       }
 
       if (
@@ -192,26 +211,26 @@ export class AccountsService {
             account_password: true,
           },
           include: {
-            role_name: true,
+            Role: true,
           },
         });
       } else {
-        return 'you do not have permission to access this';
+        return accountIsUnauthorized();
       }
     } catch (error: unknown) {
       return handleError(error);
     }
   }
 
-  async findOneByEmail(email: string): Promise<Account | string> {
+  async findOneByEmail(email: string): Promise<Account | PrismaResultError> {
     try {
       return await this.prisma.account.findFirstOrThrow({
         where: {
           account_email: email,
         },
       });
-    } catch (error) {
-      return 'error, this needs completing';
+    } catch (error: unknown) {
+      return handleError(error);
     }
   }
 
@@ -219,10 +238,18 @@ export class AccountsService {
     request: RequestWithAccount,
     id: number,
     updateAccountDto: UpdateAccountDto,
-  ): Promise<Account | string> {
+  ): Promise<
+    | Prisma.AccountGetPayload<{
+        omit: { account_password: true };
+        include: { VenueAccess: true; VenueManager: true; Role: true };
+      }>
+    | PrismaResultError
+  > {
     try {
+      // need to change this to check for jwt in cookie
+      // maybe get jwt and decrypt then get request account
       if (!request.account) {
-        return 'There was an unspecified error';
+        return noRequestAccountError();
       }
 
       const requestAccount = await getAccountInfoFromId(
@@ -230,17 +257,9 @@ export class AccountsService {
         request.account.sub,
       );
 
-      if (typeof requestAccount === 'string') {
-        return 'there was an error with requestAccount';
+      if (isPrismaResultError(requestAccount)) {
+        return requestAccount;
       }
-
-      // @IsOptional()
-      // @IsNumber({}, { each: true })
-      // account_venueAccessIds?: number[];
-
-      // @IsOptional()
-      // @IsNumber({}, { each: true })
-      // account_venueManagerIds?: number[];
 
       if (
         (await isAccountAdminRole(this.prisma, requestAccount)) ||
@@ -255,16 +274,12 @@ export class AccountsService {
 
           updateAccountDto.account_venueAccessIds.map(
             async (venueId: number) => {
-              try {
-                await this.prisma.venueAccess.create({
-                  data: {
-                    venueAccess_accountId: id,
-                    venueAccess_venueId: venueId,
-                  },
-                });
-              } catch (error: unknown) {
-                console.log(error);
-              }
+              await this.prisma.venueAccess.create({
+                data: {
+                  venueAccess_accountId: id,
+                  venueAccess_venueId: venueId,
+                },
+              });
             },
           );
         }
@@ -278,16 +293,12 @@ export class AccountsService {
 
           updateAccountDto.account_venueAccessIds.map(
             async (venueId: number) => {
-              try {
-                await this.prisma.venueManager.create({
-                  data: {
-                    venueManager_accountId: id,
-                    venueManager_venueId: venueId,
-                  },
-                });
-              } catch (error: unknown) {
-                console.log(error);
-              }
+              await this.prisma.venueManager.create({
+                data: {
+                  venueManager_accountId: id,
+                  venueManager_venueId: venueId,
+                },
+              });
             },
           );
         }
@@ -311,10 +322,14 @@ export class AccountsService {
           include: {
             VenueAccess: true,
             VenueManager: true,
+            Role: true,
+          },
+          omit: {
+            account_password: true,
           },
         });
       } else {
-        return 'you do not have permission to access this';
+        return accountIsUnauthorized();
       }
     } catch (error: unknown) {
       return handleError(error);
@@ -324,10 +339,10 @@ export class AccountsService {
   async remove(
     request: RequestWithAccount,
     id: number,
-  ): Promise<Account | string> {
+  ): Promise<Account | PrismaResultError> {
     try {
       if (!request.account) {
-        return 'There was an unspecified error';
+        return noRequestAccountError();
       }
 
       const requestAccount = await getAccountInfoFromId(
@@ -335,8 +350,8 @@ export class AccountsService {
         request.account.sub,
       );
 
-      if (typeof requestAccount === 'string') {
-        return 'there was an error with requestAccount';
+      if (isPrismaResultError(requestAccount)) {
+        return requestAccount;
       }
 
       if (await isAccountAdminRole(this.prisma, requestAccount)) {
@@ -346,7 +361,7 @@ export class AccountsService {
           },
         });
       } else {
-        return 'you do not have permission to access this';
+        return accountIsUnauthorized();
       }
     } catch (error: unknown) {
       return handleError(error);

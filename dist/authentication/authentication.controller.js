@@ -20,10 +20,10 @@ let AuthenticationController = class AuthenticationController {
     constructor(authenticationService) {
         this.authenticationService = authenticationService;
     }
-    create(userLogin) {
-        return this.authenticationService.signIn(userLogin.user_email, userLogin.user_password);
+    async create(userLogin, response) {
+        return await this.authenticationService.signIn(userLogin.user_email, userLogin.user_password, response);
     }
-    getProfile(request) {
+    async getProfile(request) {
         return request.account;
     }
 };
@@ -32,16 +32,17 @@ __decorate([
     (0, public_guard_1.Public)(),
     (0, common_1.Post)('login'),
     __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Res)({ passthrough: true })),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], AuthenticationController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)('profile'),
-    __param(0, (0, common_1.Request)()),
+    __param(0, (0, common_1.Req)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", Object)
+    __metadata("design:returntype", Promise)
 ], AuthenticationController.prototype, "getProfile", null);
 exports.AuthenticationController = AuthenticationController = __decorate([
     (0, common_1.Controller)('authentication'),

@@ -21,12 +21,11 @@ let AccountsService = class AccountsService {
     async create(request, createAccountDto) {
         try {
             if (!request.account) {
-                console.log(request.account);
-                return 'There was an unspecified error';
+                return (0, utils_1.noRequestAccountError)();
             }
             const requestAccount = await (0, utils_1.getAccountInfoFromId)(this.prisma, request.account.sub);
-            if (typeof requestAccount === 'string') {
-                return 'there was an error with requestAccount';
+            if ((0, utils_1.isPrismaResultError)(requestAccount)) {
+                return requestAccount;
             }
             if (await (0, utils_1.isAccountAdminRole)(this.prisma, requestAccount)) {
                 createAccountDto.account_password = await (0, bcrypt_1.hashPassword)(createAccountDto.account_password);
@@ -42,40 +41,36 @@ let AccountsService = class AccountsService {
                         account_roleId: createAccountDto.account_roleId,
                     },
                 });
-                if (createAccountDto.account_venueAccessIds) {
-                    createAccountDto.account_venueAccessIds.map(async (venueId) => {
-                        try {
-                            await this.prisma.venueAccess.create({
-                                data: {
-                                    venueAccess_accountId: newAccount.account_id,
-                                    venueAccess_venueId: venueId,
-                                },
-                            });
-                        }
-                        catch (error) {
-                            console.log(error);
-                        }
+                const allVenueIds = await this.prisma.venue.findMany({
+                    select: {
+                        venue_id: true,
+                    },
+                });
+                if ((await (0, utils_1.isAccountAdminRole)(this.prisma, newAccount)) ||
+                    (await (0, utils_1.isAccountSecurityRole)(this.prisma, newAccount))) {
+                    allVenueIds.map(async (venueId) => {
+                        await this.prisma.venueAccess.create({
+                            data: {
+                                venueAccess_venueId: venueId.venue_id,
+                                venueAccess_accountId: newAccount.account_id,
+                            },
+                        });
                     });
                 }
-                if (createAccountDto.account_venueManagerIds) {
-                    createAccountDto.account_venueManagerIds.map(async (venueId) => {
-                        try {
-                            await this.prisma.venueManager.create({
-                                data: {
-                                    venueManager_accountId: newAccount.account_id,
-                                    venueManager_venueId: venueId,
-                                },
-                            });
-                            await this.prisma.venueAccess.create({
-                                data: {
-                                    venueAccess_accountId: newAccount.account_id,
-                                    venueAccess_venueId: venueId,
-                                },
-                            });
-                        }
-                        catch (error) {
-                            console.log(error);
-                        }
+                if (await (0, utils_1.isAccountVenueManagerRole)(this.prisma, newAccount)) {
+                    createAccountDto.account_venueManagerIds.map(async (venueIds) => {
+                        await this.prisma.venueAccess.create({
+                            data: {
+                                venueAccess_venueId: venueIds,
+                                venueAccess_accountId: newAccount.account_id,
+                            },
+                        });
+                        await this.prisma.venueManager.create({
+                            data: {
+                                venueManager_venueId: venueIds,
+                                venueManager_accountId: newAccount.account_id,
+                            },
+                        });
                     });
                 }
                 return this.prisma.account.findFirstOrThrow({
@@ -85,11 +80,12 @@ let AccountsService = class AccountsService {
                     include: {
                         VenueAccess: true,
                         VenueManager: true,
+                        Role: true,
                     },
                 });
             }
             else {
-                return 'you do not have permission to access this';
+                return (0, utils_1.accountIsUnauthorized)();
             }
         }
         catch (error) {
@@ -109,28 +105,23 @@ let AccountsService = class AccountsService {
     async findAll(request) {
         try {
             if (!request.account) {
-                return 'There was an unspecified error';
+                return (0, utils_1.noRequestAccountError)();
             }
             const requestAccount = await (0, utils_1.getAccountInfoFromId)(this.prisma, request.account.sub);
-            if (typeof requestAccount === 'string') {
-                return 'there was an error with requestAccount';
+            if ((0, utils_1.isPrismaResultError)(requestAccount)) {
+                return requestAccount;
             }
-            if (await (0, utils_1.isAccountAdminRole)(this.prisma, requestAccount)) {
-                return this.prisma.account.findMany({
-                    omit: {
-                        account_password: true,
-                    },
-                    orderBy: {
-                        account_id: 'asc',
-                    },
-                    include: {
-                        role_name: true,
-                    },
-                });
-            }
-            else {
-                return 'you do not have permission to access this';
-            }
+            return this.prisma.account.findMany({
+                omit: {
+                    account_password: true,
+                },
+                orderBy: {
+                    account_id: 'asc',
+                },
+                include: {
+                    Role: true,
+                },
+            });
         }
         catch (error) {
             return (0, utils_1.handleError)(error);
@@ -139,11 +130,11 @@ let AccountsService = class AccountsService {
     async findOne(request, id) {
         try {
             if (!request.account) {
-                return 'There was an unspecified error';
+                return (0, utils_1.noRequestAccountError)();
             }
             const requestAccount = await (0, utils_1.getAccountInfoFromId)(this.prisma, request.account.sub);
-            if (typeof requestAccount === 'string') {
-                return 'there was an error with requestAccount';
+            if ((0, utils_1.isPrismaResultError)(requestAccount)) {
+                return requestAccount;
             }
             if ((await (0, utils_1.isAccountAdminRole)(this.prisma, requestAccount)) ||
                 requestAccount.account_id === id) {
@@ -155,12 +146,12 @@ let AccountsService = class AccountsService {
                         account_password: true,
                     },
                     include: {
-                        role_name: true,
+                        Role: true,
                     },
                 });
             }
             else {
-                return 'you do not have permission to access this';
+                return (0, utils_1.accountIsUnauthorized)();
             }
         }
         catch (error) {
@@ -176,17 +167,17 @@ let AccountsService = class AccountsService {
             });
         }
         catch (error) {
-            return 'error, this needs completing';
+            return (0, utils_1.handleError)(error);
         }
     }
     async update(request, id, updateAccountDto) {
         try {
             if (!request.account) {
-                return 'There was an unspecified error';
+                return (0, utils_1.noRequestAccountError)();
             }
             const requestAccount = await (0, utils_1.getAccountInfoFromId)(this.prisma, request.account.sub);
-            if (typeof requestAccount === 'string') {
-                return 'there was an error with requestAccount';
+            if ((0, utils_1.isPrismaResultError)(requestAccount)) {
+                return requestAccount;
             }
             if ((await (0, utils_1.isAccountAdminRole)(this.prisma, requestAccount)) ||
                 requestAccount.account_id === id) {
@@ -197,17 +188,12 @@ let AccountsService = class AccountsService {
                         },
                     });
                     updateAccountDto.account_venueAccessIds.map(async (venueId) => {
-                        try {
-                            await this.prisma.venueAccess.create({
-                                data: {
-                                    venueAccess_accountId: id,
-                                    venueAccess_venueId: venueId,
-                                },
-                            });
-                        }
-                        catch (error) {
-                            console.log(error);
-                        }
+                        await this.prisma.venueAccess.create({
+                            data: {
+                                venueAccess_accountId: id,
+                                venueAccess_venueId: venueId,
+                            },
+                        });
                     });
                 }
                 if (updateAccountDto.account_venueManagerIds) {
@@ -217,17 +203,12 @@ let AccountsService = class AccountsService {
                         },
                     });
                     updateAccountDto.account_venueAccessIds.map(async (venueId) => {
-                        try {
-                            await this.prisma.venueManager.create({
-                                data: {
-                                    venueManager_accountId: id,
-                                    venueManager_venueId: venueId,
-                                },
-                            });
-                        }
-                        catch (error) {
-                            console.log(error);
-                        }
+                        await this.prisma.venueManager.create({
+                            data: {
+                                venueManager_accountId: id,
+                                venueManager_venueId: venueId,
+                            },
+                        });
                     });
                 }
                 return this.prisma.account.update({
@@ -249,11 +230,15 @@ let AccountsService = class AccountsService {
                     include: {
                         VenueAccess: true,
                         VenueManager: true,
+                        Role: true,
+                    },
+                    omit: {
+                        account_password: true,
                     },
                 });
             }
             else {
-                return 'you do not have permission to access this';
+                return (0, utils_1.accountIsUnauthorized)();
             }
         }
         catch (error) {
@@ -263,11 +248,11 @@ let AccountsService = class AccountsService {
     async remove(request, id) {
         try {
             if (!request.account) {
-                return 'There was an unspecified error';
+                return (0, utils_1.noRequestAccountError)();
             }
             const requestAccount = await (0, utils_1.getAccountInfoFromId)(this.prisma, request.account.sub);
-            if (typeof requestAccount === 'string') {
-                return 'there was an error with requestAccount';
+            if ((0, utils_1.isPrismaResultError)(requestAccount)) {
+                return requestAccount;
             }
             if (await (0, utils_1.isAccountAdminRole)(this.prisma, requestAccount)) {
                 return this.prisma.account.delete({
@@ -277,7 +262,7 @@ let AccountsService = class AccountsService {
                 });
             }
             else {
-                return 'you do not have permission to access this';
+                return (0, utils_1.accountIsUnauthorized)();
             }
         }
         catch (error) {

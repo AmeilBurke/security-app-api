@@ -1,36 +1,61 @@
-import { UpdateBannedPersonDto } from './dto/update-banned-person.dto';
-import { RequestWithAccount } from 'src/types';
 import { PrismaService } from 'src/prisma.service';
-import { AlertDetail, BanDetail, BannedPerson } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { CreateBannedPersonDto } from './dto/create-banned-person.dto';
-import { Server } from 'socket.io';
+import { PrismaResultError, RequestWithAccount } from 'src/types';
+import { UpdateBannedPersonDto } from './dto/update-banned-person.dto';
 export declare class BannedPeopleService {
     private prisma;
     constructor(prisma: PrismaService);
-    create(payload: {
-        sub: number;
-        email: string;
-        iat: number;
-        exp: number;
-    }, createBannedPersonDto: CreateBannedPersonDto & {
-        fileData: string;
-        banDetails: {
-            banDetails_reason: string;
-            banDetails_banEndDate: string;
-            banDetails_venueBanIds: number[];
+    create(request: RequestWithAccount, createBannedPersonDto: CreateBannedPersonDto & {
+        banDetails_reason: string;
+        banDetails_banEndDate: string;
+        banDetails_venueBanIds: string;
+    }, file: Express.Multer.File): Promise<Prisma.BannedPersonGetPayload<{
+        include: {
+            BanDetail: true;
+            AlertDetail: true;
         };
-    }, imageName: string, server: Server): Promise<string | void>;
-    findAll(request: RequestWithAccount): Promise<string | {
-        active_bans: (BannedPerson & {
-            BanDetail: BanDetail[];
-        })[];
-        non_active_bans: (BannedPerson & {
-            BanDetail: BanDetail[];
-        })[];
+    }> | PrismaResultError>;
+    findAllBlanketBanned(request: RequestWithAccount): Promise<{
+        banned_person_details: Prisma.BannedPersonGetPayload<{
+            include: {
+                BanDetail: true;
+            };
+        }>[];
+        banned_person_image_file: Buffer;
+    } | PrismaResultError | any>;
+    findAllByVenueId(request: RequestWithAccount, venueId: number): Promise<Prisma.BannedPersonGetPayload<{
+        include: {
+            BanDetail: true;
+        };
+    }>[] | PrismaResultError>;
+    findAllExpired(request: RequestWithAccount): Promise<Prisma.BannedPersonGetPayload<{
+        include: {
+            BanDetail: true;
+        };
+    }>[] | PrismaResultError>;
+    findAllWithActiveAlert(request: RequestWithAccount): Promise<Prisma.BannedPersonGetPayload<{
+        include: {
+            AlertDetail: true;
+            BanDetail: true;
+        };
+    }>[] | PrismaResultError>;
+    findAllWithPendingBans(request: RequestWithAccount): Promise<Prisma.BannedPersonGetPayload<{
+        include: {
+            BanDetail: {
+                include: {
+                    Account: {
+                        select: {
+                            account_name: any;
+                        };
+                    };
+                };
+            };
+        };
+    }>[] | PrismaResultError>;
+    updateOneBannedPerson(request: RequestWithAccount, file: Express.Multer.File, bannedPersonId: number, updateBannedPersonDto: UpdateBannedPersonDto): Promise<PrismaResultError | {
+        bannedPerson_id: number;
+        bannedPerson_name: string;
+        bannedPerson_imagePath: string;
     }>;
-    findOneInfo(request: RequestWithAccount, id: number): Promise<string | (BannedPerson & {
-        BanDetail: BanDetail[];
-        AlertDetail: AlertDetail[];
-    })>;
-    update(request: RequestWithAccount, file: Express.Multer.File, id: number, updateBannedPersonDto: UpdateBannedPersonDto): Promise<string | BannedPerson>;
 }

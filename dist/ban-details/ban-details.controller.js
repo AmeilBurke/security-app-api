@@ -24,14 +24,8 @@ let BanDetailsController = class BanDetailsController {
     create(request, createBanDetailDto) {
         return this.banDetailsService.create(request, createBanDetailDto);
     }
-    findAll(request) {
-        return this.banDetailsService.findAll(request);
-    }
-    findOne(request, accountId) {
-        return this.banDetailsService.findBanDetailsByAccountId(request, Number(accountId));
-    }
-    update(request, id, updateBanDetailDto) {
-        return this.banDetailsService.updateIndividualBanDetail(request, Number(id), updateBanDetailDto);
+    update(request, banDetailId, updateBanDetailDto) {
+        return this.banDetailsService.updateIndividualBanDetail(request, Number(banDetailId), updateBanDetailDto);
     }
     remove(request, id) {
         return this.banDetailsService.remove(request, Number(id));
@@ -46,21 +40,6 @@ __decorate([
     __metadata("design:paramtypes", [Object, create_ban_detail_dto_1.CreateBanDetailDto]),
     __metadata("design:returntype", void 0)
 ], BanDetailsController.prototype, "create", null);
-__decorate([
-    (0, common_1.Get)(),
-    __param(0, (0, common_1.Req)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", void 0)
-], BanDetailsController.prototype, "findAll", null);
-__decorate([
-    (0, common_1.Get)(':id'),
-    __param(0, (0, common_1.Req)()),
-    __param(1, (0, common_1.Param)('id')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, String]),
-    __metadata("design:returntype", void 0)
-], BanDetailsController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Patch)(':id'),
     __param(0, (0, common_1.Req)()),

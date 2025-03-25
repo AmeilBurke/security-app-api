@@ -1,4 +1,4 @@
-import { IsBoolean, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsNumber, IsString } from 'class-validator';
 
 export class CreateBanDetailDto {
   @IsNumber()
@@ -6,9 +6,6 @@ export class CreateBanDetailDto {
 
   @IsString()
   banDetails_reason: string;
-
-  // @IsString()
-  // banDetails_banStartDate: string;
 
   @IsString()
   banDetails_banEndDate: string;

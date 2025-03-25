@@ -17,6 +17,9 @@ import { RequestWithAccount } from 'src/types';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { v4 as uuidv4 } from 'uuid';
+import * as path from 'path';
+import * as fs from 'fs';
+import { isPrismaResultError } from 'src/utils';
 
 @Controller('venues')
 export class VenuesController {
@@ -26,7 +29,14 @@ export class VenuesController {
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({
-        destination: 'src\\images\\venues',
+        destination: path.join(
+          __dirname,
+          '..',
+          '..',
+          'src',
+          'images',
+          'venues',
+        ),
         filename: (req, file, cb) => {
           const fileType = file.mimetype.split('/')[1];
           cb(null, `${uuidv4()}.${fileType}`);
@@ -34,29 +44,45 @@ export class VenuesController {
       }),
     }),
   )
-  create(
+  async create(
     @Req() request: RequestWithAccount,
     @UploadedFile() file: Express.Multer.File,
     @Body() createVenueDto: CreateVenueDto,
   ) {
-    return this.venuesService.create(request, file, createVenueDto);
+    const result = await this.venuesService.create(
+      request,
+      file,
+      createVenueDto,
+    );
+    if (isPrismaResultError(result)) {
+      try {
+        fs.unlink(file.path, () => {
+          console.log('venue controller: uploaded file has been deleted');
+        });
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    return result;
   }
 
   @Get()
   findAllVenues(@Req() request: RequestWithAccount) {
-    return this.venuesService.findAllVenues(request);
+    return this.venuesService.findAllvenues(request);
   }
-
-  @Get(':id')
-  findOne(@Req() request: RequestWithAccount, @Param('id') id: string) {
-    return this.venuesService.findAllBansForVenue(request, Number(id));
-  }
-
+  
   @Patch(':id')
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({
-        destination: 'src\\images\\venues',
+        destination: path.join(
+          __dirname,
+          '..',
+          '..',
+          'src',
+          'images',
+          'venues',
+        ),
         filename: (req, file, cb) => {
           const fileType = file.mimetype.split('/')[1];
           cb(null, `${uuidv4()}.${fileType}`);
@@ -64,17 +90,32 @@ export class VenuesController {
       }),
     }),
   )
-  update(
+  async update(
     @Req() request: RequestWithAccount,
     @UploadedFile() file: Express.Multer.File,
-    @Param('id') id: string,
+    @Param('id') venueId: string,
     @Body() updateVenueDto: UpdateVenueDto,
   ) {
-    return this.venuesService.update(request, file, Number(id), updateVenueDto);
+    const result = await this.venuesService.updateOneVenue(
+      request,
+      file,
+      Number(venueId),
+      updateVenueDto,
+    );
+    if (isPrismaResultError(result)) {
+      try {
+        fs.unlink(file.path, () => {
+          console.log('venue controller: uploaded file has been deleted');
+        });
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    return result;
   }
 
   @Delete(':id')
-  remove(@Req() request: RequestWithAccount, @Param('id') id: string) {
-    return this.venuesService.remove(request, Number(id));
+  remove(@Req() request: RequestWithAccount, @Param('id') venueId: string) {
+    return this.venuesService.deleteOneVenue(request, Number(venueId));
   }
 }

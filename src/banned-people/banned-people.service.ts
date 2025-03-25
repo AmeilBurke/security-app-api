@@ -1,155 +1,158 @@
-import { Injectable, StreamableFile } from '@nestjs/common';
-import { UpdateBannedPersonDto } from './dto/update-banned-person.dto';
-import { BannedPersonWithSomeBanDetails, RequestWithAccount } from 'src/types';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
 import {
+  accountIsUnauthorized,
   getAccountInfoFromId,
   handleError,
+  invalidDayJsDate,
   isAccountAdminRole,
+  isAccountSecurityRole,
+  isPrismaResultError,
+  noFileReceivedError,
+  noRequestAccountError,
 } from 'src/utils';
 import dayjs from 'dayjs';
-import {
-  AlertDetail,
-  BanDetail,
-  BannedPerson,
-  VenueManager,
-} from '@prisma/client';
-import path from 'path';
+import { BanDetail, BannedPerson, Prisma } from '@prisma/client';
 import { CreateBannedPersonDto } from './dto/create-banned-person.dto';
+import { PrismaResultError, RequestWithAccount } from 'src/types';
+import { UpdateBannedPersonDto } from './dto/update-banned-person.dto';
 import * as fs from 'fs';
-import { Server } from 'socket.io';
 
 @Injectable()
 export class BannedPeopleService {
   constructor(private prisma: PrismaService) {}
+
   async create(
-    payload: { sub: number; email: string; iat: number; exp: number },
+    request: RequestWithAccount,
     createBannedPersonDto: CreateBannedPersonDto & {
-      fileData: string;
-      banDetails: {
-        banDetails_reason: string;
-        banDetails_banEndDate: string;
-        banDetails_venueBanIds: number[];
-      };
+      banDetails_reason: string;
+      banDetails_banEndDate: string;
+      banDetails_venueBanIds: string;
     },
-    imageName: string,
-    server: Server,
-  ): Promise<string | void> {
+    file: Express.Multer.File,
+  ): Promise<
+    | Prisma.BannedPersonGetPayload<{
+        include: { BanDetail: true; AlertDetail: true };
+      }>
+    | PrismaResultError
+  > {
     try {
-      if (!payload.sub) {
-        return 'There was an unspecified error';
+      if (!request.account) {
+        return noRequestAccountError();
       }
 
       const requestAccount = await getAccountInfoFromId(
         this.prisma,
-        payload.sub,
+        request.account.sub,
       );
 
-      if (typeof requestAccount === 'string') {
-        return 'there was an error with requestAccount';
+      if (isPrismaResultError(requestAccount)) {
+        return requestAccount;
       }
+
+      if (!file) {
+        return noFileReceivedError();
+      }
+
+      if (!dayjs(createBannedPersonDto.banDetails_banEndDate).isValid()) {
+        return invalidDayJsDate();
+      }
+
+      const isAccountAdmin = await isAccountAdminRole(
+        this.prisma,
+        requestAccount,
+      );
 
       const newBanProfile = await this.prisma.bannedPerson.create({
         data: {
           bannedPerson_name: createBannedPersonDto.bannedPerson_name
             .toLocaleLowerCase()
             .trim(),
-          bannedPerson_imageName: imageName,
+          bannedPerson_imagePath: file.path,
         },
       });
 
-      const isBanPending = await isAccountAdminRole(
-        this.prisma,
-        requestAccount,
-      );
+      const currentDateTimeIso = dayjs().toISOString();
+      const venueBanIds = createBannedPersonDto.banDetails_venueBanIds
+        .split(',')
+        .map((venueId) => Number(venueId));
 
-      const [banEndDay, banEndMonth, banEndYear] =
-        createBannedPersonDto.banDetails.banDetails_banEndDate.split('-');
-
-      const dateNow = dayjs();
-
-      createBannedPersonDto.banDetails.banDetails_venueBanIds.map(
-        async (venueId: number) => {
+      const createBanDetails = await Promise.all(
+        venueBanIds.map(async (venueId) => {
           await this.prisma.banDetail.create({
             data: {
               banDetails_bannedPersonId: newBanProfile.bannedPerson_id,
-              banDetails_reason:
-                createBannedPersonDto.banDetails.banDetails_reason
-                  .toLocaleLowerCase()
-                  .trim(),
-              banDetails_banStartDate: `${dateNow.date()}-${dateNow.month() + 1}-${dateNow.year()}`,
-              banDetails_banEndDate: `${banEndDay}-${banEndMonth}-${banEndYear}`,
-              banDetails_venueBanId: venueId,
-              banDetails_isBanPending: !isBanPending,
+              banDetails_reason: createBannedPersonDto.banDetails_reason
+                .toLocaleLowerCase()
+                .trim(),
+              banDetails_banStartDate: currentDateTimeIso,
+              banDetails_banEndDate:
+                createBannedPersonDto.banDetails_banEndDate,
+              banDetails_isBanPending: !isAccountAdmin,
               banDetails_banUploadedBy: requestAccount.account_id,
+              banDetails_venueBanId: venueId,
             },
           });
-        },
-      );
+        }),
+      ).catch((error) => {
+        return handleError(error);
+      });
 
-      createBannedPersonDto.banDetails.banDetails_venueBanIds.map(
-        async (venueIds: number) => {
-          await this.prisma.venueBan.create({
-            data: {
-              venueBan_bannedPersonId: newBanProfile.bannedPerson_id,
-              venueBan_venueId: venueIds,
-            },
-          });
-        },
-      );
+      if (isPrismaResultError(createBanDetails)) {
+        return createBanDetails;
+      }
 
       await this.prisma.alertDetail.create({
         data: {
           alertDetail_bannedPersonId: newBanProfile.bannedPerson_id,
+          alertDetail_imagePath: newBanProfile.bannedPerson_imagePath,
           alertDetail_name: newBanProfile.bannedPerson_name,
-          alertDetail_imageName: imageName,
-          alertDetails_alertReason:
-            createBannedPersonDto.banDetails.banDetails_reason
-              .toLocaleLowerCase()
-              .trim(),
-          alertDetails_startTime: `${dateNow.hour()}:${dateNow.minute()}:${dateNow.second()}`,
+          alertDetails_alertReason: createBannedPersonDto.banDetails_reason
+            .toLocaleLowerCase()
+            .trim(),
+          // alertDetails_startTime: createBannedPersonDto.banDetails_banEndDate,
+          alertDetails_startTime: dayjs().toISOString(),
           alertDetails_alertUploadedBy: requestAccount.account_id,
+        },
+        include: {
+          Account: {
+            select: {
+              account_name: true,
+            },
+          },
         },
       });
 
-      const allAlerts = await this.prisma.alertDetail.findMany();
-
-      const alertsWithBase64Image = allAlerts.map(
-        (alertDetail: AlertDetail) => {
-          try {
-            const filePath = path.join(
-              'src\\images\\people\\',
-              alertDetail.alertDetail_imageName,
-            );
-            const fileBuffer = fs.readFileSync(filePath);
-            alertDetail.alertDetail_imageName = fileBuffer.toString('base64');
-            return alertDetail;
-          } catch (error: unknown) {
-            if (error instanceof Error) {
-              console.log(error.message);
-            }
-          }
+      return await this.prisma.bannedPerson.findFirst({
+        where: {
+          bannedPerson_id: newBanProfile.bannedPerson_id,
         },
-      );
-
-      server.emit('onBanCreate', {
-        allAlerts: alertsWithBase64Image,
+        include: {
+          BanDetail: true,
+          AlertDetail: true,
+        },
       });
     } catch (error: unknown) {
       return handleError(error);
     }
   }
 
-  async findAll(request: RequestWithAccount): Promise<
-    | string
+  // need to check with the front-end if a file is being returned
+  async findAllBlanketBanned(
+    request: RequestWithAccount,
+  ): Promise<
     | {
-        active_bans: (BannedPerson & { BanDetail: BanDetail[] })[];
-        non_active_bans: (BannedPerson & { BanDetail: BanDetail[] })[];
+        banned_person_details: Prisma.BannedPersonGetPayload<{
+          include: { BanDetail: true };
+        }>[];
+        banned_person_image_file: Buffer;
       }
+    | PrismaResultError
+    | any // need to test return type before removing this
   > {
     try {
       if (!request.account) {
-        return 'There was an unspecified error';
+        return noRequestAccountError();
       }
 
       const requestAccount = await getAccountInfoFromId(
@@ -157,76 +160,116 @@ export class BannedPeopleService {
         request.account.sub,
       );
 
-      if (typeof requestAccount === 'string') {
-        return 'there was an error with requestAccount';
+      if (isPrismaResultError(requestAccount)) {
+        return requestAccount;
       }
 
-      const allBannedPeople = await this.prisma.bannedPerson.findMany({
+      const allVenueIds = new Set(
+        (
+          await this.prisma.venue.findMany({
+            select: {
+              venue_id: true,
+            },
+          })
+        ).map((venueId) => venueId.venue_id),
+      );
+      const peopleWithActiveBans = await this.prisma.bannedPerson.findMany({
+        where: {
+          BanDetail: {
+            some: {
+              banDetails_banEndDate: { gt: dayjs().toISOString() },
+              banDetails_isBanPending: false,
+            },
+          },
+        },
+        include: {
+          BanDetail: true,
+        },
+        orderBy: {
+          bannedPerson_name: 'asc',
+        },
+      });
+
+      const peopleWithBlanketBans = peopleWithActiveBans.filter(
+        (bannedPerson: BannedPerson & { BanDetail: BanDetail[] }) => {
+          let bannedFromVenueIds = new Set<number>();
+
+          bannedPerson.BanDetail.some((banDetail: BanDetail) => {
+            bannedFromVenueIds.add(banDetail.banDetails_venueBanId);
+          });
+
+          if (bannedFromVenueIds.size === allVenueIds.size) {
+            return bannedPerson;
+          }
+        },
+      );
+
+      return peopleWithBlanketBans.map((bannedPeopleWithDetails) => {
+        if (fs.existsSync(bannedPeopleWithDetails.bannedPerson_imagePath)) {
+          const imageFile = fs.readFileSync(
+            bannedPeopleWithDetails.bannedPerson_imagePath,
+          );
+
+          return {
+            banned_person_details: bannedPeopleWithDetails,
+            banned_person_image_file: imageFile,
+          };
+        }
+      });
+    } catch (error: unknown) {
+      return handleError(error);
+    }
+  }
+
+  async findAllByVenueId(
+    request: RequestWithAccount,
+    venueId: number,
+  ): Promise<
+    | Prisma.BannedPersonGetPayload<{ include: { BanDetail: true } }>[]
+    | PrismaResultError
+  > {
+    try {
+      if (!request.account) {
+        return noRequestAccountError();
+      }
+
+      const requestAccount = await getAccountInfoFromId(
+        this.prisma,
+        request.account.sub,
+      );
+
+      if (isPrismaResultError(requestAccount)) {
+        return requestAccount;
+      }
+
+      return await this.prisma.bannedPerson.findMany({
+        where: {
+          BanDetail: {
+            some: {
+              banDetails_venueBanId: venueId,
+              banDetails_banEndDate: { gt: dayjs().toISOString() },
+              banDetails_isBanPending: false,
+            },
+          },
+        },
         include: {
           BanDetail: true,
         },
       });
-
-      const allBannedPeopleWithImages = allBannedPeople.map(
-        (bannedPerson: BannedPerson & { BanDetail: BanDetail[] }) => {
-          try {
-            const filePath = path.join(
-              'src\\images\\people\\',
-              bannedPerson.bannedPerson_imageName,
-            );
-            const fileBuffer = fs.readFileSync(filePath);
-            bannedPerson.bannedPerson_imageName = fileBuffer.toString('base64');
-          } catch (error: unknown) {
-            if (error instanceof Error) {
-              console.log(error.message);
-              bannedPerson.bannedPerson_imageName === 'undefined';
-            }
-          }
-          return bannedPerson;
-        },
-      );
-
-      const bannedPeopleWithActiveBans = allBannedPeopleWithImages.filter(
-        (bannedPerson: BannedPerson & { BanDetail: BanDetail[] }) => {
-          return bannedPerson.BanDetail.some((banDetail: BanDetail) => {
-            return dayjs(banDetail.banDetails_banEndDate, 'DD-MM-YYYY').isAfter(
-              dayjs(),
-              'day',
-            );
-          });
-        },
-      );
-
-      const bannedPeopleWithNonActiveBans = allBannedPeople.filter(
-        (bannedPerson: BannedPerson & { BanDetail: BanDetail[] }) => {
-          return bannedPerson.BanDetail.some((banDetail: BanDetail) => {
-            return dayjs(
-              banDetail.banDetails_banEndDate,
-              'DD-MM-YYYY',
-            ).isBefore(dayjs(), 'day');
-          });
-        },
-      );
-
-      return {
-        active_bans: bannedPeopleWithActiveBans,
-        non_active_bans: bannedPeopleWithNonActiveBans,
-      };
     } catch (error: unknown) {
       return handleError(error);
     }
   }
 
-  async findOneInfo(
+  async findAllExpired(
     request: RequestWithAccount,
-    id: number,
   ): Promise<
-    | string
-    | (BannedPerson & { BanDetail: BanDetail[]; AlertDetail: AlertDetail[] })
+    | Prisma.BannedPersonGetPayload<{ include: { BanDetail: true } }>[]
+    | PrismaResultError
   > {
     try {
       if (!request.account) {
-        return 'There was an unspecified error';
+        return noRequestAccountError();
       }
 
       const requestAccount = await getAccountInfoFromId(
@@ -234,50 +277,38 @@ export class BannedPeopleService {
         request.account.sub,
       );
 
-      if (typeof requestAccount === 'string') {
-        return 'there was an error with requestAccount';
+      if (isPrismaResultError(requestAccount)) {
+        return requestAccount;
       }
 
-      const bannedPersonDetails =
-        await this.prisma.bannedPerson.findFirstOrThrow({
-          where: {
-            bannedPerson_id: id,
+      return await this.prisma.bannedPerson.findMany({
+        where: {
+          BanDetail: {
+            every: {
+              banDetails_banEndDate: { lt: dayjs().toISOString() },
+            },
           },
-          include: {
-            BanDetail: true,
-            AlertDetail: true,
-          },
-        });
-
-      try {
-        const filePath = path.join(
-          'src\\images\\people\\',
-          bannedPersonDetails.bannedPerson_imageName,
-        );
-        const fileBuffer = fs.readFileSync(filePath);
-        bannedPersonDetails.bannedPerson_imageName =
-          fileBuffer.toString('base64');
-      } catch (error: unknown) {
-        if (error instanceof Error) {
-          console.log(error.message);
-        }
-      }
-
-      return bannedPersonDetails;
+        },
+        include: {
+          BanDetail: true,
+        },
+      });
     } catch (error: unknown) {
       return handleError(error);
     }
   }
 
-  async update(
+  async findAllWithActiveAlert(
     request: RequestWithAccount,
-    file: Express.Multer.File,
-    id: number,
-    updateBannedPersonDto: UpdateBannedPersonDto,
-  ): Promise<string | BannedPerson> {
+  ): Promise<
+    | Prisma.BannedPersonGetPayload<{
+        include: { AlertDetail: true; BanDetail: true };
+      }>[]
+    | PrismaResultError
+  > {
     try {
       if (!request.account) {
-        return 'There was an unspecified error';
+        return noRequestAccountError();
       }
 
       const requestAccount = await getAccountInfoFromId(
@@ -285,68 +316,130 @@ export class BannedPeopleService {
         request.account.sub,
       );
 
-      if (typeof requestAccount === 'string') {
-        return 'there was an error with requestAccount';
+      if (isPrismaResultError(requestAccount)) {
+        return requestAccount;
       }
 
-      const bannedPersonDetails =
-        await this.prisma.bannedPerson.findFirstOrThrow({
-          where: {
-            bannedPerson_id: id,
+      return await this.prisma.bannedPerson.findMany({
+        where: {
+          AlertDetail: {
+            some: {},
           },
-        });
+        },
+        include: {
+          AlertDetail: true,
+          BanDetail: true,
+        },
+      });
+    } catch (error: unknown) {
+      return handleError(error);
+    }
+  }
 
-      if (!(await isAccountAdminRole(this.prisma, requestAccount))) {
-        const requestAccountVenueManager =
-          await this.prisma.venueManager.findMany({
-            where: {
-              venueManager_accountId: requestAccount.account_id,
+  async findAllWithPendingBans(
+    request: RequestWithAccount,
+  ): Promise<
+    | Prisma.BannedPersonGetPayload<{
+        include: {
+          BanDetail: { include: { Account: { select: { account_name } } } };
+        };
+      }>[]
+    | PrismaResultError
+  > {
+    try {
+      if (!request.account) {
+        return noRequestAccountError();
+      }
+
+      const requestAccount = await getAccountInfoFromId(
+        this.prisma,
+        request.account.sub,
+      );
+
+      if (isPrismaResultError(requestAccount)) {
+        return requestAccount;
+      }
+
+      return await this.prisma.bannedPerson.findMany({
+        where: {
+          BanDetail: {
+            some: {
+              banDetails_isBanPending: true,
             },
-          });
-
-        const requestAccountVenueManagerIds = requestAccountVenueManager.map(
-          (venueManager: VenueManager) => {
-            return venueManager.venueManager_venueId;
           },
-        );
-
-        const bannedPersonDetailsWithVenuBan =
-          await this.prisma.bannedPerson.findFirstOrThrow({
+        },
+        include: {
+          BanDetail: {
             where: {
-              bannedPerson_id: id,
+              banDetails_isBanPending: true,
             },
             include: {
-              VenueBan: {
-                where: {
-                  venueBan_venueId: { in: requestAccountVenueManagerIds },
+              Account: {
+                select: {
+                  account_name: true,
                 },
               },
             },
-          });
+          },
+        },
+      });
+    } catch (error: unknown) {
+      return handleError(error);
+    }
+  }
 
-        if (bannedPersonDetailsWithVenuBan.VenueBan.length === 0) {
-          return 'you do not have permission to access this';
-        }
+  async updateOneBannedPerson(
+    request: RequestWithAccount,
+    file: Express.Multer.File,
+    bannedPersonId: number,
+    updateBannedPersonDto: UpdateBannedPersonDto,
+  ) {
+    try {
+      if (!request.account) {
+        return noRequestAccountError();
       }
 
-      if (file !== undefined) {
-        const filePath = path.join(
-          'src\\images\\people',
-          bannedPersonDetails.bannedPerson_imageName,
-        );
-        fs.unlink(filePath, () => {});
+      const requestAccount = await getAccountInfoFromId(
+        this.prisma,
+        request.account.sub,
+      );
+
+      if (isPrismaResultError(requestAccount)) {
+        return requestAccount;
       }
 
-      return this.prisma.bannedPerson.update({
+      if (
+        !(await isAccountAdminRole(this.prisma, requestAccount)) &&
+        (await !isAccountSecurityRole(this.prisma, requestAccount))
+      ) {
+        return accountIsUnauthorized();
+      }
+
+      const bannedPersonToUpdate = await this.prisma.bannedPerson.findFirst({
         where: {
-          bannedPerson_id: id,
+          bannedPerson_id: bannedPersonId,
+        },
+      });
+
+      if (isPrismaResultError(bannedPersonToUpdate)) {
+        return bannedPersonToUpdate;
+      }
+
+      if (file) {
+        fs.unlink(bannedPersonToUpdate.bannedPerson_imagePath, (error) =>
+          console.log(error),
+        );
+      }
+
+      return await this.prisma.bannedPerson.update({
+        where: {
+          bannedPerson_id: bannedPersonId,
         },
         data: {
           bannedPerson_name: updateBannedPersonDto.bannedPerson_name,
-          bannedPerson_imageName:
-            file !== undefined
-              ? file.filename
-              : updateBannedPersonDto.bannedPerson_imagePath,
+          bannedPerson_imagePath: file
+            ? file.path
+            : updateBannedPersonDto.bannedPerson_imagePath,
         },
       });
     } catch (error: unknown) {

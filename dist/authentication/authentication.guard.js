@@ -14,7 +14,6 @@ const common_1 = require("@nestjs/common");
 const core_1 = require("@nestjs/core");
 const jwt_1 = require("@nestjs/jwt");
 const public_guard_1 = require("./public.guard");
-const bcrypt_1 = require("../bcrypt/bcrypt");
 let AuthenticationGuard = class AuthenticationGuard {
     constructor(jwtService, reflector) {
         this.jwtService = jwtService;
@@ -29,25 +28,23 @@ let AuthenticationGuard = class AuthenticationGuard {
             return true;
         }
         const request = context.switchToHttp().getRequest();
-        const token = this.extractTokenFromHeader(request);
+        const token = this.extractTokenFromCookie(request);
         if (token === undefined) {
             throw new common_1.UnauthorizedException();
         }
-        const decryptedToken = await (0, bcrypt_1.decryptString)(token);
         try {
-            const payload = await this.jwtService.verifyAsync(decryptedToken, {
+            const payload = await this.jwtService.verifyAsync(token, {
                 secret: process.env.JWT_SECRET,
             });
             request['account'] = payload;
         }
         catch {
-            throw new common_1.UnauthorizedException();
+            throw new common_1.UnauthorizedException('invalid token');
         }
         return true;
     }
-    extractTokenFromHeader(request) {
-        const [type, token] = request.headers.authorization?.split(' ') ?? [];
-        return type === 'Bearer' ? token : undefined;
+    extractTokenFromCookie(request) {
+        return request.cookies['jwt'];
     }
 };
 exports.AuthenticationGuard = AuthenticationGuard;

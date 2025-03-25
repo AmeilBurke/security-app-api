@@ -24,12 +24,11 @@ let BanDetailsService = class BanDetailsService {
     async create(request, createBanDetailDto) {
         try {
             if (!request.account) {
-                console.log(request.account);
-                return 'There was an unspecified error';
+                return (0, utils_1.noRequestAccountError)();
             }
             const requestAccount = await (0, utils_1.getAccountInfoFromId)(this.prisma, request.account.sub);
-            if (typeof requestAccount === 'string') {
-                return 'there was an error with requestAccount';
+            if ((0, utils_1.isPrismaResultError)(requestAccount)) {
+                return requestAccount;
             }
             let isBanPending;
             if (await (0, utils_1.isAccountAdminRole)(this.prisma, requestAccount)) {
@@ -38,20 +37,28 @@ let BanDetailsService = class BanDetailsService {
             else {
                 isBanPending = true;
             }
-            const dateNow = (0, dayjs_1.default)();
-            const [banEndDay, banEndMonth, banEndYear] = createBanDetailDto.banDetails_banEndDate.split('-');
+            const currentDateTimeIso = (0, dayjs_1.default)().toISOString();
+            const venueBanData = createBanDetailDto.banDetails_venueBanIds.map((venueId) => {
+                return {
+                    venueBan_bannedPersonId: createBanDetailDto.banDetails_bannedPersonId,
+                    venueBan_venueId: venueId,
+                };
+            });
             const banDetailsData = createBanDetailDto.banDetails_venueBanIds.map((venueId) => {
                 return {
                     banDetails_bannedPersonId: createBanDetailDto.banDetails_bannedPersonId,
                     banDetails_reason: createBanDetailDto.banDetails_reason
                         .toLocaleLowerCase()
                         .trim(),
-                    banDetails_banStartDate: `${dateNow.date()}-${dateNow.month() + 1}-${dateNow.year()}`,
-                    banDetails_banEndDate: `${banEndDay}-${banEndMonth}-${banEndYear}`,
+                    banDetails_banStartDate: currentDateTimeIso,
+                    banDetails_banEndDate: createBanDetailDto.banDetails_banEndDate,
                     banDetails_venueBanId: venueId,
                     banDetails_isBanPending: isBanPending,
                     banDetails_banUploadedBy: requestAccount.account_id,
                 };
+            });
+            await this.prisma.venueBan.createMany({
+                data: venueBanData,
             });
             return await this.prisma.banDetail.createMany({
                 data: banDetailsData,
@@ -61,49 +68,14 @@ let BanDetailsService = class BanDetailsService {
             return (0, utils_1.handleError)(error);
         }
     }
-    async findAll(request) {
-        try {
-            if (!request.account) {
-                console.log(request.account);
-                return 'There was an unspecified error';
-            }
-            const requestAccount = await (0, utils_1.getAccountInfoFromId)(this.prisma, request.account.sub);
-            if (typeof requestAccount === 'string') {
-                return 'there was an error with requestAccount';
-            }
-            const allBanDetails = await this.prisma.banDetail.findMany();
-            const activeBans = allBanDetails.filter((banDetail) => {
-                return banDetail.banDetails_isBanPending === false;
-            });
-            const nonActiveBans = allBanDetails.filter((banDetail) => {
-                return banDetail.banDetails_isBanPending === true;
-            });
-            if (await (0, utils_1.isAccountAdminRole)(this.prisma, requestAccount)) {
-                return {
-                    active_bans: activeBans,
-                    non_active_bans: nonActiveBans,
-                };
-            }
-            else {
-                return {
-                    active_bans: activeBans,
-                    non_active_bans: null,
-                };
-            }
-        }
-        catch (error) {
-            return (0, utils_1.handleError)(error);
-        }
-    }
     async findBanDetailsByAccountId(request, accountId) {
         try {
             if (!request.account) {
-                console.log(request.account);
-                return 'There was an unspecified error';
+                return (0, utils_1.noRequestAccountError)();
             }
             const requestAccount = await (0, utils_1.getAccountInfoFromId)(this.prisma, request.account.sub);
-            if (typeof requestAccount === 'string') {
-                return 'there was an error with requestAccount';
+            if ((0, utils_1.isPrismaResultError)(requestAccount)) {
+                return requestAccount;
             }
             return await this.prisma.banDetail.findFirstOrThrow({
                 where: {
@@ -118,12 +90,11 @@ let BanDetailsService = class BanDetailsService {
     async updateIndividualBanDetail(request, id, updateBanDetailDto) {
         try {
             if (!request.account) {
-                console.log(request.account);
-                return 'There was an unspecified error';
+                return (0, utils_1.noRequestAccountError)();
             }
             const requestAccount = await (0, utils_1.getAccountInfoFromId)(this.prisma, request.account.sub);
-            if (typeof requestAccount === 'string') {
-                return 'there was an error with requestAccount';
+            if ((0, utils_1.isPrismaResultError)(requestAccount)) {
+                return requestAccount;
             }
             return await this.prisma.banDetail.update({
                 where: {
@@ -148,12 +119,11 @@ let BanDetailsService = class BanDetailsService {
     async remove(request, id) {
         try {
             if (!request.account) {
-                console.log(request.account);
-                return 'There was an unspecified error';
+                return (0, utils_1.noRequestAccountError)();
             }
             const requestAccount = await (0, utils_1.getAccountInfoFromId)(this.prisma, request.account.sub);
-            if (typeof requestAccount === 'string') {
-                return 'there was an error with requestAccount';
+            if ((0, utils_1.isPrismaResultError)(requestAccount)) {
+                return requestAccount;
             }
             if (await (0, utils_1.isAccountAdminRole)(this.prisma, requestAccount)) {
                 return await this.prisma.banDetail.delete({
@@ -163,7 +133,7 @@ let BanDetailsService = class BanDetailsService {
                 });
             }
             else {
-                return 'you do not have permission to access this';
+                return (0, utils_1.accountIsUnauthorized)();
             }
         }
         catch (error) {

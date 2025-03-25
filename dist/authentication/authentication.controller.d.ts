@@ -1,16 +1,23 @@
 import { AuthenticationService } from './authentication.service';
-import { RequestWithAccount } from 'src/types';
+import { Request, Response } from 'express';
 export declare class AuthenticationController {
     private readonly authenticationService;
     constructor(authenticationService: AuthenticationService);
     create(userLogin: {
         user_email: string;
         user_password: string;
-    }): Promise<Buffer | string>;
-    getProfile(request: RequestWithAccount): {
+    }, response: Response): Promise<string | import("../types").PrismaResultError>;
+    getProfile(request: Request & {
+        account: {
+            sub: number;
+            email: string;
+            iat: number;
+            exp: number;
+        };
+    }): Promise<{
         sub: number;
         email: string;
         iat: number;
         exp: number;
-    };
+    }>;
 }

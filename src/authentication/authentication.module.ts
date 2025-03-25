@@ -6,6 +6,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { AuthenticationGuard } from './authentication.guard';
 import { AccountsService } from 'src/accounts/accounts.service';
 import { PrismaService } from 'src/prisma.service';
+import { BannedPeopleService } from 'src/banned-people/banned-people.service';
 
 @Module({
   controllers: [AuthenticationController],

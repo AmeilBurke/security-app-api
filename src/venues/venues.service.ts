@@ -4,13 +4,20 @@ import { UpdateVenueDto } from './dto/update-venue.dto';
 import { PrismaService } from 'src/prisma.service';
 import { RequestWithAccount } from 'src/types';
 import {
+  accountIsUnauthorized,
   getAccountInfoFromId,
   handleError,
   isAccountAdminRole,
+  isAccountSecurityRole,
+  isPrismaResultError,
+  noFileReceivedError,
+  noRequestAccountError,
 } from 'src/utils';
-import { Account, BannedPerson, Venue } from '@prisma/client';
+import { Account, BannedPerson, Venue, Prisma } from '@prisma/client';
 import * as path from 'path';
 import * as fs from 'fs';
+import { PrismaResultError } from 'src/types';
+import { Response } from 'express';
 
 @Injectable()
 export class VenuesService {
@@ -20,10 +27,10 @@ export class VenuesService {
     request: RequestWithAccount,
     file: Express.Multer.File,
     createVenueDto: CreateVenueDto,
-  ): Promise<string | Venue> {
+  ): Promise<Venue | PrismaResultError> {
     try {
       if (!request.account) {
-        return 'There was an unspecified error';
+        return noRequestAccountError();
       }
 
       const requestAccount = await getAccountInfoFromId(
@@ -31,22 +38,22 @@ export class VenuesService {
         request.account.sub,
       );
 
-      if (typeof requestAccount === 'string') {
-        return 'there was an error with requestAccount';
+      if (isPrismaResultError(requestAccount)) {
+        return requestAccount;
       }
 
-      if (file === undefined) {
-        return 'you need to upload a photo for the venue';
+      if (!file) {
+        return noFileReceivedError();
       }
 
       if (!(await isAccountAdminRole(this.prisma, requestAccount))) {
-        return 'you do not have permission to access this';
+        return accountIsUnauthorized();
       }
 
       const newVenue = await this.prisma.venue.create({
         data: {
           venue_name: createVenueDto.venue_name.toLocaleLowerCase().trim(),
-          venue_imagePath: file.filename,
+          venue_imagePath: file.path,
         },
       });
 
@@ -97,70 +104,15 @@ export class VenuesService {
     }
   }
 
-  async findAllVenues(request: RequestWithAccount): Promise<string | Venue[]> {
-    try {
-      if (!request.account) {
-        return 'There was an unspecified error';
-      }
-
-      const requestAccount = await getAccountInfoFromId(
-        this.prisma,
-        request.account.sub,
-      );
-
-      if (typeof requestAccount === 'string') {
-        return 'there was an error with requestAccount';
-      }
-
-      const accountRole = await this.prisma.role.findFirstOrThrow({
-        where: {
-          role_id: requestAccount.account_roleId,
-        },
-      });
-
-      if (accountRole.role_name === 'venue manager') {
-        return 'you do not have permission to access this';
-      }
-
-      const allVenues = await this.prisma.venue.findMany({
-        orderBy: {
-          venue_name: 'asc',
-        },
-      });
-
-      const allVenuesConvertedImage = allVenues.map((venue: Venue) => {
-        try {
-          const filePath = path.join(
-            'src\\images\\venues\\',
-            venue.venue_imagePath,
-          );
-          const fileBuffer = fs.readFileSync(filePath);
-          venue.venue_imagePath = fileBuffer.toString('base64');
-          return venue;
-        } catch (error: unknown) {
-          console.log(error);
-        }
-      });
-      return allVenuesConvertedImage;
-    } catch (error: unknown) {
-      return handleError(error);
-    }
-  }
-
-  async findAllBansForVenue(
+  async findAllvenues(
     request: RequestWithAccount,
-    id: number,
   ): Promise<
-    | string
-    | {
-        bannedPerson_id: number;
-        bannedPerson_name: string;
-        bannedPerson_imageName: string;
-      }[]
+    | Prisma.VenueGetPayload<{ include: { VenueManager: true } }>[]
+    | PrismaResultError
   > {
     try {
       if (!request.account) {
-        return 'There was an unspecified error';
+        return noRequestAccountError();
       }
 
       const requestAccount = await getAccountInfoFromId(
@@ -168,57 +120,56 @@ export class VenuesService {
         request.account.sub,
       );
 
-      if (typeof requestAccount === 'string') {
-        return 'there was an error with requestAccount';
+      if (isPrismaResultError(requestAccount)) {
+        return requestAccount;
       }
 
-      const accountRole = await this.prisma.role.findFirstOrThrow({
-        where: {
-          role_id: requestAccount.account_roleId,
-        },
-      });
+      if (
+        (await isAccountAdminRole(this.prisma, requestAccount)) ||
+        (await isAccountSecurityRole(this.prisma, requestAccount))
+      ) {
+        return await this.prisma.venue.findMany({
+          include: {
+            VenueManager: true,
+          },
+        });
+      }
 
-      const venueBannedAccounts = await this.prisma.bannedPerson.findMany({
+      const venueAccess = (
+        await this.prisma.account.findFirst({
+          where: {
+            account_id: requestAccount.account_id,
+          },
+          include: {
+            VenueAccess: true,
+          },
+        })
+      ).VenueAccess.map((venueAccess) => venueAccess.venueAccess_venueId);
+
+      return await this.prisma.venue.findMany({
         where: {
-          VenueBan: {
-            some: {
-              venueBan_venueId: id,
-            },
+          venue_id: {
+            in: venueAccess,
           },
         },
-      });
-
-      const venuBannedAccountBase64Images = venueBannedAccounts.map(
-        (bannedPerson: BannedPerson) => {
-          try {
-            const filePath = path.join(
-              'src\\images\\people\\',
-              bannedPerson.bannedPerson_imageName,
-            );
-            const fileBuffer = fs.readFileSync(filePath);
-            bannedPerson.bannedPerson_imageName = fileBuffer.toString('base64');
-            return bannedPerson;
-          } catch (error: unknown) {
-            console.log(error);
-          }
+        include: {
+          VenueManager: true,
         },
-      );
-
-      return venuBannedAccountBase64Images;
+      });
     } catch (error: unknown) {
       return handleError(error);
     }
   }
 
-  async update(
+  async updateOneVenue(
     request: RequestWithAccount,
     file: Express.Multer.File,
-    id: number,
+    venueId: number,
     updateVenueDto: UpdateVenueDto,
-  ): Promise<string | Venue> {
+  ): Promise<Venue | PrismaResultError> {
     try {
       if (!request.account) {
-        return 'There was an unspecified error';
+        return noRequestAccountError();
       }
 
       const requestAccount = await getAccountInfoFromId(
@@ -226,36 +177,31 @@ export class VenuesService {
         request.account.sub,
       );
 
-      if (typeof requestAccount === 'string') {
-        return 'there was an error with requestAccount';
+      if (isPrismaResultError(requestAccount)) {
+        return requestAccount;
       }
 
-      const accountRole = await this.prisma.role.findFirstOrThrow({
+      if (!(await isAccountAdminRole(this.prisma, requestAccount))) {
+        return accountIsUnauthorized();
+      }
+
+      const venueToUpdate = await this.prisma.venue.findFirst({
         where: {
-          role_id: requestAccount.account_roleId,
+          venue_id: venueId,
         },
       });
 
-      if (!(await isAccountAdminRole(this.prisma, requestAccount))) {
-        const venueManagers = await this.prisma.venueManager.findMany({
-          where: {
-            venueManager_accountId: requestAccount.account_id,
-          },
-        });
-
-        if (venueManagers.length === 0) {
-          return 'you do not have permission to access this';
-        }
+      if (file) {
+        fs.unlink(venueToUpdate.venue_imagePath, (error) => console.log(error));
       }
 
       return await this.prisma.venue.update({
         where: {
-          venue_id: id,
+          venue_id: venueId,
         },
         data: {
+          venue_imagePath: file ? file.path : updateVenueDto.venue_imagePath,
           venue_name: updateVenueDto.venue_name,
-          venue_imagePath:
-            file !== undefined ? file.filename : updateVenueDto.venue_imagePath,
         },
       });
     } catch (error: unknown) {
@@ -263,10 +209,13 @@ export class VenuesService {
     }
   }
 
-  async remove(request: RequestWithAccount, id: number) {
+  async deleteOneVenue(
+    request: RequestWithAccount,
+    venueId: number,
+  ): Promise<Venue | PrismaResultError> {
     try {
       if (!request.account) {
-        return 'There was an unspecified error';
+        return noRequestAccountError();
       }
 
       const requestAccount = await getAccountInfoFromId(
@@ -274,39 +223,41 @@ export class VenuesService {
         request.account.sub,
       );
 
-      if (typeof requestAccount === 'string') {
-        return 'there was an error with requestAccount';
+      if (isPrismaResultError(requestAccount)) {
+        return requestAccount;
       }
 
       if (!(await isAccountAdminRole(this.prisma, requestAccount))) {
-        return 'you do not have permission to access this';
+        return accountIsUnauthorized();
       }
 
-      const deletedBanDetails = await this.prisma.banDetail.deleteMany({
+      const venueToBeDeleted = await this.prisma.venue.findFirstOrThrow({
         where: {
-          banDetails_venueBanId: id,
+          venue_id: venueId,
         },
       });
 
-      const deletedVenueBans = await this.prisma.venueBan.deleteMany({
+      try {
+        await fs.promises.unlink(venueToBeDeleted.venue_imagePath);
+      } catch (error) {
+        console.log(error);
+      }
+
+      await this.prisma.banDetail.deleteMany({
         where: {
-          venueBan_venueId: id,
+          banDetails_venueBanId: venueId,
         },
       });
 
-      const deletedVenueAccess = await this.prisma.venueAccess.deleteMany({
+      await this.prisma.venueAccess.deleteMany({
         where: {
-          venueAccess_venueId: id,
+          venueAccess_venueId: venueId,
         },
       });
-
-      console.log(`${deletedBanDetails.count} related ban details deleted`);
-      console.log(`${deletedVenueBans.count} related venue bans deleted`);
-      console.log(`${deletedVenueAccess.count} related venue access deleted`);
 
       return await this.prisma.venue.delete({
         where: {
-          venue_id: id,
+          venue_id: venueId,
         },
       });
     } catch (error: unknown) {

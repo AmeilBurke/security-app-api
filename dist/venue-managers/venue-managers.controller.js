@@ -27,12 +27,6 @@ let VenueManagersController = class VenueManagersController {
     findAll(request) {
         return this.venueManagersService.findAll(request);
     }
-    findOne(request, id) {
-        return this.venueManagersService.findOne(request, Number(id));
-    }
-    findOneByVenueID(request, id) {
-        return this.venueManagersService.findOneByVenueID(request, Number(id));
-    }
     update(request, id, updateVenueManagerDto) {
         return this.venueManagersService.update(request, Number(id), updateVenueManagerDto);
     }
@@ -56,22 +50,6 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], VenueManagersController.prototype, "findAll", null);
-__decorate([
-    (0, common_1.Get)(':id'),
-    __param(0, (0, common_1.Req)()),
-    __param(1, (0, common_1.Param)('id')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, String]),
-    __metadata("design:returntype", void 0)
-], VenueManagersController.prototype, "findOne", null);
-__decorate([
-    (0, common_1.Get)('/venue/:id'),
-    __param(0, (0, common_1.Req)()),
-    __param(1, (0, common_1.Param)('id')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, String]),
-    __metadata("design:returntype", void 0)
-], VenueManagersController.prototype, "findOneByVenueID", null);
 __decorate([
     (0, common_1.Patch)(':id'),
     __param(0, (0, common_1.Req)()),

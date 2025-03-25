@@ -1,10 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { CreateVenueAccessDto } from './dto/create-venue-access.dto';
-import { RequestWithAccount } from 'src/types';
+import { PrismaResultError, RequestWithAccount } from 'src/types';
 import {
+  accountIsUnauthorized,
   getAccountInfoFromId,
   handleError,
   isAccountAdminRole,
+  isPrismaResultError,
+  noRequestAccountError,
 } from 'src/utils';
 import { PrismaService } from 'src/prisma.service';
 import { VenueAccess } from '@prisma/client';
@@ -16,11 +19,10 @@ export class VenueAccessService {
   async create(
     request: RequestWithAccount,
     createVenueAccessDto: CreateVenueAccessDto,
-  ): Promise<string | VenueAccess> {
+  ): Promise<VenueAccess | PrismaResultError> {
     try {
       if (!request.account) {
-        console.log(request.account);
-        return 'There was an unspecified error';
+        return noRequestAccountError()
       }
 
       const requestAccount = await getAccountInfoFromId(
@@ -28,8 +30,8 @@ export class VenueAccessService {
         request.account.sub,
       );
 
-      if (typeof requestAccount === 'string') {
-        return 'there was an error with requestAccount';
+      if (isPrismaResultError(requestAccount)) {
+        return requestAccount
       }
 
       if (await isAccountAdminRole(this.prisma, requestAccount)) {
@@ -40,66 +42,7 @@ export class VenueAccessService {
           },
         });
       } else {
-        return 'you do not have permission to access this';
-      }
-    } catch (error: unknown) {
-      return handleError(error);
-    }
-  }
-
-  async findAll(request: RequestWithAccount): Promise<string | VenueAccess[]> {
-    try {
-      if (!request.account) {
-        console.log(request.account);
-        return 'There was an unspecified error';
-      }
-
-      const requestAccount = await getAccountInfoFromId(
-        this.prisma,
-        request.account.sub,
-      );
-
-      if (typeof requestAccount === 'string') {
-        return 'there was an error with requestAccount';
-      }
-
-      if (await isAccountAdminRole(this.prisma, requestAccount)) {
-        return await this.prisma.venueAccess.findMany();
-      } else {
-        return 'you do not have permission to access this';
-      }
-    } catch (error: unknown) {
-      return handleError(error);
-    }
-  }
-
-  async findOne(
-    request: RequestWithAccount,
-    id: number,
-  ): Promise<string | VenueAccess> {
-    try {
-      if (!request.account) {
-        console.log(request.account);
-        return 'There was an unspecified error';
-      }
-
-      const requestAccount = await getAccountInfoFromId(
-        this.prisma,
-        request.account.sub,
-      );
-
-      if (typeof requestAccount === 'string') {
-        return 'there was an error with requestAccount';
-      }
-
-      if (await isAccountAdminRole(this.prisma, requestAccount)) {
-        return await this.prisma.venueAccess.findFirstOrThrow({
-          where: {
-            venueAccess_id: id,
-          },
-        });
-      } else {
-        return 'you do not have permission to access this';
+        return accountIsUnauthorized()
       }
     } catch (error: unknown) {
       return handleError(error);
@@ -109,11 +52,10 @@ export class VenueAccessService {
   async remove(
     request: RequestWithAccount,
     id: number,
-  ): Promise<string | VenueAccess> {
+  ): Promise<VenueAccess | PrismaResultError> {
     try {
       if (!request.account) {
-        console.log(request.account);
-        return 'There was an unspecified error';
+        return noRequestAccountError()
       }
 
       const requestAccount = await getAccountInfoFromId(
@@ -121,8 +63,8 @@ export class VenueAccessService {
         request.account.sub,
       );
 
-      if (typeof requestAccount === 'string') {
-        return 'there was an error with requestAccount';
+      if (isPrismaResultError(requestAccount)) {
+        return requestAccount
       }
 
       if (await isAccountAdminRole(this.prisma, requestAccount)) {
@@ -132,7 +74,7 @@ export class VenueAccessService {
           },
         });
       } else {
-        return 'you do not have permission to access this';
+        return accountIsUnauthorized()
       }
     } catch (error: unknown) {
       return handleError(error);

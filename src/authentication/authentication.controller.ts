@@ -1,7 +1,8 @@
-import { Controller, Post, Body, Get, Request } from '@nestjs/common';
+import { Controller, Post, Body, Get, Res, Req } from '@nestjs/common';
 import { AuthenticationService } from './authentication.service';
 import { Public } from './public.guard';
-import { RequestWithAccount } from 'src/types';
+import { Account, Prisma } from '@prisma/client';
+import { Request, Response } from 'express';
 
 @Controller('authentication')
 export class AuthenticationController {
@@ -9,22 +10,21 @@ export class AuthenticationController {
 
   @Public()
   @Post('login')
-  create(
+  async create(
     @Body() userLogin: { user_email: string; user_password: string },
-  ): Promise<Buffer | string> {
-    return this.authenticationService.signIn(
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    return await this.authenticationService.signIn(
       userLogin.user_email,
       userLogin.user_password,
+      response,
     );
   }
 
   @Get('profile')
-  getProfile(@Request() request: RequestWithAccount): {
-    sub: number;
-    email: string;
-    iat: number;
-    exp: number;
-  } {
+  async getProfile(
+    @Req() request: Request & { account: {sub: number, email: string, iat: number, exp: number} }
+  ) {
     return request.account;
   }
 }

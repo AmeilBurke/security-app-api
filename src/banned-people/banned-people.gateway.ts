@@ -1,98 +1,52 @@
 import {
   WebSocketGateway,
   SubscribeMessage,
-  MessageBody,
   WebSocketServer,
   ConnectedSocket,
-  WsException,
+  MessageBody,
 } from '@nestjs/websockets';
+import dayjs from 'dayjs';
 import { Server, Socket } from 'socket.io';
-import { JwtService } from '@nestjs/jwt';
-import { BannedPeopleService } from './banned-people.service';
-import { CreateBannedPersonDto } from './dto/create-banned-person.dto';
-import { v4 as uuidv4 } from 'uuid';
-import * as path from 'path';
-import * as fs from 'fs';
-import { decryptString } from 'src/bcrypt/bcrypt';
-
-@WebSocketGateway({ cors: true, connectionStateRecovery: true })
+@WebSocketGateway({
+  cors: true,
+  connectionStateRecovery: true,
+  pingInterval: 25000,
+  pingTimeout: 60000,
+})
 export class BannedPeopleGateway {
-  constructor(
-    private bannedPeopleService: BannedPeopleService,
-    private jwtService: JwtService,
-  ) {}
-
   @WebSocketServer()
   server: Server;
 
   onModuleInit() {
     this.server.on('connection', (socket: Socket) => {
-      console.log(`${socket.id} - connected to Banned People gateway`);
+      console.log(
+        `${socket.id} - connected to Banned People gateway @ ${dayjs()}`,
+      );
+
+      socket.on('disconnect', () => {
+        console.log(
+          `${socket.id} - disconnected from Banned People gateway @ ${dayjs()}`,
+        );
+      });
+
       if (socket.recovered) {
-        console.log(`session: ${socket.id} recovered`);
+        console.log(
+          `${socket.id} - disconnected but recovered to Banned People gateway @ ${dayjs()}`,
+        );
       }
     });
   }
 
   @SubscribeMessage('addBannedPerson')
-  async create(
-    @MessageBody()
-    createBannedPerson: CreateBannedPersonDto & {
-      fileData: string;
-      banDetails: {
-        banDetails_reason: string;
-        banDetails_banEndDate: string;
-        banDetails_venueBanIds: number[];
-      };
-    },
-    @ConnectedSocket() client: Socket,
-  ) {
-    if (!client.handshake.headers.jwt) {
-      return 'no valid JWT token found';
-    }
-
-    const decryptedToken = await decryptString(
-      String(client.handshake.headers.jwt),
-    );
-
-    let payload: { sub: number; email: string; iat: number; exp: number };
-    try {
-      payload = await this.jwtService.verifyAsync(decryptedToken, {
-        secret: process.env.JWT_SECRET,
-      });
-    } catch (error: unknown) {
-      // need to look at this in frontend to see what they get
-      console.log(error);
-
-      throw new WsException('JWT Token is expired or invalid');
-      // return error;
-    }
-
-    let fileExtension: string;
-
-    switch (createBannedPerson.fileData[0]) {
-      case '/':
-        fileExtension = 'jpg';
-        break;
-
-      case 'i':
-        fileExtension = 'png';
-        break;
-
-      case 'U':
-        fileExtension = 'webp';
-    }
-    const imageName = `${uuidv4()}.${fileExtension}`;
-
-    const filePath = path.join('src\\images\\people', `${imageName}`);
-    const fileBuffer = Buffer.from(createBannedPerson.fileData, 'base64');
-    fs.writeFileSync(filePath, fileBuffer);
-
-    return this.bannedPeopleService.create(
-      payload,
-      createBannedPerson,
-      imageName,
-      this.server,
-    );
+  create(
+    @MessageBody() accountName: { account_name: string },
+    @ConnectedSocket() socket: Socket,
+  ): void {
+    // need to test adding cookie to WS request when doing front-end
+    // need to add jwt check here
+    // send this when admin approves a ban or uploads one, not when security put in a pending request
+    this.server.emit('bannedPersonCreated', {
+      message: `${accountName.account_name} has uploaded a new ban`,
+    });
   }
 }

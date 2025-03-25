@@ -21,8 +21,8 @@ model Account {
   account_email    String         @unique
   account_password String
   account_name     String
-  role_name        Role           @relation(fields: [account_roleId], references: [role_id])
   account_roleId   Int
+  Role             Role           @relation(fields: [account_roleId], references: [role_id])
   VenueAccess      VenueAccess[]
   VenueManager     VenueManager[]
   AlertDetail      AlertDetail[]
@@ -41,24 +41,24 @@ model Venue {
 
 model VenueAccess {
   venueAccess_id        Int     @id @unique @default(autoincrement())
-  account_id            Account @relation(fields: [venueAccess_accountId], references: [account_id])
   venueAccess_accountId Int
-  venue_id              Venue   @relation(fields: [venueAccess_venueId], references: [venue_id])
   venueAccess_venueId   Int
+  Account               Account @relation(fields: [venueAccess_accountId], references: [account_id])
+  Venue                 Venue   @relation(fields: [venueAccess_venueId], references: [venue_id])
 }
 
 model VenueManager {
   venueManager_id        Int     @id @unique @default(autoincrement())
-  venue_id               Venue   @relation(fields: [venueManager_venueId], references: [venue_id])
   venueManager_venueId   Int
-  account_id             Account @relation(fields: [venueManager_accountId], references: [account_id])
   venueManager_accountId Int
+  Venue                  Venue   @relation(fields: [venueManager_venueId], references: [venue_id])
+  Account                Account @relation(fields: [venueManager_accountId], references: [account_id])
 }
 
 model BannedPerson {
   bannedPerson_id        Int           @id @unique @default(autoincrement())
   bannedPerson_name      String
-  bannedPerson_imageName String
+  bannedPerson_imagePath String
   AlertDetail            AlertDetail[]
   VenueBan               VenueBan[]
   BanDetail              BanDetail[]
@@ -66,34 +66,34 @@ model BannedPerson {
 
 model AlertDetail {
   alertDetail_id               Int           @id @unique @default(autoincrement())
-  bannedPerson_id              BannedPerson? @relation(fields: [alertDetail_bannedPersonId], references: [bannedPerson_id])
   alertDetail_bannedPersonId   Int?
   alertDetail_name             String
-  alertDetail_imageName        String
+  alertDetail_imagePath        String
   alertDetails_alertReason     String
   alertDetails_startTime       String
-  account_id                   Account       @relation(fields: [alertDetails_alertUploadedBy], references: [account_id])
   alertDetails_alertUploadedBy Int
+  Account                      Account       @relation(fields: [alertDetails_alertUploadedBy], references: [account_id])
+  BannedPerson                 BannedPerson? @relation(fields: [alertDetail_bannedPersonId], references: [bannedPerson_id])
 }
 
 model VenueBan {
   venueBan_id             Int          @id @unique @default(autoincrement())
-  bannedPerson_id         BannedPerson @relation(fields: [venueBan_bannedPersonId], references: [bannedPerson_id])
   venueBan_bannedPersonId Int
-  venue_id                Venue        @relation(fields: [venueBan_venueId], references: [venue_id])
   venueBan_venueId        Int
+  BannedPerson            BannedPerson @relation(fields: [venueBan_bannedPersonId], references: [bannedPerson_id])
+  Venue                   Venue        @relation(fields: [venueBan_venueId], references: [venue_id])
 }
 
 model BanDetail {
   banDetails_id             Int          @id @unique @default(autoincrement())
-  bannedPerson_id           BannedPerson @relation(fields: [banDetails_bannedPersonId], references: [bannedPerson_id])
   banDetails_bannedPersonId Int
   banDetails_reason         String
   banDetails_banStartDate   String
   banDetails_banEndDate     String
-  banDetails_bannedFrom     Venue        @relation(fields: [banDetails_venueBanId], references: [venue_id])
   banDetails_venueBanId     Int
   banDetails_isBanPending   Boolean
-  account_id                Account      @relation(fields: [banDetails_banUploadedBy], references: [account_id])
   banDetails_banUploadedBy  Int
+  Account                   Account      @relation(fields: [banDetails_banUploadedBy], references: [account_id])
+  Venue                     Venue        @relation(fields: [banDetails_venueBanId], references: [venue_id])
+  BannedPerson              BannedPerson @relation(fields: [banDetails_bannedPersonId], references: [bannedPerson_id])
 }

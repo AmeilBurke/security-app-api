@@ -20,12 +20,11 @@ let VenueAccessService = class VenueAccessService {
     async create(request, createVenueAccessDto) {
         try {
             if (!request.account) {
-                console.log(request.account);
-                return 'There was an unspecified error';
+                return (0, utils_1.noRequestAccountError)();
             }
             const requestAccount = await (0, utils_1.getAccountInfoFromId)(this.prisma, request.account.sub);
-            if (typeof requestAccount === 'string') {
-                return 'there was an error with requestAccount';
+            if ((0, utils_1.isPrismaResultError)(requestAccount)) {
+                return requestAccount;
             }
             if (await (0, utils_1.isAccountAdminRole)(this.prisma, requestAccount)) {
                 return await this.prisma.venueAccess.create({
@@ -36,53 +35,7 @@ let VenueAccessService = class VenueAccessService {
                 });
             }
             else {
-                return 'you do not have permission to access this';
-            }
-        }
-        catch (error) {
-            return (0, utils_1.handleError)(error);
-        }
-    }
-    async findAll(request) {
-        try {
-            if (!request.account) {
-                console.log(request.account);
-                return 'There was an unspecified error';
-            }
-            const requestAccount = await (0, utils_1.getAccountInfoFromId)(this.prisma, request.account.sub);
-            if (typeof requestAccount === 'string') {
-                return 'there was an error with requestAccount';
-            }
-            if (await (0, utils_1.isAccountAdminRole)(this.prisma, requestAccount)) {
-                return await this.prisma.venueAccess.findMany();
-            }
-            else {
-                return 'you do not have permission to access this';
-            }
-        }
-        catch (error) {
-            return (0, utils_1.handleError)(error);
-        }
-    }
-    async findOne(request, id) {
-        try {
-            if (!request.account) {
-                console.log(request.account);
-                return 'There was an unspecified error';
-            }
-            const requestAccount = await (0, utils_1.getAccountInfoFromId)(this.prisma, request.account.sub);
-            if (typeof requestAccount === 'string') {
-                return 'there was an error with requestAccount';
-            }
-            if (await (0, utils_1.isAccountAdminRole)(this.prisma, requestAccount)) {
-                return await this.prisma.venueAccess.findFirstOrThrow({
-                    where: {
-                        venueAccess_id: id,
-                    },
-                });
-            }
-            else {
-                return 'you do not have permission to access this';
+                return (0, utils_1.accountIsUnauthorized)();
             }
         }
         catch (error) {
@@ -92,12 +45,11 @@ let VenueAccessService = class VenueAccessService {
     async remove(request, id) {
         try {
             if (!request.account) {
-                console.log(request.account);
-                return 'There was an unspecified error';
+                return (0, utils_1.noRequestAccountError)();
             }
             const requestAccount = await (0, utils_1.getAccountInfoFromId)(this.prisma, request.account.sub);
-            if (typeof requestAccount === 'string') {
-                return 'there was an error with requestAccount';
+            if ((0, utils_1.isPrismaResultError)(requestAccount)) {
+                return requestAccount;
             }
             if (await (0, utils_1.isAccountAdminRole)(this.prisma, requestAccount)) {
                 return await this.prisma.venueAccess.delete({
@@ -107,7 +59,7 @@ let VenueAccessService = class VenueAccessService {
                 });
             }
             else {
-                return 'you do not have permission to access this';
+                return (0, utils_1.accountIsUnauthorized)();
             }
         }
         catch (error) {

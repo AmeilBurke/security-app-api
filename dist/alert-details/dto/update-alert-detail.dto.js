@@ -15,12 +15,7 @@ class UpdateAlertDetailDto {
 }
 exports.UpdateAlertDetailDto = UpdateAlertDetailDto;
 __decorate([
-    (0, class_validator_1.IsNumber)(),
-    __metadata("design:type", Number)
-], UpdateAlertDetailDto.prototype, "alertDetail_id", void 0);
-__decorate([
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
 ], UpdateAlertDetailDto.prototype, "alertDetail_bannedPersonId", void 0);
 __decorate([
@@ -37,5 +32,5 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], UpdateAlertDetailDto.prototype, "alertDetail_imageName", void 0);
+], UpdateAlertDetailDto.prototype, "alertDetail_imagePath", void 0);
 //# sourceMappingURL=update-alert-detail.dto.js.map

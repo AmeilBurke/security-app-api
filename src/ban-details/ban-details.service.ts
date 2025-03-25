@@ -1,11 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { CreateBanDetailDto } from './dto/create-ban-detail.dto';
 import { UpdateIndividualBanDetailDto } from './dto/update-individual-ban-detail.dto';
-import { RequestWithAccount } from 'src/types';
+import { PrismaResultError, RequestWithAccount } from 'src/types';
 import {
+  accountIsUnauthorized,
   getAccountInfoFromId,
   handleError,
   isAccountAdminRole,
+  isPrismaResultError,
+  noRequestAccountError,
 } from 'src/utils';
 import { PrismaService } from 'src/prisma.service';
 import dayjs from 'dayjs';
@@ -18,11 +21,10 @@ export class BanDetailsService {
   async create(
     request: RequestWithAccount,
     createBanDetailDto: CreateBanDetailDto,
-  ): Promise<string | Prisma.PrismaPromise<Prisma.BatchPayload>> {
+  ): Promise<Prisma.PrismaPromise<Prisma.BatchPayload> | PrismaResultError> {
     try {
       if (!request.account) {
-        console.log(request.account);
-        return 'There was an unspecified error';
+        return noRequestAccountError();
       }
 
       const requestAccount = await getAccountInfoFromId(
@@ -30,8 +32,8 @@ export class BanDetailsService {
         request.account.sub,
       );
 
-      if (typeof requestAccount === 'string') {
-        return 'there was an error with requestAccount';
+      if (isPrismaResultError(requestAccount)) {
+        return requestAccount;
       }
 
       let isBanPending: boolean;
@@ -41,10 +43,17 @@ export class BanDetailsService {
       } else {
         isBanPending = true;
       }
+      const currentDateTimeIso = dayjs().toISOString();
 
-      const dateNow = dayjs();
-      const [banEndDay, banEndMonth, banEndYear] =
-        createBanDetailDto.banDetails_banEndDate.split('-');
+      const venueBanData = createBanDetailDto.banDetails_venueBanIds.map(
+        (venueId: number) => {
+          return {
+            venueBan_bannedPersonId:
+              createBanDetailDto.banDetails_bannedPersonId,
+            venueBan_venueId: venueId,
+          };
+        },
+      );
 
       const banDetailsData = createBanDetailDto.banDetails_venueBanIds.map(
         (venueId: number) => {
@@ -54,14 +63,18 @@ export class BanDetailsService {
             banDetails_reason: createBanDetailDto.banDetails_reason
               .toLocaleLowerCase()
               .trim(),
-            banDetails_banStartDate: `${dateNow.date()}-${dateNow.month() + 1}-${dateNow.year()}`,
-            banDetails_banEndDate: `${banEndDay}-${banEndMonth}-${banEndYear}`,
+            banDetails_banStartDate: currentDateTimeIso,
+            banDetails_banEndDate: createBanDetailDto.banDetails_banEndDate,
             banDetails_venueBanId: venueId,
             banDetails_isBanPending: isBanPending,
             banDetails_banUploadedBy: requestAccount.account_id,
           };
         },
       );
+
+      await this.prisma.venueBan.createMany({
+        data: venueBanData,
+      });
 
       return await this.prisma.banDetail.createMany({
         data: banDetailsData,
@@ -71,54 +84,13 @@ export class BanDetailsService {
     }
   }
 
-  async findAll(request: RequestWithAccount): Promise<string | { active_bans: BanDetail[]; non_active_bans: BanDetail[] | null }> {
-    try {
-      if (!request.account) {
-        console.log(request.account);
-        return 'There was an unspecified error';
-      }
-
-      const requestAccount = await getAccountInfoFromId(this.prisma, request.account.sub);
-
-      if (typeof requestAccount === 'string') {
-        return 'there was an error with requestAccount';
-      }
-
-      // might need to fix this at a later date (might need to do by date to see if it's expired or not)
-      const allBanDetails = await this.prisma.banDetail.findMany();
-
-      const activeBans = allBanDetails.filter((banDetail: BanDetail) => {
-        return banDetail.banDetails_isBanPending === false;
-      });
-
-      const nonActiveBans = allBanDetails.filter((banDetail: BanDetail) => {
-        return banDetail.banDetails_isBanPending === true;
-      });
-
-      if (await isAccountAdminRole(this.prisma, requestAccount)) {
-        return {
-          active_bans: activeBans,
-          non_active_bans: nonActiveBans,
-        };
-      } else {
-        return {
-          active_bans: activeBans,
-          non_active_bans: null,
-        };
-      }
-    } catch (error: unknown) {
-      return handleError(error);
-    }
-  }
-
   async findBanDetailsByAccountId(
     request: RequestWithAccount,
     accountId: number,
-  ): Promise<string | BanDetail> {
+  ): Promise<BanDetail | PrismaResultError> {
     try {
       if (!request.account) {
-        console.log(request.account);
-        return 'There was an unspecified error';
+        return noRequestAccountError();
       }
 
       const requestAccount = await getAccountInfoFromId(
@@ -126,8 +98,8 @@ export class BanDetailsService {
         request.account.sub,
       );
 
-      if (typeof requestAccount === 'string') {
-        return 'there was an error with requestAccount';
+      if (isPrismaResultError(requestAccount)) {
+        return requestAccount;
       }
 
       return await this.prisma.banDetail.findFirstOrThrow({
@@ -144,11 +116,10 @@ export class BanDetailsService {
     request: RequestWithAccount,
     id: number,
     updateBanDetailDto: UpdateIndividualBanDetailDto,
-  ): Promise<string | BanDetail> {
+  ): Promise<BanDetail | PrismaResultError> {
     try {
       if (!request.account) {
-        console.log(request.account);
-        return 'There was an unspecified error';
+        return noRequestAccountError();
       }
 
       const requestAccount = await getAccountInfoFromId(
@@ -156,8 +127,8 @@ export class BanDetailsService {
         request.account.sub,
       );
 
-      if (typeof requestAccount === 'string') {
-        return 'there was an error with requestAccount';
+      if (isPrismaResultError(requestAccount)) {
+        return requestAccount;
       }
 
       return await this.prisma.banDetail.update({
@@ -186,11 +157,10 @@ export class BanDetailsService {
   async remove(
     request: RequestWithAccount,
     id: number,
-  ): Promise<string | BanDetail> {
+  ): Promise<BanDetail | PrismaResultError> {
     try {
       if (!request.account) {
-        console.log(request.account);
-        return 'There was an unspecified error';
+        return noRequestAccountError();
       }
 
       const requestAccount = await getAccountInfoFromId(
@@ -198,8 +168,8 @@ export class BanDetailsService {
         request.account.sub,
       );
 
-      if (typeof requestAccount === 'string') {
-        return 'there was an error with requestAccount';
+      if (isPrismaResultError(requestAccount)) {
+        return requestAccount;
       }
 
       if (await isAccountAdminRole(this.prisma, requestAccount)) {
@@ -209,7 +179,7 @@ export class BanDetailsService {
           },
         });
       } else {
-        return 'you do not have permission to access this';
+        return accountIsUnauthorized();
       }
     } catch (error: unknown) {
       return handleError(error);

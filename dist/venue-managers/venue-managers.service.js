@@ -20,24 +20,21 @@ let VenueManagersService = class VenueManagersService {
     async create(request, createVenueManagerDto) {
         try {
             if (!request.account) {
-                console.log(request.account);
-                return 'There was an unspecified error';
+                return (0, utils_1.noRequestAccountError)();
             }
             const requestAccount = await (0, utils_1.getAccountInfoFromId)(this.prisma, request.account.sub);
-            if (typeof requestAccount === 'string') {
-                return 'there was an error with requestAccount';
+            if ((0, utils_1.isPrismaResultError)(requestAccount)) {
+                return requestAccount;
             }
-            if (await (0, utils_1.isAccountAdminRole)(this.prisma, requestAccount)) {
-                return await this.prisma.venueManager.create({
-                    data: {
-                        venueManager_accountId: createVenueManagerDto.venueManager_accountId,
-                        venueManager_venueId: createVenueManagerDto.venueManager_venueId,
-                    },
-                });
+            if (!(await (0, utils_1.isAccountAdminRole)(this.prisma, requestAccount))) {
+                return (0, utils_1.accountIsUnauthorized)();
             }
-            else {
-                return 'you do not have permission to access this';
-            }
+            return await this.prisma.venueManager.create({
+                data: {
+                    venueManager_accountId: createVenueManagerDto.venueManager_accountId,
+                    venueManager_venueId: createVenueManagerDto.venueManager_venueId,
+                },
+            });
         }
         catch (error) {
             return (0, utils_1.handleError)(error);
@@ -46,12 +43,14 @@ let VenueManagersService = class VenueManagersService {
     async findAll(request) {
         try {
             if (!request.account) {
-                console.log(request.account);
-                return 'There was an unspecified error';
+                return (0, utils_1.noRequestAccountError)();
             }
             const requestAccount = await (0, utils_1.getAccountInfoFromId)(this.prisma, request.account.sub);
-            if (typeof requestAccount === 'string') {
-                return 'there was an error with requestAccount';
+            if ((0, utils_1.isPrismaResultError)(requestAccount)) {
+                return requestAccount;
+            }
+            if (!(await (0, utils_1.isAccountAdminRole)(this.prisma, requestAccount))) {
+                return (0, utils_1.accountIsUnauthorized)();
             }
             return await this.prisma.venueManager.findMany();
         }
@@ -61,57 +60,22 @@ let VenueManagersService = class VenueManagersService {
     }
     async findOne(request, id) {
         try {
-            if (!request.account) {
-                console.log(request.account);
-                return 'There was an unspecified error';
-            }
-            const requestAccount = await (0, utils_1.getAccountInfoFromId)(this.prisma, request.account.sub);
-            if (typeof requestAccount === 'string') {
-                return 'there was an error with requestAccount';
-            }
-            return await this.prisma.venueManager.findFirstOrThrow({
-                where: {
-                    venueManager_id: id,
-                },
-            });
         }
         catch (error) {
             return (0, utils_1.handleError)(error);
         }
     }
-    async findOneByVenueID(request, venueId) {
-        if (!request.account) {
-            console.log(request.account);
-            return 'There was an unspecified error';
-        }
-        const requestAccount = await (0, utils_1.getAccountInfoFromId)(this.prisma, request.account.sub);
-        if (typeof requestAccount === 'string') {
-            return 'there was an error with requestAccount';
-        }
-        return await this.prisma.account.findMany({
-            where: {
-                VenueManager: {
-                    some: {
-                        venueManager_venueId: venueId,
-                    },
-                },
-            },
-            select: {
-                account_id: true,
-                account_email: true,
-                account_name: true,
-            },
-        });
-    }
     async update(request, id, updateVenueManagerDto) {
         try {
             if (!request.account) {
-                console.log(request.account);
-                return 'There was an unspecified error';
+                return (0, utils_1.noRequestAccountError)();
             }
             const requestAccount = await (0, utils_1.getAccountInfoFromId)(this.prisma, request.account.sub);
-            if (typeof requestAccount === 'string') {
-                return 'there was an error with requestAccount';
+            if ((0, utils_1.isPrismaResultError)(requestAccount)) {
+                return requestAccount;
+            }
+            if (!(await (0, utils_1.isAccountAdminRole)(this.prisma, requestAccount))) {
+                return (0, utils_1.accountIsUnauthorized)();
             }
             return await this.prisma.venueManager.update({
                 where: {
@@ -130,20 +94,20 @@ let VenueManagersService = class VenueManagersService {
     async remove(request, id) {
         try {
             if (!request.account) {
-                console.log(request.account);
-                return 'There was an unspecified error';
+                return (0, utils_1.noRequestAccountError)();
             }
             const requestAccount = await (0, utils_1.getAccountInfoFromId)(this.prisma, request.account.sub);
-            if (typeof requestAccount === 'string') {
-                return 'there was an error with requestAccount';
+            if ((0, utils_1.isPrismaResultError)(requestAccount)) {
+                return requestAccount;
             }
-            if (await (0, utils_1.isAccountAdminRole)(this.prisma, requestAccount)) {
-                return await this.prisma.venueManager.delete({
-                    where: {
-                        venueManager_id: id,
-                    },
-                });
+            if (!(await (0, utils_1.isAccountAdminRole)(this.prisma, requestAccount))) {
+                return (0, utils_1.accountIsUnauthorized)();
             }
+            return await this.prisma.venueManager.delete({
+                where: {
+                    venueManager_id: id,
+                },
+            });
         }
         catch (error) {
             return (0, utils_1.handleError)(error);

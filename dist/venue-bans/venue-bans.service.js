@@ -11,93 +11,10 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.VenueBansService = void 0;
 const common_1 = require("@nestjs/common");
-const utils_1 = require("../utils");
 const prisma_service_1 = require("../prisma.service");
 let VenueBansService = class VenueBansService {
     constructor(prisma) {
         this.prisma = prisma;
-    }
-    async create(request, createVenueBanDto) {
-        try {
-            if (!request.account) {
-                console.log(request.account);
-                return 'There was an unspecified error';
-            }
-            const requestAccount = await (0, utils_1.getAccountInfoFromId)(this.prisma, request.account.sub);
-            if (typeof requestAccount === 'string') {
-                return 'there was an error with requestAccount';
-            }
-            if (await (0, utils_1.isAccountAdminRole)(this.prisma, requestAccount)) {
-                return await this.prisma.venueBan.create({
-                    data: {
-                        venueBan_bannedPersonId: createVenueBanDto.venueBan_bannedPersonId,
-                        venueBan_venueId: createVenueBanDto.venueBan_venueId,
-                    },
-                });
-            }
-            else {
-                return 'you do not have permission to access this';
-            }
-        }
-        catch (error) {
-            return (0, utils_1.handleError)(error);
-        }
-    }
-    async findAll(request) {
-        try {
-            if (!request.account) {
-                console.log(request.account);
-                return 'There was an unspecified error';
-            }
-            const requestAccount = await (0, utils_1.getAccountInfoFromId)(this.prisma, request.account.sub);
-            if (typeof requestAccount === 'string') {
-                return 'there was an error with requestAccount';
-            }
-            return await this.prisma.venueBan.findMany();
-        }
-        catch (error) {
-            return (0, utils_1.handleError)(error);
-        }
-    }
-    async findOne(request, id) {
-        try {
-            if (!request.account) {
-                console.log(request.account);
-                return 'There was an unspecified error';
-            }
-            const requestAccount = await (0, utils_1.getAccountInfoFromId)(this.prisma, request.account.sub);
-            if (typeof requestAccount === 'string') {
-                return 'there was an error with requestAccount';
-            }
-            return await this.prisma.venueBan.findFirstOrThrow({
-                where: {
-                    venueBan_venueId: id,
-                },
-            });
-        }
-        catch (error) {
-            return (0, utils_1.handleError)(error);
-        }
-    }
-    async remove(request, id) {
-        try {
-            if (!request.account) {
-                console.log(request.account);
-                return 'There was an unspecified error';
-            }
-            const requestAccount = await (0, utils_1.getAccountInfoFromId)(this.prisma, request.account.sub);
-            if (typeof requestAccount === 'string') {
-                return 'there was an error with requestAccount';
-            }
-            return await this.prisma.venueBan.delete({
-                where: {
-                    venueBan_id: id,
-                },
-            });
-        }
-        catch (error) {
-            return (0, utils_1.handleError)(error);
-        }
     }
 };
 exports.VenueBansService = VenueBansService;

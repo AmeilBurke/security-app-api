@@ -25,28 +25,15 @@ export class BanDetailsController {
     return this.banDetailsService.create(request, createBanDetailDto);
   }
 
-  @Get()
-  findAll(@Req() request: RequestWithAccount) {
-    return this.banDetailsService.findAll(request);
-  }
-
-  @Get(':id')
-  findOne(@Req() request: RequestWithAccount, @Param('id') accountId: string) {
-    return this.banDetailsService.findBanDetailsByAccountId(
-      request,
-      Number(accountId),
-    );
-  }
-
   @Patch(':id')
   update(
     @Req() request: RequestWithAccount,
-    @Param('id') id: string,
+    @Param('id') banDetailId: string,
     @Body() updateBanDetailDto: UpdateIndividualBanDetailDto,
   ) {
     return this.banDetailsService.updateIndividualBanDetail(
       request,
-      Number(id),
+      Number(banDetailId),
       updateBanDetailDto,
     );
   }
