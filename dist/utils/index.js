@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.isAccountVenueManagerRole = exports.isAccountSecurityRole = exports.isAccountAdminRole = exports.getAccountInfoFromId = exports.invalidDayJsDate = exports.accountIsUnauthorized = exports.noFileReceivedError = exports.noRequestAccountError = exports.isPrismaResultError = exports.handleError = void 0;
+exports.addJwtCookieToRequest = exports.isAccountVenueManagerRole = exports.isAccountSecurityRole = exports.isAccountAdminRole = exports.getAccountInfoFromId = exports.invalidDayJsDate = exports.accountIsUnauthorized = exports.noFileReceivedError = exports.noRequestAccountError = exports.isPrismaResultError = exports.handleError = void 0;
 const library_1 = require("@prisma/client/runtime/library");
 const handleError = (error) => {
     if (error instanceof library_1.PrismaClientKnownRequestError) {
@@ -120,4 +120,18 @@ const isAccountVenueManagerRole = async (prisma, account) => {
     }
 };
 exports.isAccountVenueManagerRole = isAccountVenueManagerRole;
+const addJwtCookieToRequest = async (response, jwtService, accountId, accountEmail) => {
+    const jwt = await jwtService.signAsync({
+        sub: accountId,
+        email: accountEmail,
+    });
+    response.cookie('jwt', jwt, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'none',
+        partitioned: true,
+        path: '/',
+    });
+};
+exports.addJwtCookieToRequest = addJwtCookieToRequest;
 //# sourceMappingURL=index.js.map

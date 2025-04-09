@@ -7,12 +7,14 @@ import {
   Param,
   Delete,
   Req,
+  Res,
 } from '@nestjs/common';
 import { AccountsService } from './accounts.service';
 import { CreateAccountDto } from './dto/create-account.dto';
 import { UpdateAccountDto } from './dto/update-account.dto';
 import { Public } from 'src/authentication/public.guard';
 import { RequestWithAccount } from 'src/types';
+import { Response } from 'express';
 
 @Controller('accounts')
 export class AccountsController {
@@ -29,12 +31,9 @@ export class AccountsController {
 
   @Public()
   @Post('/secret')
-  createSecret(
-    @Body() createAccountDto: CreateAccountDto,
-  ) {
+  createSecret(@Body() createAccountDto: CreateAccountDto) {
     return this.accountsService.createSecret(createAccountDto);
   }
-
 
   @Get()
   findAll(@Req() request: RequestWithAccount) {

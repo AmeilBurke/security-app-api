@@ -4,6 +4,8 @@ import { AlertDetailsGateway } from './alert-details.gateway';
 import { PrismaService } from 'src/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import { AlertDetailsController } from './alert-details.controller';
+import { AuthenticationService } from 'src/authentication/authentication.service';
+import { AccountsService } from 'src/accounts/accounts.service';
 
 @Module({
   controllers: [AlertDetailsController],
@@ -12,6 +14,8 @@ import { AlertDetailsController } from './alert-details.controller';
     AlertDetailsService,
     PrismaService,
     JwtService,
+    AuthenticationService,
+    AccountsService
   ],
 })
 export class AlertDetailsModule {}

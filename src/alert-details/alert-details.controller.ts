@@ -1,4 +1,15 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Req, UploadedFile, UseInterceptors } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Req,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
 import { AlertDetailsService } from './alert-details.service';
 import { RequestWithAccount } from 'src/types';
 import { CreateAlertDetailDto } from './dto/create-alert-detail.dto';
@@ -18,14 +29,7 @@ export class AlertDetailsController {
         files: 1,
       },
       storage: diskStorage({
-        destination: path.join(
-          __dirname,
-          '..',
-          '..',
-          'src',
-          'images',
-          'people',
-        ),
+        destination: path.join(__dirname, '..', '..', 'images', 'people'),
         filename: (req, file, cb) => {
           const fileType = file.mimetype.split('/')[1];
           cb(null, `${uuidv4()}.${fileType}`);
@@ -36,9 +40,13 @@ export class AlertDetailsController {
   async create(
     @Req() request: RequestWithAccount,
     @Body() createAlertDetailDto: CreateAlertDetailDto,
-    @UploadedFile() file: Express.Multer.File
+    @UploadedFile() file: Express.Multer.File,
   ) {
-    return await this.alertDetailService.create(request, createAlertDetailDto, file);
+    return await this.alertDetailService.create(
+      request,
+      createAlertDetailDto,
+      file,
+    );
   }
 
   @Get()
@@ -53,14 +61,7 @@ export class AlertDetailsController {
         files: 1,
       },
       storage: diskStorage({
-        destination: path.join(
-          __dirname,
-          '..',
-          '..',
-          'src',
-          'images',
-          'people',
-        ),
+        destination: path.join(__dirname, '..', '..', 'images', 'people'),
         filename: (req, file, cb) => {
           const fileType = file.mimetype.split('/')[1];
           cb(null, `${uuidv4()}.${fileType}`);
@@ -68,14 +69,18 @@ export class AlertDetailsController {
       }),
     }),
   )
-
   async update(
     @Req() request: RequestWithAccount,
     @Body() updateAlertDetailDto: UpdateAlertDetailDto,
     @Param('alertDetailId') alertDetailId: string,
-    @UploadedFile() file: Express.Multer.File
+    @UploadedFile() file: Express.Multer.File,
   ) {
-    return await this.alertDetailService.update(request, updateAlertDetailDto, Number(alertDetailId), file);
+    return await this.alertDetailService.update(
+      request,
+      updateAlertDetailDto,
+      Number(alertDetailId),
+      file,
+    );
   }
 
   @Delete()
@@ -84,7 +89,13 @@ export class AlertDetailsController {
   }
 
   @Delete(':alertDetailId')
-  async deleteOne(@Req() request: RequestWithAccount, @Param('alertDetailId') alertDetailId: string) {
-    return await this.alertDetailService.deleteOne(request, Number(alertDetailId));
+  async deleteOne(
+    @Req() request: RequestWithAccount,
+    @Param('alertDetailId') alertDetailId: string,
+  ) {
+    return await this.alertDetailService.deleteOne(
+      request,
+      Number(alertDetailId),
+    );
   }
 }

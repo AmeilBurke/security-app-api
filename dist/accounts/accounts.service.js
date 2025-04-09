@@ -164,6 +164,9 @@ let AccountsService = class AccountsService {
                 where: {
                     account_email: email,
                 },
+                include: {
+                    Role: true,
+                },
             });
         }
         catch (error) {

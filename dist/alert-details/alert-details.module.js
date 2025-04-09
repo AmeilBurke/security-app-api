@@ -13,6 +13,8 @@ const alert_details_gateway_1 = require("./alert-details.gateway");
 const prisma_service_1 = require("../prisma.service");
 const jwt_1 = require("@nestjs/jwt");
 const alert_details_controller_1 = require("./alert-details.controller");
+const authentication_service_1 = require("../authentication/authentication.service");
+const accounts_service_1 = require("../accounts/accounts.service");
 let AlertDetailsModule = class AlertDetailsModule {
 };
 exports.AlertDetailsModule = AlertDetailsModule;
@@ -24,6 +26,8 @@ exports.AlertDetailsModule = AlertDetailsModule = __decorate([
             alert_details_service_1.AlertDetailsService,
             prisma_service_1.PrismaService,
             jwt_1.JwtService,
+            authentication_service_1.AuthenticationService,
+            accounts_service_1.AccountsService
         ],
     })
 ], AlertDetailsModule);

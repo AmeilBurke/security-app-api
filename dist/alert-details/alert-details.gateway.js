@@ -19,9 +19,30 @@ exports.AlertDetailsGateway = void 0;
 const websockets_1 = require("@nestjs/websockets");
 const socket_io_1 = require("socket.io");
 const dayjs_1 = __importDefault(require("dayjs"));
+const jwt_1 = require("@nestjs/jwt");
+const authentication_service_1 = require("../authentication/authentication.service");
 let AlertDetailsGateway = class AlertDetailsGateway {
+    constructor(jwtService, authenticationService) {
+        this.jwtService = jwtService;
+        this.authenticationService = authenticationService;
+    }
     onModuleInit() {
-        this.server.on('connection', (socket) => {
+        this.server.on('connection', async (socket) => {
+            if (!socket.handshake.headers.cookie) {
+                console.error(`WS ERROR: ${socket.id} - Missing JWT cookie`);
+                socket.emit('missing_jwt', {
+                    error_type: 'WS MISSING COOKIE',
+                });
+                socket.disconnect();
+                return;
+            }
+            const accountJwtDetails = await this.jwtService.verifyAsync(socket.handshake.headers.cookie.split('=')[1], { secret: process.env.JWT_SECRET });
+            if (!accountJwtDetails.sub) {
+                socket.disconnect();
+                return {
+                    error_type: 'WS MISSING COOKIE',
+                };
+            }
             console.log(`${socket.id} - connected to Alert Details gateway @ ${(0, dayjs_1.default)()}`);
             socket.on('disconnect', () => {
                 console.log(`${socket.id} - disconnected from Alert Details gateway @ ${(0, dayjs_1.default)()}`);
@@ -32,7 +53,15 @@ let AlertDetailsGateway = class AlertDetailsGateway {
         });
     }
     create(accountName, socket) {
-        this.server.emit('alertDetailCreated', { message: `${accountName.account_name} has uploaded an alert` });
+        try {
+            const jwtToken = socket.handshake.headers.cookie.split('=')[1];
+        }
+        catch (error) {
+            console.log(error);
+        }
+        this.server.emit('alert_detail_created', {
+            message: `${accountName.account_name} has uploaded an alert`,
+        });
     }
 };
 exports.AlertDetailsGateway = AlertDetailsGateway;
@@ -41,7 +70,7 @@ __decorate([
     __metadata("design:type", socket_io_1.Server)
 ], AlertDetailsGateway.prototype, "server", void 0);
 __decorate([
-    (0, websockets_1.SubscribeMessage)('alertDetailCreated'),
+    (0, websockets_1.SubscribeMessage)('alert_detail_created'),
     __param(0, (0, websockets_1.MessageBody)()),
     __param(1, (0, websockets_1.ConnectedSocket)()),
     __metadata("design:type", Function),
@@ -50,11 +79,17 @@ __decorate([
 ], AlertDetailsGateway.prototype, "create", null);
 exports.AlertDetailsGateway = AlertDetailsGateway = __decorate([
     (0, websockets_1.WebSocketGateway)({
-        cors: true,
+        cors: {
+            origin: ['https://172.20.112.1:5173', 'https://localhost:5173'],
+            credentials: true,
+        },
+        allowEIO3: true,
         connectionStateRecovery: {
             maxDisconnectionDuration: 1 * 60 * 1000,
             skipMiddleWares: false,
         },
-    })
+    }),
+    __metadata("design:paramtypes", [jwt_1.JwtService,
+        authentication_service_1.AuthenticationService])
 ], AlertDetailsGateway);
 //# sourceMappingURL=alert-details.gateway.js.map

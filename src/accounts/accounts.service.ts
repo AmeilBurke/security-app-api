@@ -6,9 +6,6 @@ import { hashPassword } from 'src/bcrypt/bcrypt';
 import {
   Account,
   Prisma,
-  Role,
-  VenueAccess,
-  VenueManager,
 } from '@prisma/client';
 import {
   accountIsUnauthorized,
@@ -222,11 +219,21 @@ export class AccountsService {
     }
   }
 
-  async findOneByEmail(email: string): Promise<Account | PrismaResultError> {
+  async findOneByEmail(
+    email: string,
+  ): Promise<
+    | Prisma.AccountGetPayload<{
+        include: { Role: true };
+      }>
+    | PrismaResultError
+  > {
     try {
       return await this.prisma.account.findFirstOrThrow({
         where: {
           account_email: email,
+        },
+        include: {
+          Role: true,
         },
       });
     } catch (error: unknown) {

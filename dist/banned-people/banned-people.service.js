@@ -21,13 +21,23 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
@@ -41,6 +51,7 @@ const prisma_service_1 = require("../prisma.service");
 const utils_1 = require("../utils");
 const dayjs_1 = __importDefault(require("dayjs"));
 const fs = __importStar(require("fs"));
+const path_1 = __importDefault(require("path"));
 let BannedPeopleService = class BannedPeopleService {
     constructor(prisma) {
         this.prisma = prisma;
@@ -112,7 +123,7 @@ let BannedPeopleService = class BannedPeopleService {
                     },
                 },
             });
-            return await this.prisma.bannedPerson.findFirst({
+            const newBannedPerson = await this.prisma.bannedPerson.findFirst({
                 where: {
                     bannedPerson_id: newBanProfile.bannedPerson_id,
                 },
@@ -121,6 +132,8 @@ let BannedPeopleService = class BannedPeopleService {
                     AlertDetail: true,
                 },
             });
+            newBannedPerson.bannedPerson_imagePath = `${process.env.API_URL}/images/people/${file.filename}`;
+            return newBannedPerson;
         }
         catch (error) {
             return (0, utils_1.handleError)(error);
@@ -156,22 +169,13 @@ let BannedPeopleService = class BannedPeopleService {
                     bannedPerson_name: 'asc',
                 },
             });
-            const peopleWithBlanketBans = peopleWithActiveBans.filter((bannedPerson) => {
+            return peopleWithActiveBans.filter((bannedPerson) => {
                 let bannedFromVenueIds = new Set();
                 bannedPerson.BanDetail.some((banDetail) => {
                     bannedFromVenueIds.add(banDetail.banDetails_venueBanId);
                 });
                 if (bannedFromVenueIds.size === allVenueIds.size) {
                     return bannedPerson;
-                }
-            });
-            return peopleWithBlanketBans.map((bannedPeopleWithDetails) => {
-                if (fs.existsSync(bannedPeopleWithDetails.bannedPerson_imagePath)) {
-                    const imageFile = fs.readFileSync(bannedPeopleWithDetails.bannedPerson_imagePath);
-                    return {
-                        banned_person_details: bannedPeopleWithDetails,
-                        banned_person_image_file: imageFile,
-                    };
                 }
             });
         }
@@ -295,6 +299,29 @@ let BannedPeopleService = class BannedPeopleService {
             return (0, utils_1.handleError)(error);
         }
     }
+    async findAllWithoutPendingBans(request) {
+        try {
+            if (!request.account) {
+                return (0, utils_1.noRequestAccountError)();
+            }
+            const requestAccount = await (0, utils_1.getAccountInfoFromId)(this.prisma, request.account.sub);
+            if ((0, utils_1.isPrismaResultError)(requestAccount)) {
+                return requestAccount;
+            }
+            return await this.prisma.bannedPerson.findMany({
+                where: {
+                    BanDetail: {
+                        every: {
+                            banDetails_isBanPending: false,
+                        },
+                    },
+                },
+            });
+        }
+        catch (error) {
+            return (0, utils_1.handleError)(error);
+        }
+    }
     async updateOneBannedPerson(request, file, bannedPersonId, updateBannedPersonDto) {
         try {
             if (!request.account) {
@@ -305,7 +332,7 @@ let BannedPeopleService = class BannedPeopleService {
                 return requestAccount;
             }
             if (!(await (0, utils_1.isAccountAdminRole)(this.prisma, requestAccount)) &&
-                (await !(0, utils_1.isAccountSecurityRole)(this.prisma, requestAccount))) {
+                !(await (0, utils_1.isAccountSecurityRole)(this.prisma, requestAccount))) {
                 return (0, utils_1.accountIsUnauthorized)();
             }
             const bannedPersonToUpdate = await this.prisma.bannedPerson.findFirst({
@@ -316,10 +343,7 @@ let BannedPeopleService = class BannedPeopleService {
             if ((0, utils_1.isPrismaResultError)(bannedPersonToUpdate)) {
                 return bannedPersonToUpdate;
             }
-            if (file) {
-                fs.unlink(bannedPersonToUpdate.bannedPerson_imagePath, (error) => console.log(error));
-            }
-            return await this.prisma.bannedPerson.update({
+            const updatedBannedPerson = await this.prisma.bannedPerson.update({
                 where: {
                     bannedPerson_id: bannedPersonId,
                 },
@@ -330,6 +354,18 @@ let BannedPeopleService = class BannedPeopleService {
                         : updateBannedPersonDto.bannedPerson_imagePath,
                 },
             });
+            updatedBannedPerson.bannedPerson_imagePath = `${process.env.API_URL}/images/people/${path_1.default.basename(updatedBannedPerson.bannedPerson_imagePath)}`;
+            if (file) {
+                try {
+                    await fs.promises.unlink(bannedPersonToUpdate.bannedPerson_imagePath);
+                }
+                catch (error) {
+                    console.log(`error removing file at: ${file.path}`);
+                }
+            }
+            else {
+            }
+            return updatedBannedPerson;
         }
         catch (error) {
             return (0, utils_1.handleError)(error);

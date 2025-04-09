@@ -5,6 +5,9 @@ import {
 } from '@prisma/client/runtime/library';
 import { PrismaService } from 'src/prisma.service';
 import { PrismaResultError } from 'src/types';
+import { Response } from 'express';
+import { AuthenticationService } from 'src/authentication/authentication.service';
+import { JwtService } from '@nestjs/jwt';
 
 export const handleError = (error: unknown): PrismaResultError => {
   if (error instanceof PrismaClientKnownRequestError) {
@@ -64,7 +67,8 @@ export const accountIsUnauthorized = (): PrismaResultError => {
   return {
     error_type: 'account unauthorized',
     error_code: '401',
-    error_message: 'the account requesting this does not have the required authorization',
+    error_message:
+      'the account requesting this does not have the required authorization',
   };
 };
 
@@ -72,9 +76,10 @@ export const invalidDayJsDate = (): PrismaResultError => {
   return {
     error_type: 'invalid dayjs date',
     error_code: '400',
-    error_message: 'the date given could not be converted to a valid dayjs date',
+    error_message:
+      'the date given could not be converted to a valid dayjs date',
   };
-}
+};
 
 export const getAccountInfoFromId = async (
   prisma: PrismaService,
@@ -140,4 +145,24 @@ export const isAccountVenueManagerRole = async (
   } else {
     return false;
   }
+};
+
+export const addJwtCookieToRequest = async (
+  response: Response,
+  jwtService: JwtService,
+  accountId: number,
+  accountEmail: string,
+) => {
+  const jwt = await jwtService.signAsync({
+    sub: accountId,
+    email: accountEmail,
+  });
+
+  response.cookie('jwt', jwt, {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'none',
+    partitioned: true,
+    path: '/',
+  });
 };

@@ -17,6 +17,7 @@ import { CreateBannedPersonDto } from './dto/create-banned-person.dto';
 import { PrismaResultError, RequestWithAccount } from 'src/types';
 import { UpdateBannedPersonDto } from './dto/update-banned-person.dto';
 import * as fs from 'fs';
+import path from 'path';
 
 @Injectable()
 export class BannedPeopleService {
@@ -110,7 +111,6 @@ export class BannedPeopleService {
           alertDetails_alertReason: createBannedPersonDto.banDetails_reason
             .toLocaleLowerCase()
             .trim(),
-          // alertDetails_startTime: createBannedPersonDto.banDetails_banEndDate,
           alertDetails_startTime: dayjs().toISOString(),
           alertDetails_alertUploadedBy: requestAccount.account_id,
         },
@@ -123,7 +123,7 @@ export class BannedPeopleService {
         },
       });
 
-      return await this.prisma.bannedPerson.findFirst({
+      const newBannedPerson = await this.prisma.bannedPerson.findFirst({
         where: {
           bannedPerson_id: newBanProfile.bannedPerson_id,
         },
@@ -132,23 +132,19 @@ export class BannedPeopleService {
           AlertDetail: true,
         },
       });
+
+      newBannedPerson.bannedPerson_imagePath = `${process.env.API_URL}/images/people/${file.filename}`;
+      return newBannedPerson;
     } catch (error: unknown) {
       return handleError(error);
     }
   }
 
-  // need to check with the front-end if a file is being returned
   async findAllBlanketBanned(
     request: RequestWithAccount,
   ): Promise<
-    | {
-        banned_person_details: Prisma.BannedPersonGetPayload<{
-          include: { BanDetail: true };
-        }>[];
-        banned_person_image_file: Buffer;
-      }
+    | Prisma.BannedPersonGetPayload<{ include: { BanDetail: true } }>[]
     | PrismaResultError
-    | any // need to test return type before removing this
   > {
     try {
       if (!request.account) {
@@ -190,7 +186,7 @@ export class BannedPeopleService {
         },
       });
 
-      const peopleWithBlanketBans = peopleWithActiveBans.filter(
+      return peopleWithActiveBans.filter(
         (bannedPerson: BannedPerson & { BanDetail: BanDetail[] }) => {
           let bannedFromVenueIds = new Set<number>();
 
@@ -203,19 +199,6 @@ export class BannedPeopleService {
           }
         },
       );
-
-      return peopleWithBlanketBans.map((bannedPeopleWithDetails) => {
-        if (fs.existsSync(bannedPeopleWithDetails.bannedPerson_imagePath)) {
-          const imageFile = fs.readFileSync(
-            bannedPeopleWithDetails.bannedPerson_imagePath,
-          );
-
-          return {
-            banned_person_details: bannedPeopleWithDetails,
-            banned_person_image_file: imageFile,
-          };
-        }
-      });
     } catch (error: unknown) {
       return handleError(error);
     }
@@ -298,9 +281,7 @@ export class BannedPeopleService {
     }
   }
 
-  async findAllWithActiveAlert(
-    request: RequestWithAccount,
-  ): Promise<
+  async findAllWithActiveAlert(request: RequestWithAccount): Promise<
     | Prisma.BannedPersonGetPayload<{
         include: { AlertDetail: true; BanDetail: true };
       }>[]
@@ -336,9 +317,7 @@ export class BannedPeopleService {
     }
   }
 
-  async findAllWithPendingBans(
-    request: RequestWithAccount,
-  ): Promise<
+  async findAllWithPendingBans(request: RequestWithAccount): Promise<
     | Prisma.BannedPersonGetPayload<{
         include: {
           BanDetail: { include: { Account: { select: { account_name } } } };
@@ -388,6 +367,37 @@ export class BannedPeopleService {
     }
   }
 
+  async findAllWithoutPendingBans(
+    request: RequestWithAccount,
+  ): Promise<any | PrismaResultError> {
+    try {
+      if (!request.account) {
+        return noRequestAccountError();
+      }
+
+      const requestAccount = await getAccountInfoFromId(
+        this.prisma,
+        request.account.sub,
+      );
+
+      if (isPrismaResultError(requestAccount)) {
+        return requestAccount;
+      }
+
+      return await this.prisma.bannedPerson.findMany({
+        where: {
+          BanDetail: {
+            every: {
+              banDetails_isBanPending: false,
+            },
+          },
+        },
+      });
+    } catch (error: unknown) {
+      return handleError(error);
+    }
+  }
+
   async updateOneBannedPerson(
     request: RequestWithAccount,
     file: Express.Multer.File,
@@ -410,7 +420,7 @@ export class BannedPeopleService {
 
       if (
         !(await isAccountAdminRole(this.prisma, requestAccount)) &&
-        (await !isAccountSecurityRole(this.prisma, requestAccount))
+        !(await isAccountSecurityRole(this.prisma, requestAccount))
       ) {
         return accountIsUnauthorized();
       }
@@ -425,13 +435,7 @@ export class BannedPeopleService {
         return bannedPersonToUpdate;
       }
 
-      if (file) {
-        fs.unlink(bannedPersonToUpdate.bannedPerson_imagePath, (error) =>
-          console.log(error),
-        );
-      }
-
-      return await this.prisma.bannedPerson.update({
+      const updatedBannedPerson = await this.prisma.bannedPerson.update({
         where: {
           bannedPerson_id: bannedPersonId,
         },
@@ -442,6 +446,18 @@ export class BannedPeopleService {
             : updateBannedPersonDto.bannedPerson_imagePath,
         },
       });
+
+      updatedBannedPerson.bannedPerson_imagePath = `${process.env.API_URL}/images/people/${path.basename(updatedBannedPerson.bannedPerson_imagePath)}`;
+
+      if (file) {
+        try {
+          await fs.promises.unlink(bannedPersonToUpdate.bannedPerson_imagePath);
+        } catch (error) {
+          console.log(`error removing file at: ${file.path}`);
+        }
+      } else {
+      }
+      return updatedBannedPerson;
     } catch (error: unknown) {
       return handleError(error);
     }

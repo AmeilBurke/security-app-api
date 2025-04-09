@@ -1,6 +1,8 @@
 import { Account } from '@prisma/client';
 import { PrismaService } from 'src/prisma.service';
 import { PrismaResultError } from 'src/types';
+import { Response } from 'express';
+import { JwtService } from '@nestjs/jwt';
 export declare const handleError: (error: unknown) => PrismaResultError;
 export declare const isPrismaResultError: (object: any) => object is PrismaResultError;
 export declare const noRequestAccountError: () => PrismaResultError;
@@ -11,3 +13,4 @@ export declare const getAccountInfoFromId: (prisma: PrismaService, id: number) =
 export declare const isAccountAdminRole: (prisma: PrismaService, account: Account) => Promise<boolean>;
 export declare const isAccountSecurityRole: (prisma: PrismaService, account: Account) => Promise<boolean>;
 export declare const isAccountVenueManagerRole: (prisma: PrismaService, account: Account) => Promise<boolean>;
+export declare const addJwtCookieToRequest: (response: Response, jwtService: JwtService, accountId: number, accountEmail: string) => Promise<void>;

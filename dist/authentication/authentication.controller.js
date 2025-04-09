@@ -23,14 +23,24 @@ let AuthenticationController = class AuthenticationController {
     async create(userLogin, response) {
         return await this.authenticationService.signIn(userLogin.user_email, userLogin.user_password, response);
     }
-    async getProfile(request) {
-        return request.account;
+    async getProfile(request, response) {
+        return await this.authenticationService.getAccountDetails(request.account.sub, response);
+    }
+    signOut(response) {
+        response.clearCookie('jwt', {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'none',
+            partitioned: true,
+            path: '/',
+        });
+        return 'you have been signed out';
     }
 };
 exports.AuthenticationController = AuthenticationController;
 __decorate([
     (0, public_guard_1.Public)(),
-    (0, common_1.Post)('login'),
+    (0, common_1.Post)('sign-in'),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Res)({ passthrough: true })),
     __metadata("design:type", Function),
@@ -40,10 +50,18 @@ __decorate([
 __decorate([
     (0, common_1.Get)('profile'),
     __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Res)({ passthrough: true })),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], AuthenticationController.prototype, "getProfile", null);
+__decorate([
+    (0, common_1.Get)('sign-out'),
+    __param(0, (0, common_1.Res)({ passthrough: true })),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], AuthenticationController.prototype, "signOut", null);
 exports.AuthenticationController = AuthenticationController = __decorate([
     (0, common_1.Controller)('authentication'),
     __metadata("design:paramtypes", [authentication_service_1.AuthenticationService])

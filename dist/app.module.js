@@ -21,6 +21,8 @@ const ban_details_module_1 = require("./ban-details/ban-details.module");
 const venue_managers_module_1 = require("./venue-managers/venue-managers.module");
 const venue_bans_module_1 = require("./venue-bans/venue-bans.module");
 const venue_access_module_1 = require("./venue-access/venue-access.module");
+const serve_static_1 = require("@nestjs/serve-static");
+const path_1 = require("path");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -40,6 +42,10 @@ exports.AppModule = AppModule = __decorate([
             venue_managers_module_1.VenueManagersModule,
             venue_bans_module_1.VenueBansModule,
             venue_access_module_1.VenueAccessModule,
+            serve_static_1.ServeStaticModule.forRoot({
+                rootPath: (0, path_1.join)(__dirname, '..', 'images'),
+                serveRoot: '/images',
+            }),
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],

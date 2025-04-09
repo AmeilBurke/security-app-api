@@ -21,13 +21,23 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
@@ -42,6 +52,7 @@ const utils_1 = require("../utils");
 const dayjs_1 = __importDefault(require("dayjs"));
 const fs = __importStar(require("fs"));
 const schedule_1 = require("@nestjs/schedule");
+const path_1 = __importDefault(require("path"));
 let AlertDetailsService = class AlertDetailsService {
     constructor(prisma) {
         this.prisma = prisma;
@@ -58,7 +69,7 @@ let AlertDetailsService = class AlertDetailsService {
             if (!file) {
                 return (0, utils_1.noFileReceivedError)();
             }
-            return await this.prisma.alertDetail.create({
+            const newAlertDetail = await this.prisma.alertDetail.create({
                 data: {
                     alertDetail_bannedPersonId: createAlertDetail.alertDetail_bannedPersonId,
                     alertDetail_name: createAlertDetail.alertDetail_name
@@ -72,6 +83,8 @@ let AlertDetailsService = class AlertDetailsService {
                     alertDetails_alertUploadedBy: requestAccount.account_id,
                 },
             });
+            newAlertDetail.alertDetail_imagePath = `${process.env.API_URL}/images/people/${path_1.default.basename(newAlertDetail.alertDetail_imagePath)}`;
+            return newAlertDetail;
         }
         catch (error) {
             return (0, utils_1.handleError)(error);
@@ -115,9 +128,14 @@ let AlertDetailsService = class AlertDetailsService {
                         alertDetail_id: alertDetailId,
                     },
                 });
-                await fs.promises.unlink(alertDetailToBeDeleted.alertDetail_imagePath);
+                try {
+                    await fs.promises.unlink(alertDetailToBeDeleted.alertDetail_imagePath);
+                }
+                catch (error) {
+                    console.log(`error removing file at: ${file.path}`);
+                }
             }
-            return await this.prisma.alertDetail.update({
+            const newAlertDetail = await this.prisma.alertDetail.update({
                 where: {
                     alertDetail_id: alertDetailId,
                 },
@@ -132,6 +150,8 @@ let AlertDetailsService = class AlertDetailsService {
                     alertDetails_alertUploadedBy: requestAccount.account_id,
                 },
             });
+            newAlertDetail.alertDetail_imagePath = `${process.env.API_URL}/images/people/${path_1.default.basename(newAlertDetail.alertDetail_imagePath)}`;
+            return newAlertDetail;
         }
         catch (error) {
             return (0, utils_1.handleError)(error);
@@ -173,7 +193,12 @@ let AlertDetailsService = class AlertDetailsService {
                     alertDetail_id: alertDetailId,
                 },
             });
-            await fs.promises.unlink(alertDetailToDelete.alertDetail_imagePath);
+            try {
+                await fs.promises.unlink(alertDetailToDelete.alertDetail_imagePath);
+            }
+            catch (error) {
+                console.log(`error removing file at: ${alertDetailToDelete.alertDetail_imagePath}`);
+            }
             return await this.prisma.alertDetail.delete({
                 where: {
                     alertDetail_id: alertDetailId,
@@ -187,6 +212,15 @@ let AlertDetailsService = class AlertDetailsService {
     async cronDeleteAll() {
         try {
             console.log('cron run');
+            const allAlertDetails = await this.prisma.alertDetail.findMany();
+            allAlertDetails.map(async (alertDetail) => {
+                try {
+                    await fs.promises.unlink(alertDetail.alertDetail_imagePath);
+                }
+                catch (error) {
+                    console.log(`error removing file at: ${alertDetail.alertDetail_imagePath}`);
+                }
+            });
             await this.prisma.alertDetail.deleteMany();
         }
         catch (error) {

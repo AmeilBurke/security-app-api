@@ -29,14 +29,7 @@ export class VenuesController {
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({
-        destination: path.join(
-          __dirname,
-          '..',
-          '..',
-          'src',
-          'images',
-          'venues',
-        ),
+        destination: path.join(__dirname, '..', '..', 'images', 'venues'),
         filename: (req, file, cb) => {
           const fileType = file.mimetype.split('/')[1];
           cb(null, `${uuidv4()}.${fileType}`);
@@ -54,13 +47,12 @@ export class VenuesController {
       file,
       createVenueDto,
     );
-    if (isPrismaResultError(result)) {
+
+    if (isPrismaResultError(result) && file) {
       try {
-        fs.unlink(file.path, () => {
-          console.log('venue controller: uploaded file has been deleted');
-        });
+        await fs.promises.unlink(file.path);
       } catch (error) {
-        console.log(error)
+        console.log(`error removing file at: ${file.path}`);
       }
     }
     return result;
@@ -70,19 +62,12 @@ export class VenuesController {
   findAllVenues(@Req() request: RequestWithAccount) {
     return this.venuesService.findAllvenues(request);
   }
-  
+
   @Patch(':id')
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({
-        destination: path.join(
-          __dirname,
-          '..',
-          '..',
-          'src',
-          'images',
-          'venues',
-        ),
+        destination: path.join(__dirname, '..', '..', 'images', 'venues'),
         filename: (req, file, cb) => {
           const fileType = file.mimetype.split('/')[1];
           cb(null, `${uuidv4()}.${fileType}`);
@@ -102,13 +87,12 @@ export class VenuesController {
       Number(venueId),
       updateVenueDto,
     );
-    if (isPrismaResultError(result)) {
+
+    if (isPrismaResultError(result) && file) {
       try {
-        fs.unlink(file.path, () => {
-          console.log('venue controller: uploaded file has been deleted');
-        });
+        await fs.promises.unlink(file.path);
       } catch (error) {
-        console.log(error)
+        console.log(`error removing file at: ${file.path}`);
       }
     }
     return result;

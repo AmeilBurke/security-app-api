@@ -16,14 +16,11 @@ export declare class BannedPeopleService {
             AlertDetail: true;
         };
     }> | PrismaResultError>;
-    findAllBlanketBanned(request: RequestWithAccount): Promise<{
-        banned_person_details: Prisma.BannedPersonGetPayload<{
-            include: {
-                BanDetail: true;
-            };
-        }>[];
-        banned_person_image_file: Buffer;
-    } | PrismaResultError | any>;
+    findAllBlanketBanned(request: RequestWithAccount): Promise<Prisma.BannedPersonGetPayload<{
+        include: {
+            BanDetail: true;
+        };
+    }>[] | PrismaResultError>;
     findAllByVenueId(request: RequestWithAccount, venueId: number): Promise<Prisma.BannedPersonGetPayload<{
         include: {
             BanDetail: true;
@@ -53,9 +50,10 @@ export declare class BannedPeopleService {
             };
         };
     }>[] | PrismaResultError>;
-    updateOneBannedPerson(request: RequestWithAccount, file: Express.Multer.File, bannedPersonId: number, updateBannedPersonDto: UpdateBannedPersonDto): Promise<PrismaResultError | {
+    findAllWithoutPendingBans(request: RequestWithAccount): Promise<any | PrismaResultError>;
+    updateOneBannedPerson(request: RequestWithAccount, file: Express.Multer.File, bannedPersonId: number, updateBannedPersonDto: UpdateBannedPersonDto): Promise<{
         bannedPerson_id: number;
         bannedPerson_name: string;
         bannedPerson_imagePath: string;
-    }>;
+    } | PrismaResultError>;
 }

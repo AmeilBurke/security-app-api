@@ -2,20 +2,35 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
+import * as fs from 'fs';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-  app.enableCors();
+  const httpsOptions = {
+    key: fs.readFileSync(
+      'C:\\Users\\ameil\\Documents\\Github Repositories\\certificates\\172.20.112.1-key.pem',
+    ),
+    cert: fs.readFileSync(
+      'C:\\Users\\ameil\\Documents\\Github Repositories\\certificates\\172.20.112.1.pem',
+    ),
+  };
 
-  //activate this when back on frontens
-  // app.enableCors({
-  //   origin: 'http://localhost:5173', // Your frontend URL
-  //   credentials: true,
-  // });
+  const app = await NestFactory.create(AppModule, {
+    httpsOptions,
+  });
+
+  app.enableCors({
+    origin: [
+      'https://localhost:5173',
+      'https://172.20.112.1:5173',
+      'https://172.20.112.1:3000',
+      'wss://172.20.112.1:3000',
+    ],
+    credentials: true,
+    methods: 'GET,POST,PUT,DELETE',
+  });
   app.useGlobalPipes(new ValidationPipe());
-  // need to look into this
   app.use(cookieParser(process.env.COOKIE_SECRET));
-  // app.use(cookieParser());
+
   await app.listen(3000, '0.0.0.0');
 }
 bootstrap();

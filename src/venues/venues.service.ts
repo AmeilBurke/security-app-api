@@ -57,6 +57,8 @@ export class VenuesService {
         },
       });
 
+      newVenue.venue_imagePath = `${process.env.API_URL}/images/venues/${file.filename}`;
+
       const adminAndSecurityRole = await this.prisma.role.findMany({
         select: {
           role_id: true,
@@ -185,17 +187,16 @@ export class VenuesService {
         return accountIsUnauthorized();
       }
 
-      const venueToUpdate = await this.prisma.venue.findFirst({
+      const oldVenueImage = await this.prisma.venue.findFirst({
         where: {
           venue_id: venueId,
         },
+        select: {
+          venue_imagePath: true,
+        },
       });
 
-      if (file) {
-        fs.unlink(venueToUpdate.venue_imagePath, (error) => console.log(error));
-      }
-
-      return await this.prisma.venue.update({
+      const updatedVenue = await this.prisma.venue.update({
         where: {
           venue_id: venueId,
         },
@@ -204,6 +205,19 @@ export class VenuesService {
           venue_name: updateVenueDto.venue_name,
         },
       });
+
+      if (file) {
+        updatedVenue.venue_imagePath = `${process.env.API_URL}/images/venues/${file.filename}`;
+        try {
+          await fs.promises.unlink(oldVenueImage.venue_imagePath);
+        } catch (error) {
+          console.log(`error removing file at: ${file.path}`);
+        }
+      } else {
+        updatedVenue.venue_imagePath = `${process.env.API_URL}/images/venues/${path.basename(updatedVenue.venue_imagePath)}`;
+      }
+
+      return updatedVenue;
     } catch (error: unknown) {
       return handleError(error);
     }
@@ -240,7 +254,9 @@ export class VenuesService {
       try {
         await fs.promises.unlink(venueToBeDeleted.venue_imagePath);
       } catch (error) {
-        console.log(error);
+        console.log(
+          `error removing file at: ${venueToBeDeleted.venue_imagePath}`,
+        );
       }
 
       await this.prisma.banDetail.deleteMany({

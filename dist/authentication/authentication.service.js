@@ -13,12 +13,14 @@ exports.AuthenticationService = void 0;
 const common_1 = require("@nestjs/common");
 const jwt_1 = require("@nestjs/jwt");
 const accounts_service_1 = require("../accounts/accounts.service");
+const prisma_service_1 = require("../prisma.service");
 const utils_1 = require("../utils");
 const bcrypt = require('bcrypt');
 let AuthenticationService = class AuthenticationService {
-    constructor(accountsService, jwtService) {
+    constructor(accountsService, jwtService, prisma) {
         this.accountsService = accountsService;
         this.jwtService = jwtService;
+        this.prisma = prisma;
     }
     async signIn(email, password, response) {
         const account = await this.accountsService.findOneByEmail(email);
@@ -26,16 +28,31 @@ let AuthenticationService = class AuthenticationService {
             return account;
         }
         if (await bcrypt.compare(password, account.account_password)) {
-            const jwt = await this.jwtService.signAsync({ sub: account.account_id, email: account.account_email });
-            response.cookie('jwt', jwt, {
-                httpOnly: true,
-                secure: false,
-                sameSite: 'strict',
-            });
-            return `logged in as ${account.account_name}`;
+            await (0, utils_1.addJwtCookieToRequest)(response, this.jwtService, account.account_id, account.account_email);
+            const { account_password, ...result } = account;
+            return result;
         }
         else {
             throw new common_1.UnauthorizedException();
+        }
+    }
+    async getAccountDetails(accountId, response) {
+        try {
+            const account = await this.prisma.account.findFirst({
+                where: {
+                    account_id: accountId,
+                },
+                include: {
+                    Role: true,
+                },
+            });
+            const { account_password, ...result } = account;
+            await (0, utils_1.addJwtCookieToRequest)(response, this.jwtService, account.account_id, account.account_email);
+            return result;
+        }
+        catch (error) {
+            console.log(error);
+            return (0, utils_1.handleError)(error);
         }
     }
 };
@@ -43,6 +60,7 @@ exports.AuthenticationService = AuthenticationService;
 exports.AuthenticationService = AuthenticationService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [accounts_service_1.AccountsService,
-        jwt_1.JwtService])
+        jwt_1.JwtService,
+        prisma_service_1.PrismaService])
 ], AuthenticationService);
 //# sourceMappingURL=authentication.service.js.map

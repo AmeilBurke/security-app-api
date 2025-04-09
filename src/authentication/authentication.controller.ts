@@ -1,15 +1,15 @@
 import { Controller, Post, Body, Get, Res, Req } from '@nestjs/common';
 import { AuthenticationService } from './authentication.service';
 import { Public } from './public.guard';
-import { Account, Prisma } from '@prisma/client';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { RequestWithAccount } from 'src/types';
 
 @Controller('authentication')
 export class AuthenticationController {
   constructor(private readonly authenticationService: AuthenticationService) {}
 
   @Public()
-  @Post('login')
+  @Post('sign-in')
   async create(
     @Body() userLogin: { user_email: string; user_password: string },
     @Res({ passthrough: true }) response: Response,
@@ -23,8 +23,25 @@ export class AuthenticationController {
 
   @Get('profile')
   async getProfile(
-    @Req() request: Request & { account: {sub: number, email: string, iat: number, exp: number} }
+    @Req()
+    request: RequestWithAccount,
+    @Res({ passthrough: true }) response: Response,
   ) {
-    return request.account;
+    return await this.authenticationService.getAccountDetails(
+      request.account.sub,
+      response,
+    );
+  }
+
+  @Get('sign-out')
+  signOut(@Res({ passthrough: true }) response: Response) {
+    response.clearCookie('jwt', {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+      partitioned: true,
+      path: '/',
+    });
+    return 'you have been signed out';
   }
 }

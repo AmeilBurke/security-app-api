@@ -34,7 +34,22 @@ export declare class BannedPeopleController {
         bannedPerson_name: string;
         bannedPerson_imagePath: string;
     })>;
-    findAllBlanketBanned(request: RequestWithAccount): Promise<any>;
+    findAllBlanketBanned(request: RequestWithAccount): Promise<import("src/types").PrismaResultError | ({
+        BanDetail: {
+            banDetails_id: number;
+            banDetails_bannedPersonId: number;
+            banDetails_reason: string;
+            banDetails_banStartDate: string;
+            banDetails_banEndDate: string;
+            banDetails_venueBanId: number;
+            banDetails_isBanPending: boolean;
+            banDetails_banUploadedBy: number;
+        }[];
+    } & {
+        bannedPerson_id: number;
+        bannedPerson_name: string;
+        bannedPerson_imagePath: string;
+    })[]>;
     findAllByVenueId(request: RequestWithAccount, venueId: string): Promise<import("src/types").PrismaResultError | ({
         BanDetail: {
             banDetails_id: number;
@@ -112,9 +127,10 @@ export declare class BannedPeopleController {
         bannedPerson_name: string;
         bannedPerson_imagePath: string;
     })[]>;
-    update(request: RequestWithAccount, file: Express.Multer.File, id: string, updateBannedPersonDto: UpdateBannedPersonDto): Promise<import("src/types").PrismaResultError | {
+    findAllWithoutPendingBans(request: RequestWithAccount): Promise<any>;
+    update(request: RequestWithAccount, file: Express.Multer.File, id: string, updateBannedPersonDto: UpdateBannedPersonDto): Promise<{
         bannedPerson_id: number;
         bannedPerson_name: string;
         bannedPerson_imagePath: string;
-    }>;
+    } | import("src/types").PrismaResultError>;
 }

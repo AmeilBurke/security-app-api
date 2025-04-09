@@ -20,7 +20,6 @@ import path from 'path';
 import { isPrismaResultError } from 'src/utils';
 import * as fs from 'fs';
 
-
 @Controller('banned-people')
 export class BannedPeopleController {
   constructor(private readonly bannedPeopleService: BannedPeopleService) {}
@@ -32,14 +31,7 @@ export class BannedPeopleController {
         files: 1,
       },
       storage: diskStorage({
-        destination: path.join(
-          __dirname,
-          '..',
-          '..',
-          'src',
-          'images',
-          'people',
-        ),
+        destination: path.join(__dirname, '..', '..', 'images', 'people'),
         filename: (req, file, cb) => {
           const fileType = file.mimetype.split('/')[1];
           cb(null, `${uuidv4()}.${fileType}`);
@@ -59,45 +51,58 @@ export class BannedPeopleController {
     @UploadedFile()
     file: Express.Multer.File,
   ) {
-    return this.bannedPeopleService.create(request, createBannedPerson, file);
+    const result = await this.bannedPeopleService.create(
+      request,
+      createBannedPerson,
+      file,
+    );
+
+    if (isPrismaResultError(result)) {
+      try {
+        fs.promises.unlink(file.path);
+      } catch (error) {
+        console.log(`error removing file at: ${file.path}`);
+      }
+    }
+    return result;
   }
 
   // need to update to return file with details {details: bannedPerson; image: file}
   @Get('/blanket-banned')
-  findAllBlanketBanned(@Req() request: RequestWithAccount) {
-    return this.bannedPeopleService.findAllBlanketBanned(request);
+  async findAllBlanketBanned(@Req() request: RequestWithAccount) {
+    return await this.bannedPeopleService.findAllBlanketBanned(request);
   }
 
   @Get('/venue/:venueId')
-  findAllByVenueId(
+  async findAllByVenueId(
     @Req() request: RequestWithAccount,
     @Param('venueId') venueId: string,
   ) {
-    return this.bannedPeopleService.findAllByVenueId(request, Number(venueId));
+    return await this.bannedPeopleService.findAllByVenueId(
+      request,
+      Number(venueId),
+    );
   }
 
   @Get('/expired')
-  findAllExpired(@Req() request: RequestWithAccount) {
-    return this.bannedPeopleService.findAllExpired(request);
+  async findAllExpired(@Req() request: RequestWithAccount) {
+    return await this.bannedPeopleService.findAllExpired(request);
   }
 
   @Get('/active-alert')
-  findAllWithActiveAlert(@Req() request: RequestWithAccount) {
-    return this.bannedPeopleService.findAllWithActiveAlert(request);
+  async findAllWithActiveAlert(@Req() request: RequestWithAccount) {
+    return await this.bannedPeopleService.findAllWithActiveAlert(request);
   }
 
   @Get('/pending')
-  findAllWithPendingBans(@Req() request: RequestWithAccount) {
-    return this.bannedPeopleService.findAllWithPendingBans(request);
+  async findAllWithPendingBans(@Req() request: RequestWithAccount) {
+    return await this.bannedPeopleService.findAllWithPendingBans(request);
   }
-  // @Get('/photo/:id')
-  // findOneWithPhoto(
-  //   @Req() request: RequestWithAccount,
-  //   @Res({ passthrough: true }) response: ExpressResponse,
-  //   @Param('id') id: string,
-  // ) {
-  //   return this.bannedPeopleService.findOnePhoto(request, response, Number(id));
-  // }
+
+  @Get('/not-pending')
+  async findAllWithoutPendingBans(@Req() request: RequestWithAccount) {
+    return await this.bannedPeopleService.findAllWithoutPendingBans(request);
+  }
 
   @Patch(':id')
   @UseInterceptors(
@@ -106,14 +111,7 @@ export class BannedPeopleController {
         files: 1,
       },
       storage: diskStorage({
-        destination: path.join(
-          __dirname,
-          '..',
-          '..',
-          'src',
-          'images',
-          'people',
-        ),
+        destination: path.join(__dirname, '..', '..', 'images', 'people'),
         filename: (req, file, cb) => {
           const fileType = file.mimetype.split('/')[1];
           cb(null, `${uuidv4()}.${fileType}`);
@@ -121,24 +119,26 @@ export class BannedPeopleController {
       }),
     }),
   )
-  update(
+  async update(
     @Req() request: RequestWithAccount,
     @UploadedFile() file: Express.Multer.File,
     @Param('id') id: string,
     @Body() updateBannedPersonDto: UpdateBannedPersonDto,
   ) {
-    const result = this.bannedPeopleService.updateOneBannedPerson(
+    const result = await this.bannedPeopleService.updateOneBannedPerson(
       request,
       file,
       Number(id),
       updateBannedPersonDto,
     );
 
-        if (isPrismaResultError(result)) {
-          fs.unlink(file.path, () => {
-            console.log('banned-people controller: uploaded file has been deleted');
-          });
-        }
-        return result;
+    if (isPrismaResultError(result) && file) {
+      try {
+        fs.promises.unlink(file.path);
+      } catch (error) {
+        console.log(`error removing file at: ${file.path}`);
+      }
+    }
+    return result;
   }
 }

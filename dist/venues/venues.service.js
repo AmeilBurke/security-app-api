@@ -21,13 +21,23 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
@@ -36,6 +46,7 @@ exports.VenuesService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma.service");
 const utils_1 = require("../utils");
+const path = __importStar(require("path"));
 const fs = __importStar(require("fs"));
 let VenuesService = class VenuesService {
     constructor(prisma) {
@@ -62,6 +73,7 @@ let VenuesService = class VenuesService {
                     venue_imagePath: file.path,
                 },
             });
+            newVenue.venue_imagePath = `${process.env.API_URL}/images/venues/${file.filename}`;
             const adminAndSecurityRole = await this.prisma.role.findMany({
                 select: {
                     role_id: true,
@@ -152,15 +164,15 @@ let VenuesService = class VenuesService {
             if (!(await (0, utils_1.isAccountAdminRole)(this.prisma, requestAccount))) {
                 return (0, utils_1.accountIsUnauthorized)();
             }
-            const venueToUpdate = await this.prisma.venue.findFirst({
+            const oldVenueImage = await this.prisma.venue.findFirst({
                 where: {
                     venue_id: venueId,
                 },
+                select: {
+                    venue_imagePath: true,
+                },
             });
-            if (file) {
-                fs.unlink(venueToUpdate.venue_imagePath, (error) => console.log(error));
-            }
-            return await this.prisma.venue.update({
+            const updatedVenue = await this.prisma.venue.update({
                 where: {
                     venue_id: venueId,
                 },
@@ -169,6 +181,19 @@ let VenuesService = class VenuesService {
                     venue_name: updateVenueDto.venue_name,
                 },
             });
+            if (file) {
+                updatedVenue.venue_imagePath = `${process.env.API_URL}/images/venues/${file.filename}`;
+                try {
+                    await fs.promises.unlink(oldVenueImage.venue_imagePath);
+                }
+                catch (error) {
+                    console.log(`error removing file at: ${file.path}`);
+                }
+            }
+            else {
+                updatedVenue.venue_imagePath = `${process.env.API_URL}/images/venues/${path.basename(updatedVenue.venue_imagePath)}`;
+            }
+            return updatedVenue;
         }
         catch (error) {
             return (0, utils_1.handleError)(error);
@@ -195,7 +220,7 @@ let VenuesService = class VenuesService {
                 await fs.promises.unlink(venueToBeDeleted.venue_imagePath);
             }
             catch (error) {
-                console.log(error);
+                console.log(`error removing file at: ${venueToBeDeleted.venue_imagePath}`);
             }
             await this.prisma.banDetail.deleteMany({
                 where: {

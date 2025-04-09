@@ -12,6 +12,8 @@ import { BanDetailsModule } from './ban-details/ban-details.module';
 import { VenueManagersModule } from './venue-managers/venue-managers.module';
 import { VenueBansModule } from './venue-bans/venue-bans.module';
 import { VenueAccessModule } from './venue-access/venue-access.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -28,6 +30,10 @@ import { VenueAccessModule } from './venue-access/venue-access.module';
     VenueManagersModule,
     VenueBansModule,
     VenueAccessModule,
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'images'),
+      serveRoot: '/images',
+    }),
   ],
   controllers: [AppController],
   providers: [AppService],

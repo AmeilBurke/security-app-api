@@ -30,7 +30,11 @@ export declare class AccountsService {
             Role: true;
         };
     }> | PrismaResultError>;
-    findOneByEmail(email: string): Promise<Account | PrismaResultError>;
+    findOneByEmail(email: string): Promise<Prisma.AccountGetPayload<{
+        include: {
+            Role: true;
+        };
+    }> | PrismaResultError>;
     update(request: RequestWithAccount, id: number, updateAccountDto: UpdateAccountDto): Promise<Prisma.AccountGetPayload<{
         omit: {
             account_password: true;
