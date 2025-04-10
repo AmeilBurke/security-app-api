@@ -7,21 +7,21 @@ export declare class AuthenticationController {
     create(userLogin: {
         user_email: string;
         user_password: string;
-    }, response: Response): Promise<import("src/types").PrismaResultError | Omit<{
+    }, response: Response): Promise<Omit<{
+        account_id: number;
         account_email: string;
         account_password: string;
         account_name: string;
         account_roleId: number;
-        account_id: number;
     } & {
         Role: import(".prisma/client").Role;
-    }, "account_password">>;
+    }, "account_password"> | import("src/types").PrismaResultError>;
     getProfile(request: RequestWithAccount, response: Response): Promise<import("src/types").PrismaResultError | Omit<{
+        account_id: number;
         account_email: string;
         account_password: string;
         account_name: string;
         account_roleId: number;
-        account_id: number;
     } & {
         Role: import(".prisma/client").Role;
     }, "account_password">>;

@@ -56,6 +56,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AuthenticationController.prototype, "getProfile", null);
 __decorate([
+    (0, public_guard_1.Public)(),
     (0, common_1.Get)('sign-out'),
     __param(0, (0, common_1.Res)({ passthrough: true })),
     __metadata("design:type", Function),

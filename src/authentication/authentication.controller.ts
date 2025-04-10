@@ -33,6 +33,7 @@ export class AuthenticationController {
     );
   }
 
+  @Public()
   @Get('sign-out')
   signOut(@Res({ passthrough: true }) response: Response) {
     response.clearCookie('jwt', {

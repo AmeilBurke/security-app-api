@@ -186,7 +186,7 @@ export class BannedPeopleService {
         },
       });
 
-      return peopleWithActiveBans.filter(
+      const filteredBannedPeople = peopleWithActiveBans.filter(
         (bannedPerson: BannedPerson & { BanDetail: BanDetail[] }) => {
           let bannedFromVenueIds = new Set<number>();
 
@@ -197,6 +197,13 @@ export class BannedPeopleService {
           if (bannedFromVenueIds.size === allVenueIds.size) {
             return bannedPerson;
           }
+        },
+      );
+
+      return filteredBannedPeople.map(
+        (bannedPerson: BannedPerson & { BanDetail: BanDetail[] }) => {
+          bannedPerson.bannedPerson_imagePath = `${process.env.API_URL}/images/people/${path.basename(bannedPerson.bannedPerson_imagePath)}`;
+          return bannedPerson;
         },
       );
     } catch (error: unknown) {
@@ -384,7 +391,7 @@ export class BannedPeopleService {
         return requestAccount;
       }
 
-      return await this.prisma.bannedPerson.findMany({
+      const activeBannedPeople = await this.prisma.bannedPerson.findMany({
         where: {
           BanDetail: {
             every: {
@@ -392,6 +399,11 @@ export class BannedPeopleService {
             },
           },
         },
+      });
+
+      return activeBannedPeople.map((bannedPerson) => {
+        bannedPerson.bannedPerson_imagePath = `${process.env.API_URL}/images/people/${path.basename(bannedPerson.bannedPerson_imagePath)}`;
+        return bannedPerson;
       });
     } catch (error: unknown) {
       return handleError(error);
