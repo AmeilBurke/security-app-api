@@ -17,25 +17,32 @@ export class BannedPeopleGateway {
   @WebSocketServer()
   server: Server;
 
-  // onModuleInit() {
-  //   this.server.on('connection', (socket: Socket) => {
-  //     console.log(
-  //       `${socket.id} - connected to Banned People gateway @ ${dayjs()}`,
-  //     );
+  onModuleInit() {
+    this.server.on('connection', (socket: Socket) => {
 
-  //     socket.on('disconnect', () => {
-  //       console.log(
-  //         `${socket.id} - disconnected from Banned People gateway @ ${dayjs()}`,
-  //       );
-  //     });
+      // need to come back to this logic when front end is done
+      if(!socket.handshake.headers.cookie) {
+        console.log('connection refused')
+        socket.disconnect()
+      }
 
-  //     if (socket.recovered) {
-  //       console.log(
-  //         `${socket.id} - disconnected but recovered to Banned People gateway @ ${dayjs()}`,
-  //       );
-  //     }
-  //   });
-  // }
+      console.log(
+        `${socket.id} - connected to Banned People gateway @ ${dayjs()}`,
+      );
+
+      socket.on('disconnect', () => {
+        console.log(
+          `${socket.id} - disconnected from Banned People gateway @ ${dayjs()}`,
+        );
+      });
+
+      if (socket.recovered) {
+        console.log(
+          `${socket.id} - disconnected but recovered to Banned People gateway @ ${dayjs()}`,
+        );
+      }
+    });
+  }
 
   // @SubscribeMessage('addBannedPerson')
   // create(

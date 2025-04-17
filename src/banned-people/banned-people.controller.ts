@@ -60,6 +60,7 @@ export class BannedPeopleController {
     if (isPrismaResultError(result)) {
       try {
         fs.promises.unlink(file.path);
+        console.log(`file ${file.path} removed`);
       } catch (error) {
         console.log(`error removing file at: ${file.path}`);
       }

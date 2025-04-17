@@ -7,10 +7,10 @@ import * as fs from 'fs';
 async function bootstrap() {
   const httpsOptions = {
     key: fs.readFileSync(
-      'C:\\Users\\ameil\\Documents\\Github Repositories\\certificates\\172.20.112.1-key.pem',
+      'C:\\Users\\ameil\\OneDrive\\Documents\\Github Repositories\\certificates\\172.20.112.1-key.pem',
     ),
     cert: fs.readFileSync(
-      'C:\\Users\\ameil\\Documents\\Github Repositories\\certificates\\172.20.112.1.pem',
+      'C:\\Users\\ameil\\OneDrive\\Documents\\Github Repositories\\certificates\\172.20.112.1.pem',
     ),
   };
 
@@ -24,7 +24,6 @@ async function bootstrap() {
       'https://172.20.112.1:5173',
       'https://192.168.1.73:5173',
     ],
-    // origin: '*',
     credentials: true,
     methods: 'GET,POST,PUT,DELETE',
   });

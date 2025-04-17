@@ -8,11 +8,30 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.BannedPeopleGateway = void 0;
 const websockets_1 = require("@nestjs/websockets");
+const dayjs_1 = __importDefault(require("dayjs"));
 const socket_io_1 = require("socket.io");
 let BannedPeopleGateway = class BannedPeopleGateway {
+    onModuleInit() {
+        this.server.on('connection', (socket) => {
+            if (!socket.handshake.headers.cookie) {
+                console.log('connection refused');
+                socket.disconnect();
+            }
+            console.log(`${socket.id} - connected to Banned People gateway @ ${(0, dayjs_1.default)()}`);
+            socket.on('disconnect', () => {
+                console.log(`${socket.id} - disconnected from Banned People gateway @ ${(0, dayjs_1.default)()}`);
+            });
+            if (socket.recovered) {
+                console.log(`${socket.id} - disconnected but recovered to Banned People gateway @ ${(0, dayjs_1.default)()}`);
+            }
+        });
+    }
 };
 exports.BannedPeopleGateway = BannedPeopleGateway;
 __decorate([
