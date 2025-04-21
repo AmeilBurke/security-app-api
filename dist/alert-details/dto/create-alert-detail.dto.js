@@ -16,8 +16,8 @@ class CreateAlertDetailDto {
 exports.CreateAlertDetailDto = CreateAlertDetailDto;
 __decorate([
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsNumber)(),
-    __metadata("design:type", Number)
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
 ], CreateAlertDetailDto.prototype, "alertDetail_bannedPersonId", void 0);
 __decorate([
     (0, class_validator_1.IsString)(),

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.addJwtCookieToRequest = exports.isAccountVenueManagerRole = exports.isAccountSecurityRole = exports.isAccountAdminRole = exports.getAccountInfoFromId = exports.invalidDayJsDate = exports.accountIsUnauthorized = exports.noFileReceivedError = exports.noRequestAccountError = exports.isPrismaResultError = exports.handleError = void 0;
+exports.capitalizeString = exports.addJwtCookieToRequest = exports.isAccountVenueManagerRole = exports.isAccountSecurityRole = exports.isAccountAdminRole = exports.getAccountInfoFromId = exports.invalidDayJsDate = exports.accountIsUnauthorized = exports.noFileReceivedError = exports.noRequestAccountError = exports.isPrismaResultError = exports.handleError = void 0;
 const library_1 = require("@prisma/client/runtime/library");
 const handleError = (error) => {
     if (error instanceof library_1.PrismaClientKnownRequestError) {
@@ -134,4 +134,8 @@ const addJwtCookieToRequest = async (response, jwtService, accountId, accountEma
     });
 };
 exports.addJwtCookieToRequest = addJwtCookieToRequest;
+const capitalizeString = (text) => {
+    return text.split(' ').map((word) => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+};
+exports.capitalizeString = capitalizeString;
 //# sourceMappingURL=index.js.map

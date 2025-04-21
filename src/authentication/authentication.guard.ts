@@ -30,9 +30,8 @@ export class AuthenticationGuard implements CanActivate {
     const token = this.extractTokenFromCookie(request);
 
     if (token === undefined) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('invalid token');
     }
-
 
     try {
       const payload = await this.jwtService.verifyAsync(token, {

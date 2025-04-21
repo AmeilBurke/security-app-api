@@ -69,9 +69,14 @@ let AlertDetailsService = class AlertDetailsService {
             if (!file) {
                 return (0, utils_1.noFileReceivedError)();
             }
+            let isValidNumber = false;
+            if (createAlertDetail.alertDetail_bannedPersonId &&
+                !isNaN(Number(createAlertDetail.alertDetail_bannedPersonId))) {
+                isValidNumber = true;
+            }
             const newAlertDetail = await this.prisma.alertDetail.create({
                 data: {
-                    alertDetail_bannedPersonId: createAlertDetail.alertDetail_bannedPersonId,
+                    alertDetail_bannedPersonId: isValidNumber ? Number(createAlertDetail.alertDetail_bannedPersonId) : null,
                     alertDetail_name: createAlertDetail.alertDetail_name
                         .toLocaleLowerCase()
                         .trim(),
@@ -83,7 +88,7 @@ let AlertDetailsService = class AlertDetailsService {
                     alertDetails_alertUploadedBy: requestAccount.account_id,
                 },
             });
-            newAlertDetail.alertDetail_imagePath = `${process.env.API_URL}/images/people/${path_1.default.basename(newAlertDetail.alertDetail_imagePath)}`;
+            newAlertDetail.alertDetail_imagePath = `${process.env.API_URL}/images/alerts/${path_1.default.basename(newAlertDetail.alertDetail_imagePath)}`;
             return newAlertDetail;
         }
         catch (error) {
@@ -150,7 +155,7 @@ let AlertDetailsService = class AlertDetailsService {
                     alertDetails_alertUploadedBy: requestAccount.account_id,
                 },
             });
-            newAlertDetail.alertDetail_imagePath = `${process.env.API_URL}/images/people/${path_1.default.basename(newAlertDetail.alertDetail_imagePath)}`;
+            newAlertDetail.alertDetail_imagePath = `${process.env.API_URL}/images/alerts/${path_1.default.basename(newAlertDetail.alertDetail_imagePath)}`;
             return newAlertDetail;
         }
         catch (error) {

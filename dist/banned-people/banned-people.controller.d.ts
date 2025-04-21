@@ -9,7 +9,16 @@ export declare class BannedPeopleController {
         banDetails_reason: string;
         banDetails_banEndDate: string;
         banDetails_venueBanIds: string;
-    }, file: Express.Multer.File): Promise<({
+    }, file: Express.Multer.File): Promise<import("src/types").PrismaResultError | ({
+        AlertDetail: {
+            alertDetail_id: number;
+            alertDetail_bannedPersonId: number | null;
+            alertDetail_name: string;
+            alertDetail_imagePath: string;
+            alertDetails_alertReason: string;
+            alertDetails_startTime: string;
+            alertDetails_alertUploadedBy: number;
+        }[];
         BanDetail: {
             banDetails_id: number;
             banDetails_bannedPersonId: number;
@@ -20,20 +29,11 @@ export declare class BannedPeopleController {
             banDetails_isBanPending: boolean;
             banDetails_banUploadedBy: number;
         }[];
-        AlertDetail: {
-            alertDetail_id: number;
-            alertDetail_bannedPersonId: number | null;
-            alertDetail_name: string;
-            alertDetail_imagePath: string;
-            alertDetails_alertReason: string;
-            alertDetails_startTime: string;
-            alertDetails_alertUploadedBy: number;
-        }[];
     } & {
         bannedPerson_id: number;
         bannedPerson_name: string;
         bannedPerson_imagePath: string;
-    }) | import("src/types").PrismaResultError>;
+    })>;
     findAllBlanketBanned(request: RequestWithAccount): Promise<import("src/types").PrismaResultError | ({
         BanDetail: {
             banDetails_id: number;
@@ -83,6 +83,15 @@ export declare class BannedPeopleController {
         bannedPerson_imagePath: string;
     })[]>;
     findAllWithActiveAlert(request: RequestWithAccount): Promise<import("src/types").PrismaResultError | ({
+        AlertDetail: {
+            alertDetail_id: number;
+            alertDetail_bannedPersonId: number | null;
+            alertDetail_name: string;
+            alertDetail_imagePath: string;
+            alertDetails_alertReason: string;
+            alertDetails_startTime: string;
+            alertDetails_alertUploadedBy: number;
+        }[];
         BanDetail: {
             banDetails_id: number;
             banDetails_bannedPersonId: number;
@@ -92,15 +101,6 @@ export declare class BannedPeopleController {
             banDetails_venueBanId: number;
             banDetails_isBanPending: boolean;
             banDetails_banUploadedBy: number;
-        }[];
-        AlertDetail: {
-            alertDetail_id: number;
-            alertDetail_bannedPersonId: number | null;
-            alertDetail_name: string;
-            alertDetail_imagePath: string;
-            alertDetails_alertReason: string;
-            alertDetails_startTime: string;
-            alertDetails_alertUploadedBy: number;
         }[];
     } & {
         bannedPerson_id: number;

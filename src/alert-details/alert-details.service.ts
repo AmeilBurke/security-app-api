@@ -10,12 +10,12 @@ import {
   noRequestAccountError,
 } from 'src/utils';
 import dayjs from 'dayjs';
-import { Server } from 'socket.io';
 import { AlertDetail, Prisma } from '@prisma/client';
 import * as fs from 'fs';
 import { Cron } from '@nestjs/schedule';
 import { PrismaResultError, RequestWithAccount } from 'src/types';
 import path from 'path';
+import { isNumber } from 'class-validator';
 
 @Injectable()
 export class AlertDetailsService {
@@ -44,10 +44,18 @@ export class AlertDetailsService {
         return noFileReceivedError();
       }
 
+      let isValidNumber = false;
+
+      if (
+        createAlertDetail.alertDetail_bannedPersonId &&
+        !isNaN(Number(createAlertDetail.alertDetail_bannedPersonId))
+      ) {
+        isValidNumber = true;
+      }
+
       const newAlertDetail = await this.prisma.alertDetail.create({
         data: {
-          alertDetail_bannedPersonId:
-            createAlertDetail.alertDetail_bannedPersonId,
+          alertDetail_bannedPersonId: isValidNumber ? Number(createAlertDetail.alertDetail_bannedPersonId) : null ,
           alertDetail_name: createAlertDetail.alertDetail_name
             .toLocaleLowerCase()
             .trim(),
@@ -59,7 +67,7 @@ export class AlertDetailsService {
           alertDetails_alertUploadedBy: requestAccount.account_id,
         },
       });
-      newAlertDetail.alertDetail_imagePath = `${process.env.API_URL}/images/people/${path.basename(newAlertDetail.alertDetail_imagePath)}`;
+      newAlertDetail.alertDetail_imagePath = `${process.env.API_URL}/images/alerts/${path.basename(newAlertDetail.alertDetail_imagePath)}`;
       return newAlertDetail;
     } catch (error: unknown) {
       return handleError(error);
@@ -155,7 +163,7 @@ export class AlertDetailsService {
         },
       });
 
-      newAlertDetail.alertDetail_imagePath = `${process.env.API_URL}/images/people/${path.basename(newAlertDetail.alertDetail_imagePath)}`;
+      newAlertDetail.alertDetail_imagePath = `${process.env.API_URL}/images/alerts/${path.basename(newAlertDetail.alertDetail_imagePath)}`;
       return newAlertDetail;
     } catch (error: unknown) {
       return handleError(error);
@@ -237,7 +245,6 @@ export class AlertDetailsService {
     }
   }
 
-  // need to test if this works
   @Cron('0 0 6 * * *')
   private async cronDeleteAll() {
     try {

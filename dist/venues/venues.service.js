@@ -123,10 +123,14 @@ let VenuesService = class VenuesService {
             }
             if ((await (0, utils_1.isAccountAdminRole)(this.prisma, requestAccount)) ||
                 (await (0, utils_1.isAccountSecurityRole)(this.prisma, requestAccount))) {
-                return await this.prisma.venue.findMany({
+                const allVenues = await this.prisma.venue.findMany({
                     include: {
                         VenueManager: true,
                     },
+                });
+                return allVenues.map((venue) => {
+                    venue.venue_imagePath = `${process.env.API_URL}/images/venues/${path.basename(venue.venue_imagePath)}`;
+                    return venue;
                 });
             }
             const venueAccess = (await this.prisma.account.findFirst({
@@ -137,7 +141,7 @@ let VenuesService = class VenuesService {
                     VenueAccess: true,
                 },
             })).VenueAccess.map((venueAccess) => venueAccess.venueAccess_venueId);
-            return await this.prisma.venue.findMany({
+            const allVenues = await this.prisma.venue.findMany({
                 where: {
                     venue_id: {
                         in: venueAccess,
@@ -146,6 +150,10 @@ let VenuesService = class VenuesService {
                 include: {
                     VenueManager: true,
                 },
+            });
+            return allVenues.map((venue) => {
+                venue.venue_imagePath = `${process.env.API_URL}/images/venues/${path.basename(venue.venue_imagePath)}`;
+                return venue;
             });
         }
         catch (error) {

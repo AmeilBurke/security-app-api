@@ -12,7 +12,7 @@ export declare class VenuesService {
         include: {
             VenueManager: true;
         };
-    }>[] | PrismaResultError>;
+    }>[] | PrismaResultError | any>;
     updateOneVenue(request: RequestWithAccount, file: Express.Multer.File, venueId: number, updateVenueDto: UpdateVenueDto): Promise<Venue | PrismaResultError>;
     deleteOneVenue(request: RequestWithAccount, venueId: number): Promise<Venue | PrismaResultError>;
 }

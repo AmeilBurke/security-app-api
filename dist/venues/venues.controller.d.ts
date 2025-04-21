@@ -10,17 +10,7 @@ export declare class VenuesController {
         venue_name: string;
         venue_imagePath: string;
     }>;
-    findAllVenues(request: RequestWithAccount): Promise<import("src/types").PrismaResultError | ({
-        VenueManager: {
-            venueManager_id: number;
-            venueManager_venueId: number;
-            venueManager_accountId: number;
-        }[];
-    } & {
-        venue_id: number;
-        venue_name: string;
-        venue_imagePath: string;
-    })[]>;
+    findAllVenues(request: RequestWithAccount): Promise<any>;
     update(request: RequestWithAccount, file: Express.Multer.File, venueId: string, updateVenueDto: UpdateVenueDto): Promise<import("src/types").PrismaResultError | {
         venue_id: number;
         venue_name: string;

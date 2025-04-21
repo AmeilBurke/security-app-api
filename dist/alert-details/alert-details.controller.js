@@ -52,7 +52,7 @@ __decorate([
             files: 1,
         },
         storage: (0, multer_1.diskStorage)({
-            destination: path_1.default.join(__dirname, '..', '..', 'images', 'people'),
+            destination: path_1.default.join(__dirname, '..', '..', 'images', 'alerts'),
             filename: (req, file, cb) => {
                 const fileType = file.mimetype.split('/')[1];
                 cb(null, `${(0, uuid_1.v4)()}.${fileType}`);
@@ -80,7 +80,7 @@ __decorate([
             files: 1,
         },
         storage: (0, multer_1.diskStorage)({
-            destination: path_1.default.join(__dirname, '..', '..', 'images', 'people'),
+            destination: path_1.default.join(__dirname, '..', '..', 'images', 'alerts'),
             filename: (req, file, cb) => {
                 const fileType = file.mimetype.split('/')[1];
                 cb(null, `${(0, uuid_1.v4)()}.${fileType}`);

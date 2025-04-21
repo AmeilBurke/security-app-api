@@ -368,6 +368,9 @@ export class BannedPeopleService {
             },
           },
         },
+        orderBy: {
+          bannedPerson_name: 'asc',
+        },
       });
     } catch (error: unknown) {
       return handleError(error);
@@ -398,6 +401,9 @@ export class BannedPeopleService {
               banDetails_isBanPending: false,
             },
           },
+        },
+        orderBy: {
+          bannedPerson_name: 'asc',
         },
       });
 

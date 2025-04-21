@@ -9,6 +9,9 @@ import { Server, Socket } from 'socket.io';
 import dayjs from 'dayjs';
 import { JwtService } from '@nestjs/jwt';
 import { AuthenticationService } from 'src/authentication/authentication.service';
+import { Request } from '@nestjs/common';
+import { PrismaService } from 'src/prisma.service';
+import { capitalizeString } from 'src/utils';
 
 @WebSocketGateway({
   cors: {
@@ -25,6 +28,7 @@ export class AlertDetailsGateway {
   constructor(
     private jwtService: JwtService,
     private authenticationService: AuthenticationService,
+    private prisma: PrismaService,
   ) {}
 
   @WebSocketServer()
@@ -72,20 +76,30 @@ export class AlertDetailsGateway {
   }
 
   @SubscribeMessage('alert_detail_created')
-  create(
-    @MessageBody()
-    accountName: { account_name: string },
-    @ConnectedSocket() socket: Socket,
-  ): void {
+  async create(
+    @Request() request,
+    @ConnectedSocket()
+    socket: Socket,
+  ): Promise<void> {
     try {
-      const jwtToken = socket.handshake.headers.cookie.split('=')[1];
+      const jwtToken = await this.jwtService.verifyAsync(
+        socket.handshake.headers.cookie.split('=')[1],
+        { secret: process.env.JWT_SECRET },
+      );
       // need to get profile details form jwt to get account name
+      console.log(jwtToken);
+
+      const accountDetails = await this.prisma.account.findFirst({
+        where: {
+          account_id: jwtToken.sub,
+        },
+      });
+
+      this.server.emit('alert_detail_created', {
+        message: `${capitalizeString(accountDetails.account_name)} has uploaded an alert`,
+      });
     } catch (error) {
       console.log(error);
     }
-
-    this.server.emit('alert_detail_created', {
-      message: `${accountName.account_name} has uploaded an alert`,
-    });
   }
 }

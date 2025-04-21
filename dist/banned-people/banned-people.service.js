@@ -297,6 +297,9 @@ let BannedPeopleService = class BannedPeopleService {
                         },
                     },
                 },
+                orderBy: {
+                    bannedPerson_name: 'asc',
+                },
             });
         }
         catch (error) {
@@ -319,6 +322,9 @@ let BannedPeopleService = class BannedPeopleService {
                             banDetails_isBanPending: false,
                         },
                     },
+                },
+                orderBy: {
+                    bannedPerson_name: 'asc',
                 },
             });
             return activeBannedPeople.map((bannedPerson) => {

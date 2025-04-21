@@ -21,10 +21,14 @@ const socket_io_1 = require("socket.io");
 const dayjs_1 = __importDefault(require("dayjs"));
 const jwt_1 = require("@nestjs/jwt");
 const authentication_service_1 = require("../authentication/authentication.service");
+const common_1 = require("@nestjs/common");
+const prisma_service_1 = require("../prisma.service");
+const utils_1 = require("../utils");
 let AlertDetailsGateway = class AlertDetailsGateway {
-    constructor(jwtService, authenticationService) {
+    constructor(jwtService, authenticationService, prisma) {
         this.jwtService = jwtService;
         this.authenticationService = authenticationService;
+        this.prisma = prisma;
     }
     onModuleInit() {
         this.server.on('connection', async (socket) => {
@@ -52,16 +56,22 @@ let AlertDetailsGateway = class AlertDetailsGateway {
             }
         });
     }
-    create(accountName, socket) {
+    async create(request, socket) {
         try {
-            const jwtToken = socket.handshake.headers.cookie.split('=')[1];
+            const jwtToken = await this.jwtService.verifyAsync(socket.handshake.headers.cookie.split('=')[1], { secret: process.env.JWT_SECRET });
+            console.log(jwtToken);
+            const accountDetails = await this.prisma.account.findFirst({
+                where: {
+                    account_id: jwtToken.sub,
+                },
+            });
+            this.server.emit('alert_detail_created', {
+                message: `${(0, utils_1.capitalizeString)(accountDetails.account_name)} has uploaded an alert`,
+            });
         }
         catch (error) {
             console.log(error);
         }
-        this.server.emit('alert_detail_created', {
-            message: `${accountName.account_name} has uploaded an alert`,
-        });
     }
 };
 exports.AlertDetailsGateway = AlertDetailsGateway;
@@ -71,11 +81,11 @@ __decorate([
 ], AlertDetailsGateway.prototype, "server", void 0);
 __decorate([
     (0, websockets_1.SubscribeMessage)('alert_detail_created'),
-    __param(0, (0, websockets_1.MessageBody)()),
+    __param(0, (0, common_1.Request)()),
     __param(1, (0, websockets_1.ConnectedSocket)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, socket_io_1.Socket]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Promise)
 ], AlertDetailsGateway.prototype, "create", null);
 exports.AlertDetailsGateway = AlertDetailsGateway = __decorate([
     (0, websockets_1.WebSocketGateway)({
@@ -90,6 +100,7 @@ exports.AlertDetailsGateway = AlertDetailsGateway = __decorate([
         },
     }),
     __metadata("design:paramtypes", [jwt_1.JwtService,
-        authentication_service_1.AuthenticationService])
+        authentication_service_1.AuthenticationService,
+        prisma_service_1.PrismaService])
 ], AlertDetailsGateway);
 //# sourceMappingURL=alert-details.gateway.js.map

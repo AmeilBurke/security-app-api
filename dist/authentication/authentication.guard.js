@@ -30,7 +30,7 @@ let AuthenticationGuard = class AuthenticationGuard {
         const request = context.switchToHttp().getRequest();
         const token = this.extractTokenFromCookie(request);
         if (token === undefined) {
-            throw new common_1.UnauthorizedException();
+            throw new common_1.UnauthorizedException('invalid token');
         }
         try {
             const payload = await this.jwtService.verifyAsync(token, {

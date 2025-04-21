@@ -29,7 +29,7 @@ export class AlertDetailsController {
         files: 1,
       },
       storage: diskStorage({
-        destination: path.join(__dirname, '..', '..', 'images', 'people'),
+        destination: path.join(__dirname, '..', '..', 'images', 'alerts'),
         filename: (req, file, cb) => {
           const fileType = file.mimetype.split('/')[1];
           cb(null, `${uuidv4()}.${fileType}`);
@@ -61,7 +61,7 @@ export class AlertDetailsController {
         files: 1,
       },
       storage: diskStorage({
-        destination: path.join(__dirname, '..', '..', 'images', 'people'),
+        destination: path.join(__dirname, '..', '..', 'images', 'alerts'),
         filename: (req, file, cb) => {
           const fileType = file.mimetype.split('/')[1];
           cb(null, `${uuidv4()}.${fileType}`);

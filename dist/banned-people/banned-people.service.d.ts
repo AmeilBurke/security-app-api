@@ -51,9 +51,9 @@ export declare class BannedPeopleService {
         };
     }>[] | PrismaResultError>;
     findAllWithoutPendingBans(request: RequestWithAccount): Promise<any | PrismaResultError>;
-    updateOneBannedPerson(request: RequestWithAccount, file: Express.Multer.File, bannedPersonId: number, updateBannedPersonDto: UpdateBannedPersonDto): Promise<{
+    updateOneBannedPerson(request: RequestWithAccount, file: Express.Multer.File, bannedPersonId: number, updateBannedPersonDto: UpdateBannedPersonDto): Promise<PrismaResultError | {
         bannedPerson_id: number;
         bannedPerson_name: string;
         bannedPerson_imagePath: string;
-    } | PrismaResultError>;
+    }>;
 }

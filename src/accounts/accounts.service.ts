@@ -230,7 +230,10 @@ export class AccountsService {
     try {
       return await this.prisma.account.findFirstOrThrow({
         where: {
-          account_email: email,
+          account_email: {
+             equals: email,
+             mode: 'insensitive'
+          }
         },
         include: {
           Role: true,

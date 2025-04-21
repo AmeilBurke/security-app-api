@@ -14,3 +14,4 @@ export declare const isAccountAdminRole: (prisma: PrismaService, account: Accoun
 export declare const isAccountSecurityRole: (prisma: PrismaService, account: Account) => Promise<boolean>;
 export declare const isAccountVenueManagerRole: (prisma: PrismaService, account: Account) => Promise<boolean>;
 export declare const addJwtCookieToRequest: (response: Response, jwtService: JwtService, accountId: number, accountEmail: string) => Promise<void>;
+export declare const capitalizeString: (text: string) => string;
