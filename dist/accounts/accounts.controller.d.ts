@@ -6,11 +6,6 @@ export declare class AccountsController {
     private readonly accountsService;
     constructor(accountsService: AccountsService);
     create(request: RequestWithAccount, createAccountDto: CreateAccountDto): Promise<import("src/types").PrismaResultError | ({
-        VenueManager: {
-            venueManager_id: number;
-            venueManager_venueId: number;
-            venueManager_accountId: number;
-        }[];
         Role: {
             role_id: number;
             role_name: string;
@@ -20,19 +15,24 @@ export declare class AccountsController {
             venueAccess_accountId: number;
             venueAccess_venueId: number;
         }[];
+        VenueManager: {
+            venueManager_id: number;
+            venueManager_venueId: number;
+            venueManager_accountId: number;
+        }[];
     } & {
-        account_id: number;
         account_email: string;
         account_password: string;
         account_name: string;
         account_roleId: number;
+        account_id: number;
     })>;
     createSecret(createAccountDto: CreateAccountDto): Promise<{
-        account_id: number;
         account_email: string;
         account_password: string;
         account_name: string;
         account_roleId: number;
+        account_id: number;
     }>;
     findAll(request: RequestWithAccount): Promise<import("src/types").PrismaResultError | ({
         Role: {
@@ -40,10 +40,10 @@ export declare class AccountsController {
             role_name: string;
         };
     } & {
-        account_id: number;
         account_email: string;
         account_name: string;
         account_roleId: number;
+        account_id: number;
     })[]>;
     findOne(request: RequestWithAccount, id: string): Promise<import("src/types").PrismaResultError | ({
         Role: {
@@ -51,17 +51,12 @@ export declare class AccountsController {
             role_name: string;
         };
     } & {
-        account_id: number;
         account_email: string;
         account_name: string;
         account_roleId: number;
+        account_id: number;
     })>;
     update(request: RequestWithAccount, id: string, updateAccountDto: UpdateAccountDto): Promise<import("src/types").PrismaResultError | ({
-        VenueManager: {
-            venueManager_id: number;
-            venueManager_venueId: number;
-            venueManager_accountId: number;
-        }[];
         Role: {
             role_id: number;
             role_name: string;
@@ -71,17 +66,22 @@ export declare class AccountsController {
             venueAccess_accountId: number;
             venueAccess_venueId: number;
         }[];
+        VenueManager: {
+            venueManager_id: number;
+            venueManager_venueId: number;
+            venueManager_accountId: number;
+        }[];
     } & {
-        account_id: number;
         account_email: string;
         account_name: string;
         account_roleId: number;
+        account_id: number;
     })>;
     remove(request: RequestWithAccount, id: string): Promise<import("src/types").PrismaResultError | {
-        account_id: number;
         account_email: string;
         account_password: string;
         account_name: string;
         account_roleId: number;
+        account_id: number;
     }>;
 }
