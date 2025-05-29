@@ -10,7 +10,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { VenuesModule } from './venues/venues.module';
 import { BanDetailsModule } from './ban-details/ban-details.module';
 import { VenueManagersModule } from './venue-managers/venue-managers.module';
-import { VenueBansModule } from './venue-bans/venue-bans.module';
+// import { VenueBansModule } from './venue-bans/venue-bans.module';
 import { VenueAccessModule } from './venue-access/venue-access.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
@@ -28,7 +28,7 @@ import { join } from 'path';
     VenuesModule,
     BanDetailsModule,
     VenueManagersModule,
-    VenueBansModule,
+    // VenueBansModule,
     VenueAccessModule,
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'images'),

@@ -35,7 +35,6 @@ model Venue {
   venue_imagePath String
   VenueAccess     VenueAccess[]
   VenueManager    VenueManager[]
-  VenueBan        VenueBan[]
   BanDetail       BanDetail[]
 }
 
@@ -60,7 +59,6 @@ model BannedPerson {
   bannedPerson_name      String
   bannedPerson_imagePath String
   AlertDetail            AlertDetail[]
-  VenueBan               VenueBan[]
   BanDetail              BanDetail[]
 }
 
@@ -74,14 +72,6 @@ model AlertDetail {
   alertDetails_alertUploadedBy Int
   Account                      Account       @relation(fields: [alertDetails_alertUploadedBy], references: [account_id])
   BannedPerson                 BannedPerson? @relation(fields: [alertDetail_bannedPersonId], references: [bannedPerson_id])
-}
-
-model VenueBan {
-  venueBan_id             Int          @id @unique @default(autoincrement())
-  venueBan_bannedPersonId Int
-  venueBan_venueId        Int
-  BannedPerson            BannedPerson @relation(fields: [venueBan_bannedPersonId], references: [bannedPerson_id])
-  Venue                   Venue        @relation(fields: [venueBan_venueId], references: [venue_id])
 }
 
 model BanDetail {

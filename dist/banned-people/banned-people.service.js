@@ -123,6 +123,15 @@ let BannedPeopleService = class BannedPeopleService {
                     },
                 },
             });
+            const copyDestination = path_1.default.resolve(__dirname, '..', '..', 'images', 'alerts', file.filename);
+            try {
+                await fs.promises.copyFile(file.path, copyDestination);
+                console.log(`file copied to ${copyDestination}`);
+            }
+            catch (error) {
+                console.log(`error copying file`);
+                console.log(error);
+            }
             const newBannedPerson = await this.prisma.bannedPerson.findFirst({
                 where: {
                     bannedPerson_id: newBanProfile.bannedPerson_id,
@@ -133,6 +142,10 @@ let BannedPeopleService = class BannedPeopleService {
                 },
             });
             newBannedPerson.bannedPerson_imagePath = `${process.env.API_URL}/images/people/${file.filename}`;
+            newBannedPerson.AlertDetail.map((alertDetail) => {
+                alertDetail.alertDetail_imagePath = `${process.env.API_URL}/images/alerts/${file.filename}`;
+                return alertDetail;
+            });
             return newBannedPerson;
         }
         catch (error) {
@@ -250,16 +263,39 @@ let BannedPeopleService = class BannedPeopleService {
             if ((0, utils_1.isPrismaResultError)(requestAccount)) {
                 return requestAccount;
             }
-            return await this.prisma.bannedPerson.findMany({
+            const peopleWithActiveBans = await this.prisma.bannedPerson.findMany({
                 where: {
                     AlertDetail: {
                         some: {},
                     },
                 },
                 include: {
-                    AlertDetail: true,
-                    BanDetail: true,
+                    AlertDetail: {
+                        include: {
+                            Account: {
+                                select: {
+                                    account_name: true,
+                                },
+                            },
+                        },
+                    },
+                    BanDetail: {
+                        include: {
+                            Account: {
+                                select: {
+                                    account_name: true,
+                                },
+                            },
+                        },
+                    },
                 },
+            });
+            return peopleWithActiveBans.map((person) => {
+                person.bannedPerson_imagePath = `${process.env.API_URL}/images/people/${path_1.default.basename(person.bannedPerson_imagePath)}`;
+                person.AlertDetail.map((alert) => {
+                    alert.alertDetail_imagePath = `${process.env.API_URL}/images/people/${path_1.default.basename(person.bannedPerson_imagePath)}`;
+                });
+                return person;
             });
         }
         catch (error) {

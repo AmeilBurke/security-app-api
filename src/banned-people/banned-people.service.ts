@@ -123,6 +123,23 @@ export class BannedPeopleService {
         },
       });
 
+      const copyDestination = path.resolve(
+        __dirname,
+        '..',
+        '..',
+        'images',
+        'alerts',
+        file.filename,
+      );
+
+      try {
+        await fs.promises.copyFile(file.path, copyDestination);
+        console.log(`file copied to ${copyDestination}`);
+      } catch (error: unknown) {
+        console.log(`error copying file`);
+        console.log(error);
+      }
+
       const newBannedPerson = await this.prisma.bannedPerson.findFirst({
         where: {
           bannedPerson_id: newBanProfile.bannedPerson_id,
@@ -134,6 +151,11 @@ export class BannedPeopleService {
       });
 
       newBannedPerson.bannedPerson_imagePath = `${process.env.API_URL}/images/people/${file.filename}`;
+      newBannedPerson.AlertDetail.map((alertDetail) => {
+        alertDetail.alertDetail_imagePath = `${process.env.API_URL}/images/alerts/${file.filename}`;
+        return alertDetail;
+      });
+
       return newBannedPerson;
     } catch (error: unknown) {
       return handleError(error);
@@ -308,16 +330,41 @@ export class BannedPeopleService {
         return requestAccount;
       }
 
-      return await this.prisma.bannedPerson.findMany({
+      const peopleWithActiveBans = await this.prisma.bannedPerson.findMany({
         where: {
           AlertDetail: {
             some: {},
           },
         },
         include: {
-          AlertDetail: true,
-          BanDetail: true,
+          AlertDetail: {
+            include: {
+              Account: {
+                select: {
+                  account_name: true,
+                },
+              },
+            },
+          },
+
+          BanDetail: {
+            include: {
+              Account: {
+                select: {
+                  account_name: true,
+                },
+              },
+            },
+          },
         },
+      });
+
+      return peopleWithActiveBans.map((person) => {
+        person.bannedPerson_imagePath = `${process.env.API_URL}/images/people/${path.basename(person.bannedPerson_imagePath)}`;
+        person.AlertDetail.map((alert) => {
+          alert.alertDetail_imagePath = `${process.env.API_URL}/images/people/${path.basename(person.bannedPerson_imagePath)}`;
+        });
+        return person;
       });
     } catch (error: unknown) {
       return handleError(error);

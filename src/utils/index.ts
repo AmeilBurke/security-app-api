@@ -162,7 +162,6 @@ export const addJwtCookieToRequest = async (
     httpOnly: true,
     secure: true,
     sameSite: 'none',
-    partitioned: true,
     path: '/',
   });
 };

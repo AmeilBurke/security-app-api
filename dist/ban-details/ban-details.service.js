@@ -38,12 +38,6 @@ let BanDetailsService = class BanDetailsService {
                 isBanPending = true;
             }
             const currentDateTimeIso = (0, dayjs_1.default)().toISOString();
-            const venueBanData = createBanDetailDto.banDetails_venueBanIds.map((venueId) => {
-                return {
-                    venueBan_bannedPersonId: createBanDetailDto.banDetails_bannedPersonId,
-                    venueBan_venueId: venueId,
-                };
-            });
             const banDetailsData = createBanDetailDto.banDetails_venueBanIds.map((venueId) => {
                 return {
                     banDetails_bannedPersonId: createBanDetailDto.banDetails_bannedPersonId,
@@ -56,9 +50,6 @@ let BanDetailsService = class BanDetailsService {
                     banDetails_isBanPending: isBanPending,
                     banDetails_banUploadedBy: requestAccount.account_id,
                 };
-            });
-            await this.prisma.venueBan.createMany({
-                data: venueBanData,
             });
             return await this.prisma.banDetail.createMany({
                 data: banDetailsData,

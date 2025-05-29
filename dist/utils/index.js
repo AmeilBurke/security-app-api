@@ -129,7 +129,6 @@ const addJwtCookieToRequest = async (response, jwtService, accountId, accountEma
         httpOnly: true,
         secure: true,
         sameSite: 'none',
-        partitioned: true,
         path: '/',
     });
 };

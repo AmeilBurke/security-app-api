@@ -43,8 +43,8 @@ const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const fs = __importStar(require("fs"));
 async function bootstrap() {
     const httpsOptions = {
-        key: fs.readFileSync('C:\\Users\\ameil\\OneDrive\\Documents\\Github Repositories\\certificates\\172.20.112.1-key.pem'),
-        cert: fs.readFileSync('C:\\Users\\ameil\\OneDrive\\Documents\\Github Repositories\\certificates\\172.20.112.1.pem'),
+        key: fs.readFileSync('C:\\Users\\Ameil\\Documents\\Certificates\\ilt security app\\192.168.1.65-key.pem'),
+        cert: fs.readFileSync("C:\\Users\\Ameil\\Documents\\Certificates\\ilt security app\\192.168.1.65.pem"),
     };
     const app = await core_1.NestFactory.create(app_module_1.AppModule, {
         httpsOptions,
@@ -52,8 +52,7 @@ async function bootstrap() {
     app.enableCors({
         origin: [
             'https://localhost:5173',
-            'https://172.20.112.1:5173',
-            'https://192.168.1.73:5173',
+            'https://192.168.1.65:5173',
         ],
         credentials: true,
         methods: 'GET,POST,PUT,DELETE',

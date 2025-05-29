@@ -45,15 +45,15 @@ export class BanDetailsService {
       }
       const currentDateTimeIso = dayjs().toISOString();
 
-      const venueBanData = createBanDetailDto.banDetails_venueBanIds.map(
-        (venueId: number) => {
-          return {
-            venueBan_bannedPersonId:
-              createBanDetailDto.banDetails_bannedPersonId,
-            venueBan_venueId: venueId,
-          };
-        },
-      );
+      // const venueBanData = createBanDetailDto.banDetails_venueBanIds.map(
+      //   (venueId: number) => {
+      //     return {
+      //       venueBan_bannedPersonId:
+      //         createBanDetailDto.banDetails_bannedPersonId,
+      //       venueBan_venueId: venueId,
+      //     };
+      //   },
+      // );
 
       const banDetailsData = createBanDetailDto.banDetails_venueBanIds.map(
         (venueId: number) => {
@@ -72,9 +72,9 @@ export class BanDetailsService {
         },
       );
 
-      await this.prisma.venueBan.createMany({
-        data: venueBanData,
-      });
+      // await this.prisma.venueBan.createMany({
+      //   data: venueBanData,
+      // });
 
       return await this.prisma.banDetail.createMany({
         data: banDetailsData,

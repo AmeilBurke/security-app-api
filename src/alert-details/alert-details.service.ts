@@ -245,6 +245,8 @@ export class AlertDetailsService {
     }
   }
 
+  // need to double check this
+
   @Cron('0 0 6 * * *')
   private async cronDeleteAll() {
     try {
