@@ -150,6 +150,9 @@ let VenuesService = class VenuesService {
                 include: {
                     VenueManager: true,
                 },
+                orderBy: {
+                    venue_name: 'asc'
+                }
             });
             return allVenues.map((venue) => {
                 venue.venue_imagePath = `${process.env.API_URL}/images/venues/${path.basename(venue.venue_imagePath)}`;

@@ -70,7 +70,7 @@ let BannedPeopleController = class BannedPeopleController {
                 console.log(`file ${file.path} removed`);
             }
             catch (error) {
-                console.log(`error removing file at: ${file.path}`);
+                console.log(error);
             }
         }
         return result;
@@ -92,6 +92,9 @@ let BannedPeopleController = class BannedPeopleController {
     }
     async findAllWithoutPendingBans(request) {
         return await this.bannedPeopleService.findAllWithoutPendingBans(request);
+    }
+    async findAll(request) {
+        return await this.bannedPeopleService.findAll(request);
     }
     async update(request, file, id, updateBannedPersonDto) {
         const result = await this.bannedPeopleService.updateOneBannedPerson(request, file, Number(id), updateBannedPersonDto);
@@ -171,6 +174,13 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], BannedPeopleController.prototype, "findAllWithoutPendingBans", null);
+__decorate([
+    (0, common_1.Get)('/all'),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], BannedPeopleController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Patch)(':id'),
     (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file', {

@@ -62,13 +62,13 @@ export class BannedPeopleController {
         fs.promises.unlink(file.path);
         console.log(`file ${file.path} removed`);
       } catch (error) {
-        console.log(`error removing file at: ${file.path}`);
+        // console.log(`error removing file at: ${file.path}`);
+        console.log(error);
       }
     }
     return result;
   }
 
-  // need to update to return file with details {details: bannedPerson; image: file}
   @Get('/blanket-banned')
   async findAllBlanketBanned(@Req() request: RequestWithAccount) {
     return await this.bannedPeopleService.findAllBlanketBanned(request);
@@ -103,6 +103,11 @@ export class BannedPeopleController {
   @Get('/not-pending')
   async findAllWithoutPendingBans(@Req() request: RequestWithAccount) {
     return await this.bannedPeopleService.findAllWithoutPendingBans(request);
+  }
+
+  @Get('/all')
+  async findAll(@Req() request: RequestWithAccount) {
+    return await this.bannedPeopleService.findAll(request);
   }
 
   @Patch(':id')

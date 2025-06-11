@@ -163,6 +163,9 @@ export class VenuesService {
         include: {
           VenueManager: true,
         },
+        orderBy: {
+          venue_name: 'asc'
+        }
       });
 
       return allVenues.map((venue) => {

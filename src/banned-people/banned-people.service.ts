@@ -463,6 +463,36 @@ export class BannedPeopleService {
     }
   }
 
+  async findAll(request: RequestWithAccount) {
+    try {
+      if (!request.account) {
+        return noRequestAccountError();
+      }
+
+      const requestAccount = await getAccountInfoFromId(
+        this.prisma,
+        request.account.sub,
+      );
+
+      if (isPrismaResultError(requestAccount)) {
+        return requestAccount;
+      }
+
+      const activeBannedPeople = await this.prisma.bannedPerson.findMany({
+        orderBy: {
+          bannedPerson_name: 'asc',
+        },
+      });
+
+      return activeBannedPeople.map((bannedPerson) => {
+        bannedPerson.bannedPerson_imagePath = `${process.env.API_URL}/images/people/${path.basename(bannedPerson.bannedPerson_imagePath)}`;
+        return bannedPerson;
+      });
+    } catch (error: unknown) {
+      return handleError(error);
+    }
+  }
+
   async updateOneBannedPerson(
     request: RequestWithAccount,
     file: Express.Multer.File,

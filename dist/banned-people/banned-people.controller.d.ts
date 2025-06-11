@@ -128,6 +128,11 @@ export declare class BannedPeopleController {
         bannedPerson_imagePath: string;
     })[]>;
     findAllWithoutPendingBans(request: RequestWithAccount): Promise<any>;
+    findAll(request: RequestWithAccount): Promise<import("src/types").PrismaResultError | {
+        bannedPerson_id: number;
+        bannedPerson_name: string;
+        bannedPerson_imagePath: string;
+    }[]>;
     update(request: RequestWithAccount, file: Express.Multer.File, id: string, updateBannedPersonDto: UpdateBannedPersonDto): Promise<import("src/types").PrismaResultError | {
         bannedPerson_id: number;
         bannedPerson_name: string;

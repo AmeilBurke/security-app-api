@@ -7,6 +7,7 @@ import {
 } from '@nestjs/websockets';
 import dayjs from 'dayjs';
 import { Server, Socket } from 'socket.io';
+import { capitalizeString } from 'src/utils';
 @WebSocketGateway({
   cors: true,
   connectionStateRecovery: true,
@@ -19,11 +20,10 @@ export class BannedPeopleGateway {
 
   onModuleInit() {
     this.server.on('connection', (socket: Socket) => {
-
       // need to come back to this logic when front end is done
-      if(!socket.handshake.headers.cookie) {
-        console.log('connection refused')
-        socket.disconnect()
+      if (!socket.handshake.headers.cookie) {
+        console.log('connection refused');
+        socket.disconnect();
       }
 
       console.log(
@@ -44,16 +44,14 @@ export class BannedPeopleGateway {
     });
   }
 
-  // @SubscribeMessage('addBannedPerson')
-  // create(
-  //   @MessageBody() accountName: { account_name: string },
-  //   @ConnectedSocket() socket: Socket,
-  // ): void {
-  //   // need to test adding cookie to WS request when doing front-end
-  //   // need to add jwt check here
-  //   // send this when admin approves a ban or uploads one, not when security put in a pending request
-  //   this.server.emit('bannedPersonCreated', {
-  //     message: `${accountName.account_name} has uploaded a new ban`,
-  //   });
-  // }
+  @SubscribeMessage('addBannedPerson')
+  create(
+    @MessageBody() accountName: { account_name: string },
+    @ConnectedSocket() socket: Socket,
+  ): void {
+    // send this when admin approves a ban or uploads one, not when security put in a pending request
+    this.server.emit('bannedPersonCreated', {
+      message: `${capitalizeString(accountName.account_name)} has uploaded a new ban`,
+    });
+  }
 }

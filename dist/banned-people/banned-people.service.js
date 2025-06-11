@@ -372,6 +372,29 @@ let BannedPeopleService = class BannedPeopleService {
             return (0, utils_1.handleError)(error);
         }
     }
+    async findAll(request) {
+        try {
+            if (!request.account) {
+                return (0, utils_1.noRequestAccountError)();
+            }
+            const requestAccount = await (0, utils_1.getAccountInfoFromId)(this.prisma, request.account.sub);
+            if ((0, utils_1.isPrismaResultError)(requestAccount)) {
+                return requestAccount;
+            }
+            const activeBannedPeople = await this.prisma.bannedPerson.findMany({
+                orderBy: {
+                    bannedPerson_name: 'asc',
+                },
+            });
+            return activeBannedPeople.map((bannedPerson) => {
+                bannedPerson.bannedPerson_imagePath = `${process.env.API_URL}/images/people/${path_1.default.basename(bannedPerson.bannedPerson_imagePath)}`;
+                return bannedPerson;
+            });
+        }
+        catch (error) {
+            return (0, utils_1.handleError)(error);
+        }
+    }
     async updateOneBannedPerson(request, file, bannedPersonId, updateBannedPersonDto) {
         try {
             if (!request.account) {

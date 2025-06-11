@@ -79,8 +79,6 @@ export class AuthenticationService {
         account.account_email,
       );
 
-      // console.log(response.getHeaders())
-
       return result;
     } catch (error: unknown) {
       console.log(error);
