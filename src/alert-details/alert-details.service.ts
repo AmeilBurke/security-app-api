@@ -55,16 +55,18 @@ export class AlertDetailsService {
 
       const newAlertDetail = await this.prisma.alertDetail.create({
         data: {
-          alertDetail_bannedPersonId: isValidNumber ? Number(createAlertDetail.alertDetail_bannedPersonId) : null ,
+          alertDetail_bannedPersonId: isValidNumber
+            ? Number(createAlertDetail.alertDetail_bannedPersonId)
+            : null,
           alertDetail_name: createAlertDetail.alertDetail_name
             .toLocaleLowerCase()
             .trim(),
           alertDetail_imagePath: file.path,
-          alertDetails_alertReason: createAlertDetail.alertDetails_alertReason
+          alertDetail_alertReason: createAlertDetail.alertDetail_alertReason
             .toLocaleLowerCase()
             .trim(),
-          alertDetails_startTime: dayjs().toISOString(),
-          alertDetails_alertUploadedBy: requestAccount.account_id,
+          alertDetail_startTime: dayjs().toISOString(),
+          alertDetail_alertUploadedBy: requestAccount.account_id,
         },
       });
       newAlertDetail.alertDetail_imagePath = `${process.env.API_URL}/images/alerts/${path.basename(newAlertDetail.alertDetail_imagePath)}`;
@@ -156,10 +158,9 @@ export class AlertDetailsService {
           alertDetail_imagePath: file
             ? file.path
             : updateAlertDetailDto.alertDetail_imagePath,
-          alertDetails_alertReason:
-            updateAlertDetailDto.alertDetail_alertReason,
-          alertDetails_startTime: dayjs().toISOString(),
-          alertDetails_alertUploadedBy: requestAccount.account_id,
+          alertDetail_alertReason: updateAlertDetailDto.alertDetail_alertReason,
+          alertDetail_startTime: dayjs().toISOString(),
+          alertDetail_alertUploadedBy: requestAccount.account_id,
         },
       });
 

@@ -87,15 +87,15 @@ let BannedPeopleService = class BannedPeopleService {
             const createBanDetails = await Promise.all(venueBanIds.map(async (venueId) => {
                 await this.prisma.banDetail.create({
                     data: {
-                        banDetails_bannedPersonId: newBanProfile.bannedPerson_id,
-                        banDetails_reason: createBannedPersonDto.banDetails_reason
+                        banDetail_bannedPersonId: newBanProfile.bannedPerson_id,
+                        banDetail_reason: createBannedPersonDto.banDetails_reason
                             .toLocaleLowerCase()
                             .trim(),
-                        banDetails_banStartDate: currentDateTimeIso,
-                        banDetails_banEndDate: createBannedPersonDto.banDetails_banEndDate,
-                        banDetails_isBanPending: !isAccountAdmin,
-                        banDetails_banUploadedBy: requestAccount.account_id,
-                        banDetails_venueBanId: venueId,
+                        banDetail_banStartDate: currentDateTimeIso,
+                        banDetail_banEndDate: createBannedPersonDto.banDetails_banEndDate,
+                        banDetail_isBanPending: !isAccountAdmin,
+                        banDetail_banUploadedBy: requestAccount.account_id,
+                        banDetail_venueBanId: venueId,
                     },
                 });
             })).catch((error) => {
@@ -109,11 +109,11 @@ let BannedPeopleService = class BannedPeopleService {
                     alertDetail_bannedPersonId: newBanProfile.bannedPerson_id,
                     alertDetail_imagePath: newBanProfile.bannedPerson_imagePath,
                     alertDetail_name: newBanProfile.bannedPerson_name,
-                    alertDetails_alertReason: createBannedPersonDto.banDetails_reason
+                    alertDetail_alertReason: createBannedPersonDto.banDetails_reason
                         .toLocaleLowerCase()
                         .trim(),
-                    alertDetails_startTime: (0, dayjs_1.default)().toISOString(),
-                    alertDetails_alertUploadedBy: requestAccount.account_id,
+                    alertDetail_startTime: (0, dayjs_1.default)().toISOString(),
+                    alertDetail_alertUploadedBy: requestAccount.account_id,
                 },
                 include: {
                     Account: {
@@ -170,8 +170,8 @@ let BannedPeopleService = class BannedPeopleService {
                 where: {
                     BanDetail: {
                         some: {
-                            banDetails_banEndDate: { gt: (0, dayjs_1.default)().toISOString() },
-                            banDetails_isBanPending: false,
+                            banDetail_banEndDate: { gt: (0, dayjs_1.default)().toISOString() },
+                            banDetail_isBanPending: false,
                         },
                     },
                 },
@@ -185,7 +185,7 @@ let BannedPeopleService = class BannedPeopleService {
             const filteredBannedPeople = peopleWithActiveBans.filter((bannedPerson) => {
                 let bannedFromVenueIds = new Set();
                 bannedPerson.BanDetail.some((banDetail) => {
-                    bannedFromVenueIds.add(banDetail.banDetails_venueBanId);
+                    bannedFromVenueIds.add(banDetail.banDetail_venueBanId);
                 });
                 if (bannedFromVenueIds.size === allVenueIds.size) {
                     return bannedPerson;
@@ -213,9 +213,9 @@ let BannedPeopleService = class BannedPeopleService {
                 where: {
                     BanDetail: {
                         some: {
-                            banDetails_venueBanId: venueId,
-                            banDetails_banEndDate: { gt: (0, dayjs_1.default)().toISOString() },
-                            banDetails_isBanPending: false,
+                            banDetail_venueBanId: venueId,
+                            banDetail_banEndDate: { gt: (0, dayjs_1.default)().toISOString() },
+                            banDetail_isBanPending: false,
                         },
                     },
                 },
@@ -241,7 +241,7 @@ let BannedPeopleService = class BannedPeopleService {
                 where: {
                     BanDetail: {
                         every: {
-                            banDetails_banEndDate: { lt: (0, dayjs_1.default)().toISOString() },
+                            banDetail_banEndDate: { lt: (0, dayjs_1.default)().toISOString() },
                         },
                     },
                 },
@@ -293,7 +293,7 @@ let BannedPeopleService = class BannedPeopleService {
             return peopleWithActiveBans.map((person) => {
                 person.bannedPerson_imagePath = `${process.env.API_URL}/images/people/${path_1.default.basename(person.bannedPerson_imagePath)}`;
                 person.AlertDetail.map((alert) => {
-                    alert.alertDetail_imagePath = `${process.env.API_URL}/images/people/${path_1.default.basename(person.bannedPerson_imagePath)}`;
+                    alert.alertDetail_imagePath = `${process.env.API_URL}/images/alerts/${path_1.default.basename(person.bannedPerson_imagePath)}`;
                 });
                 return person;
             });
@@ -315,14 +315,14 @@ let BannedPeopleService = class BannedPeopleService {
                 where: {
                     BanDetail: {
                         some: {
-                            banDetails_isBanPending: true,
+                            banDetail_isBanPending: true,
                         },
                     },
                 },
                 include: {
                     BanDetail: {
                         where: {
-                            banDetails_isBanPending: true,
+                            banDetail_isBanPending: true,
                         },
                         include: {
                             Account: {
@@ -355,7 +355,7 @@ let BannedPeopleService = class BannedPeopleService {
                 where: {
                     BanDetail: {
                         every: {
-                            banDetails_isBanPending: false,
+                            banDetail_isBanPending: false,
                         },
                     },
                 },

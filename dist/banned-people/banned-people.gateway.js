@@ -36,9 +36,14 @@ let BannedPeopleGateway = class BannedPeopleGateway {
             }
         });
     }
-    create(accountName, socket) {
-        this.server.emit('bannedPersonCreated', {
-            message: `${(0, utils_1.capitalizeString)(accountName.account_name)} has uploaded a new ban`,
+    createBanForNewPerson(message) {
+        this.server.emit('banForNewPersonCreated', {
+            message: `${(0, utils_1.capitalizeString)(message.account_name)} has uploaded a new ban`,
+        });
+    }
+    createBanForExistingPerson(message) {
+        this.server.emit('banForExistingPersonCreated', {
+            message: `${(0, utils_1.capitalizeString)(message.account_name)} has uploaded a new ban for ${message.bannedPerson_name}`,
         });
     }
 };
@@ -48,13 +53,19 @@ __decorate([
     __metadata("design:type", socket_io_1.Server)
 ], BannedPeopleGateway.prototype, "server", void 0);
 __decorate([
-    (0, websockets_1.SubscribeMessage)('addBannedPerson'),
+    (0, websockets_1.SubscribeMessage)('createBanForNewPerson'),
     __param(0, (0, websockets_1.MessageBody)()),
-    __param(1, (0, websockets_1.ConnectedSocket)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, socket_io_1.Socket]),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
-], BannedPeopleGateway.prototype, "create", null);
+], BannedPeopleGateway.prototype, "createBanForNewPerson", null);
+__decorate([
+    (0, websockets_1.SubscribeMessage)('createBanForExistingPerson'),
+    __param(0, (0, websockets_1.MessageBody)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], BannedPeopleGateway.prototype, "createBanForExistingPerson", null);
 exports.BannedPeopleGateway = BannedPeopleGateway = __decorate([
     (0, websockets_1.WebSocketGateway)({
         cors: true,

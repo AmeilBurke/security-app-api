@@ -10,9 +10,9 @@ export declare class AlertDetailsController {
         alertDetail_bannedPersonId: number | null;
         alertDetail_name: string;
         alertDetail_imagePath: string;
-        alertDetails_alertReason: string;
-        alertDetails_startTime: string;
-        alertDetails_alertUploadedBy: number;
+        alertDetail_alertReason: string;
+        alertDetail_startTime: string;
+        alertDetail_alertUploadedBy: number;
     }>;
     findAll(request: RequestWithAccount): Promise<import("src/types").PrismaResultError | ({
         Account: {
@@ -23,18 +23,18 @@ export declare class AlertDetailsController {
         alertDetail_bannedPersonId: number | null;
         alertDetail_name: string;
         alertDetail_imagePath: string;
-        alertDetails_alertReason: string;
-        alertDetails_startTime: string;
-        alertDetails_alertUploadedBy: number;
+        alertDetail_alertReason: string;
+        alertDetail_startTime: string;
+        alertDetail_alertUploadedBy: number;
     })[]>;
     update(request: RequestWithAccount, updateAlertDetailDto: UpdateAlertDetailDto, alertDetailId: string, file: Express.Multer.File): Promise<import("src/types").PrismaResultError | {
         alertDetail_id: number;
         alertDetail_bannedPersonId: number | null;
         alertDetail_name: string;
         alertDetail_imagePath: string;
-        alertDetails_alertReason: string;
-        alertDetails_startTime: string;
-        alertDetails_alertUploadedBy: number;
+        alertDetail_alertReason: string;
+        alertDetail_startTime: string;
+        alertDetail_alertUploadedBy: number;
     }>;
     deleteAll(request: RequestWithAccount): Promise<import("src/types").PrismaResultError | import(".prisma/client").Prisma.BatchPayload>;
     deleteOne(request: RequestWithAccount, alertDetailId: string): Promise<import("src/types").PrismaResultError | {
@@ -42,8 +42,8 @@ export declare class AlertDetailsController {
         alertDetail_bannedPersonId: number | null;
         alertDetail_name: string;
         alertDetail_imagePath: string;
-        alertDetails_alertReason: string;
-        alertDetails_startTime: string;
-        alertDetails_alertUploadedBy: number;
+        alertDetail_alertReason: string;
+        alertDetail_startTime: string;
+        alertDetail_alertUploadedBy: number;
     }>;
 }

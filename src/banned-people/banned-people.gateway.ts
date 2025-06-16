@@ -44,14 +44,25 @@ export class BannedPeopleGateway {
     });
   }
 
-  @SubscribeMessage('addBannedPerson')
-  create(
-    @MessageBody() accountName: { account_name: string },
-    @ConnectedSocket() socket: Socket,
+  @SubscribeMessage('createBanForNewPerson')
+  createBanForNewPerson(
+    @MessageBody() message: { account_name: string },
   ): void {
-    // send this when admin approves a ban or uploads one, not when security put in a pending request
-    this.server.emit('bannedPersonCreated', {
-      message: `${capitalizeString(accountName.account_name)} has uploaded a new ban`,
+    // need to send this when admin approves a ban or uploads one, not when security put in a pending request
+    this.server.emit('banForNewPersonCreated', {
+      message: `${capitalizeString(message.account_name)} has uploaded a new ban`,
     });
   }
+
+  @SubscribeMessage('createBanForExistingPerson')
+  createBanForExistingPerson(
+    @MessageBody() message: { account_name: string; bannedPerson_name: string },
+  ): void {
+    // need to send this when admin approves a ban or uploads one, not when security put in a pending request
+    this.server.emit('banForExistingPersonCreated', {
+      message: `${capitalizeString(message.account_name)} has uploaded a new ban for ${message.bannedPerson_name}`,
+    });
+  }
+
+  // need to send a notification to admins when an account sends a pending request
 }

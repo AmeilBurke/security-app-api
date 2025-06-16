@@ -15,19 +15,19 @@ export declare class BannedPeopleController {
             alertDetail_bannedPersonId: number | null;
             alertDetail_name: string;
             alertDetail_imagePath: string;
-            alertDetails_alertReason: string;
-            alertDetails_startTime: string;
-            alertDetails_alertUploadedBy: number;
+            alertDetail_alertReason: string;
+            alertDetail_startTime: string;
+            alertDetail_alertUploadedBy: number;
         }[];
         BanDetail: {
             banDetails_id: number;
-            banDetails_bannedPersonId: number;
-            banDetails_reason: string;
-            banDetails_banStartDate: string;
-            banDetails_banEndDate: string;
-            banDetails_venueBanId: number;
-            banDetails_isBanPending: boolean;
-            banDetails_banUploadedBy: number;
+            banDetail_bannedPersonId: number;
+            banDetail_reason: string;
+            banDetail_banStartDate: string;
+            banDetail_banEndDate: string;
+            banDetail_venueBanId: number;
+            banDetail_isBanPending: boolean;
+            banDetail_banUploadedBy: number;
         }[];
     } & {
         bannedPerson_id: number;
@@ -37,13 +37,13 @@ export declare class BannedPeopleController {
     findAllBlanketBanned(request: RequestWithAccount): Promise<import("src/types").PrismaResultError | ({
         BanDetail: {
             banDetails_id: number;
-            banDetails_bannedPersonId: number;
-            banDetails_reason: string;
-            banDetails_banStartDate: string;
-            banDetails_banEndDate: string;
-            banDetails_venueBanId: number;
-            banDetails_isBanPending: boolean;
-            banDetails_banUploadedBy: number;
+            banDetail_bannedPersonId: number;
+            banDetail_reason: string;
+            banDetail_banStartDate: string;
+            banDetail_banEndDate: string;
+            banDetail_venueBanId: number;
+            banDetail_isBanPending: boolean;
+            banDetail_banUploadedBy: number;
         }[];
     } & {
         bannedPerson_id: number;
@@ -53,13 +53,13 @@ export declare class BannedPeopleController {
     findAllByVenueId(request: RequestWithAccount, venueId: string): Promise<import("src/types").PrismaResultError | ({
         BanDetail: {
             banDetails_id: number;
-            banDetails_bannedPersonId: number;
-            banDetails_reason: string;
-            banDetails_banStartDate: string;
-            banDetails_banEndDate: string;
-            banDetails_venueBanId: number;
-            banDetails_isBanPending: boolean;
-            banDetails_banUploadedBy: number;
+            banDetail_bannedPersonId: number;
+            banDetail_reason: string;
+            banDetail_banStartDate: string;
+            banDetail_banEndDate: string;
+            banDetail_venueBanId: number;
+            banDetail_isBanPending: boolean;
+            banDetail_banUploadedBy: number;
         }[];
     } & {
         bannedPerson_id: number;
@@ -69,13 +69,13 @@ export declare class BannedPeopleController {
     findAllExpired(request: RequestWithAccount): Promise<import("src/types").PrismaResultError | ({
         BanDetail: {
             banDetails_id: number;
-            banDetails_bannedPersonId: number;
-            banDetails_reason: string;
-            banDetails_banStartDate: string;
-            banDetails_banEndDate: string;
-            banDetails_venueBanId: number;
-            banDetails_isBanPending: boolean;
-            banDetails_banUploadedBy: number;
+            banDetail_bannedPersonId: number;
+            banDetail_reason: string;
+            banDetail_banStartDate: string;
+            banDetail_banEndDate: string;
+            banDetail_venueBanId: number;
+            banDetail_isBanPending: boolean;
+            banDetail_banUploadedBy: number;
         }[];
     } & {
         bannedPerson_id: number;
@@ -88,19 +88,19 @@ export declare class BannedPeopleController {
             alertDetail_bannedPersonId: number | null;
             alertDetail_name: string;
             alertDetail_imagePath: string;
-            alertDetails_alertReason: string;
-            alertDetails_startTime: string;
-            alertDetails_alertUploadedBy: number;
+            alertDetail_alertReason: string;
+            alertDetail_startTime: string;
+            alertDetail_alertUploadedBy: number;
         }[];
         BanDetail: {
             banDetails_id: number;
-            banDetails_bannedPersonId: number;
-            banDetails_reason: string;
-            banDetails_banStartDate: string;
-            banDetails_banEndDate: string;
-            banDetails_venueBanId: number;
-            banDetails_isBanPending: boolean;
-            banDetails_banUploadedBy: number;
+            banDetail_bannedPersonId: number;
+            banDetail_reason: string;
+            banDetail_banStartDate: string;
+            banDetail_banEndDate: string;
+            banDetail_venueBanId: number;
+            banDetail_isBanPending: boolean;
+            banDetail_banUploadedBy: number;
         }[];
     } & {
         bannedPerson_id: number;
@@ -114,13 +114,13 @@ export declare class BannedPeopleController {
             };
         } & {
             banDetails_id: number;
-            banDetails_bannedPersonId: number;
-            banDetails_reason: string;
-            banDetails_banStartDate: string;
-            banDetails_banEndDate: string;
-            banDetails_venueBanId: number;
-            banDetails_isBanPending: boolean;
-            banDetails_banUploadedBy: number;
+            banDetail_bannedPersonId: number;
+            banDetail_reason: string;
+            banDetail_banStartDate: string;
+            banDetail_banEndDate: string;
+            banDetail_venueBanId: number;
+            banDetail_isBanPending: boolean;
+            banDetail_banUploadedBy: number;
         })[];
     } & {
         bannedPerson_id: number;

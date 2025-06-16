@@ -235,7 +235,7 @@ let VenuesService = class VenuesService {
             }
             await this.prisma.banDetail.deleteMany({
                 where: {
-                    banDetails_venueBanId: venueId,
+                    banDetail_venueBanId: venueId,
                 },
             });
             await this.prisma.venueAccess.deleteMany({

@@ -21,9 +21,9 @@ export declare class AlertDetailsService {
         alertDetail_bannedPersonId: number | null;
         alertDetail_name: string;
         alertDetail_imagePath: string;
-        alertDetails_alertReason: string;
-        alertDetails_startTime: string;
-        alertDetails_alertUploadedBy: number;
+        alertDetail_alertReason: string;
+        alertDetail_startTime: string;
+        alertDetail_alertUploadedBy: number;
     }>;
     deleteAll(request: RequestWithAccount): Promise<Prisma.BatchPayload | PrismaResultError>;
     deleteOne(request: RequestWithAccount, alertDetailId: number): Promise<AlertDetail | PrismaResultError>;

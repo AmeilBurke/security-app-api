@@ -1,4 +1,4 @@
-import { Server, Socket } from 'socket.io';
+import { Server } from 'socket.io';
 import { JwtService } from '@nestjs/jwt';
 import { AuthenticationService } from 'src/authentication/authentication.service';
 import { PrismaService } from 'src/prisma.service';
@@ -9,5 +9,7 @@ export declare class AlertDetailsGateway {
     constructor(jwtService: JwtService, authenticationService: AuthenticationService, prisma: PrismaService);
     server: Server;
     onModuleInit(): void;
-    create(request: any, socket: Socket): Promise<void>;
+    createAlert(message: {
+        account_name: string;
+    }): void;
 }

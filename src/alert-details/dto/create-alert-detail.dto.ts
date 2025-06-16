@@ -1,7 +1,6 @@
-import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 
 export class CreateAlertDetailDto {
-  // need to convert to string
   @IsOptional()
   @IsString()
   alertDetail_bannedPersonId?: string;
@@ -10,5 +9,5 @@ export class CreateAlertDetailDto {
   alertDetail_name: string;
 
   @IsString()
-  alertDetails_alertReason: string;
+  alertDetail_alertReason: string;
 }

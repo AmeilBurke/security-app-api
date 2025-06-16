@@ -26,5 +26,5 @@ __decorate([
 __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], CreateAlertDetailDto.prototype, "alertDetails_alertReason", void 0);
+], CreateAlertDetailDto.prototype, "alertDetail_alertReason", void 0);
 //# sourceMappingURL=create-alert-detail.dto.js.map

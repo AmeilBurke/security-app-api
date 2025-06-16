@@ -67,23 +67,23 @@ model AlertDetail {
   alertDetail_bannedPersonId   Int?
   alertDetail_name             String
   alertDetail_imagePath        String
-  alertDetails_alertReason     String
-  alertDetails_startTime       String
-  alertDetails_alertUploadedBy Int
-  Account                      Account       @relation(fields: [alertDetails_alertUploadedBy], references: [account_id])
+  alertDetail_alertReason     String
+  alertDetail_startTime       String
+  alertDetail_alertUploadedBy Int
+  Account                      Account       @relation(fields: [alertDetail_alertUploadedBy], references: [account_id])
   BannedPerson                 BannedPerson? @relation(fields: [alertDetail_bannedPersonId], references: [bannedPerson_id])
 }
 
 model BanDetail {
   banDetails_id             Int          @id @unique @default(autoincrement())
-  banDetails_bannedPersonId Int
-  banDetails_reason         String
-  banDetails_banStartDate   String
-  banDetails_banEndDate     String
-  banDetails_venueBanId     Int
-  banDetails_isBanPending   Boolean
-  banDetails_banUploadedBy  Int
-  Account                   Account      @relation(fields: [banDetails_banUploadedBy], references: [account_id])
-  Venue                     Venue        @relation(fields: [banDetails_venueBanId], references: [venue_id])
-  BannedPerson              BannedPerson @relation(fields: [banDetails_bannedPersonId], references: [bannedPerson_id])
+  banDetail_bannedPersonId Int
+  banDetail_reason         String
+  banDetail_banStartDate   String
+  banDetail_banEndDate     String
+  banDetail_venueBanId     Int
+  banDetail_isBanPending   Boolean
+  banDetail_banUploadedBy  Int
+  Account                   Account      @relation(fields: [banDetail_banUploadedBy], references: [account_id])
+  Venue                     Venue        @relation(fields: [banDetail_venueBanId], references: [venue_id])
+  BannedPerson              BannedPerson @relation(fields: [banDetail_bannedPersonId], references: [bannedPerson_id])
 }

@@ -82,16 +82,15 @@ export class BannedPeopleService {
         venueBanIds.map(async (venueId) => {
           await this.prisma.banDetail.create({
             data: {
-              banDetails_bannedPersonId: newBanProfile.bannedPerson_id,
-              banDetails_reason: createBannedPersonDto.banDetails_reason
+              banDetail_bannedPersonId: newBanProfile.bannedPerson_id,
+              banDetail_reason: createBannedPersonDto.banDetails_reason
                 .toLocaleLowerCase()
                 .trim(),
-              banDetails_banStartDate: currentDateTimeIso,
-              banDetails_banEndDate:
-                createBannedPersonDto.banDetails_banEndDate,
-              banDetails_isBanPending: !isAccountAdmin,
-              banDetails_banUploadedBy: requestAccount.account_id,
-              banDetails_venueBanId: venueId,
+              banDetail_banStartDate: currentDateTimeIso,
+              banDetail_banEndDate: createBannedPersonDto.banDetails_banEndDate,
+              banDetail_isBanPending: !isAccountAdmin,
+              banDetail_banUploadedBy: requestAccount.account_id,
+              banDetail_venueBanId: venueId,
             },
           });
         }),
@@ -108,11 +107,11 @@ export class BannedPeopleService {
           alertDetail_bannedPersonId: newBanProfile.bannedPerson_id,
           alertDetail_imagePath: newBanProfile.bannedPerson_imagePath,
           alertDetail_name: newBanProfile.bannedPerson_name,
-          alertDetails_alertReason: createBannedPersonDto.banDetails_reason
+          alertDetail_alertReason: createBannedPersonDto.banDetails_reason
             .toLocaleLowerCase()
             .trim(),
-          alertDetails_startTime: dayjs().toISOString(),
-          alertDetails_alertUploadedBy: requestAccount.account_id,
+          alertDetail_startTime: dayjs().toISOString(),
+          alertDetail_alertUploadedBy: requestAccount.account_id,
         },
         include: {
           Account: {
@@ -195,8 +194,8 @@ export class BannedPeopleService {
         where: {
           BanDetail: {
             some: {
-              banDetails_banEndDate: { gt: dayjs().toISOString() },
-              banDetails_isBanPending: false,
+              banDetail_banEndDate: { gt: dayjs().toISOString() },
+              banDetail_isBanPending: false,
             },
           },
         },
@@ -213,7 +212,7 @@ export class BannedPeopleService {
           let bannedFromVenueIds = new Set<number>();
 
           bannedPerson.BanDetail.some((banDetail: BanDetail) => {
-            bannedFromVenueIds.add(banDetail.banDetails_venueBanId);
+            bannedFromVenueIds.add(banDetail.banDetail_venueBanId);
           });
 
           if (bannedFromVenueIds.size === allVenueIds.size) {
@@ -258,9 +257,9 @@ export class BannedPeopleService {
         where: {
           BanDetail: {
             some: {
-              banDetails_venueBanId: venueId,
-              banDetails_banEndDate: { gt: dayjs().toISOString() },
-              banDetails_isBanPending: false,
+              banDetail_venueBanId: venueId,
+              banDetail_banEndDate: { gt: dayjs().toISOString() },
+              banDetail_isBanPending: false,
             },
           },
         },
@@ -297,7 +296,7 @@ export class BannedPeopleService {
         where: {
           BanDetail: {
             every: {
-              banDetails_banEndDate: { lt: dayjs().toISOString() },
+              banDetail_banEndDate: { lt: dayjs().toISOString() },
             },
           },
         },
@@ -362,7 +361,7 @@ export class BannedPeopleService {
       return peopleWithActiveBans.map((person) => {
         person.bannedPerson_imagePath = `${process.env.API_URL}/images/people/${path.basename(person.bannedPerson_imagePath)}`;
         person.AlertDetail.map((alert) => {
-          alert.alertDetail_imagePath = `${process.env.API_URL}/images/people/${path.basename(person.bannedPerson_imagePath)}`;
+          alert.alertDetail_imagePath = `${process.env.API_URL}/images/alerts/${path.basename(person.bannedPerson_imagePath)}`;
         });
         return person;
       });
@@ -397,14 +396,14 @@ export class BannedPeopleService {
         where: {
           BanDetail: {
             some: {
-              banDetails_isBanPending: true,
+              banDetail_isBanPending: true,
             },
           },
         },
         include: {
           BanDetail: {
             where: {
-              banDetails_isBanPending: true,
+              banDetail_isBanPending: true,
             },
             include: {
               Account: {
@@ -445,7 +444,7 @@ export class BannedPeopleService {
         where: {
           BanDetail: {
             every: {
-              banDetails_isBanPending: false,
+              banDetail_isBanPending: false,
             },
           },
         },

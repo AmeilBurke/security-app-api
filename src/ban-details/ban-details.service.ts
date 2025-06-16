@@ -55,19 +55,19 @@ export class BanDetailsService {
       //   },
       // );
 
-      const banDetailsData = createBanDetailDto.banDetails_venueBanIds.map(
+      const banDetailData = createBanDetailDto.banDetails_venueBanIds.map(
         (venueId: number) => {
           return {
-            banDetails_bannedPersonId:
+            banDetail_bannedPersonId:
               createBanDetailDto.banDetails_bannedPersonId,
-            banDetails_reason: createBanDetailDto.banDetails_reason
+            banDetail_reason: createBanDetailDto.banDetails_reason
               .toLocaleLowerCase()
               .trim(),
-            banDetails_banStartDate: currentDateTimeIso,
-            banDetails_banEndDate: createBanDetailDto.banDetails_banEndDate,
-            banDetails_venueBanId: venueId,
-            banDetails_isBanPending: isBanPending,
-            banDetails_banUploadedBy: requestAccount.account_id,
+            banDetail_banStartDate: currentDateTimeIso,
+            banDetail_banEndDate: createBanDetailDto.banDetails_banEndDate,
+            banDetail_venueBanId: venueId,
+            banDetail_isBanPending: isBanPending,
+            banDetail_banUploadedBy: requestAccount.account_id,
           };
         },
       );
@@ -77,7 +77,7 @@ export class BanDetailsService {
       // });
 
       return await this.prisma.banDetail.createMany({
-        data: banDetailsData,
+        data: banDetailData,
       });
     } catch (error: unknown) {
       return handleError(error);
@@ -104,7 +104,7 @@ export class BanDetailsService {
 
       return await this.prisma.banDetail.findFirstOrThrow({
         where: {
-          banDetails_bannedPersonId: accountId,
+          banDetail_bannedPersonId: accountId,
         },
       });
     } catch (error: unknown) {
@@ -136,12 +136,12 @@ export class BanDetailsService {
           banDetails_id: id,
         },
         data: {
-          banDetails_reason: updateBanDetailDto.banDetails_reason
+          banDetail_reason: updateBanDetailDto.banDetails_reason
             .toLocaleLowerCase()
             .trim(),
-          banDetails_banStartDate: updateBanDetailDto.banDetails_banStartDate,
-          banDetails_banEndDate: updateBanDetailDto.banDetails_banEndDate,
-          banDetails_isBanPending: (await isAccountAdminRole(
+          banDetail_banStartDate: updateBanDetailDto.banDetails_banStartDate,
+          banDetail_banEndDate: updateBanDetailDto.banDetails_banEndDate,
+          banDetail_isBanPending: (await isAccountAdminRole(
             this.prisma,
             requestAccount,
           ))

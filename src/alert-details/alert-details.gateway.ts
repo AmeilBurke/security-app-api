@@ -75,31 +75,12 @@ export class AlertDetailsGateway {
     });
   }
 
-  @SubscribeMessage('alert_detail_created')
-  async create(
-    @Request() request,
-    @ConnectedSocket()
-    socket: Socket,
-  ): Promise<void> {
-    try {
-      const jwtToken = await this.jwtService.verifyAsync(
-        socket.handshake.headers.cookie.split('=')[1],
-        { secret: process.env.JWT_SECRET },
-      );
-      // need to get profile details form jwt to get account name
-      console.log(jwtToken);
-
-      const accountDetails = await this.prisma.account.findFirst({
-        where: {
-          account_id: jwtToken.sub,
-        },
-      });
-
-      this.server.emit('alert_detail_created', {
-        message: `${capitalizeString(accountDetails.account_name)} has uploaded an alert`,
-      });
-    } catch (error) {
-      console.log(error);
-    }
+  @SubscribeMessage('createAlert')
+  createAlert(
+    @MessageBody() message: { account_name: string },
+  ): void {
+    this.server.emit('alertCreated', {
+      message: `${capitalizeString(message.account_name)} has uploaded a new ban`,
+    });
   }
 }
