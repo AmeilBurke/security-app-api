@@ -44,63 +44,63 @@ const sharp_1 = __importDefault(require("sharp"));
 const handleError = (error) => {
     if (error instanceof library_1.PrismaClientKnownRequestError) {
         return {
-            error_type: 'PrismaClientKnownRequestError',
+            error_type: "PrismaClientKnownRequestError",
             error_code: error.code,
             error_message: error.message,
         };
     }
     if (error instanceof library_1.PrismaClientUnknownRequestError) {
         return {
-            error_type: 'PrismaClientUnknownRequestError',
-            error_code: 'PCURE',
+            error_type: "PrismaClientUnknownRequestError",
+            error_code: "PCURE",
             error_message: error.message,
         };
     }
     console.log(error);
     return {
-        error_type: 'UnknownError',
-        error_code: '500',
-        error_message: 'there was an unexpected error',
+        error_type: "UnknownError",
+        error_code: "500",
+        error_message: "there was an unexpected error",
     };
 };
 exports.handleError = handleError;
 const isPrismaResultError = (object) => {
-    return (typeof object === 'object' &&
+    return (typeof object === "object" &&
         object !== null &&
-        typeof object.error_type === 'string' &&
-        typeof object.error_code === 'string' &&
-        typeof object.error_message === 'string');
+        typeof object.error_type === "string" &&
+        typeof object.error_code === "string" &&
+        typeof object.error_message === "string");
 };
 exports.isPrismaResultError = isPrismaResultError;
 const noRequestAccountError = () => {
     return {
-        error_type: 'no request account',
-        error_code: '400',
-        error_message: 'no account details were sent with request',
+        error_type: "no request account",
+        error_code: "400",
+        error_message: "no account details were sent with request",
     };
 };
 exports.noRequestAccountError = noRequestAccountError;
 const noFileReceivedError = () => {
     return {
-        error_type: 'no file received',
-        error_code: '400',
-        error_message: 'no file was sent with request',
+        error_type: "no file received",
+        error_code: "400",
+        error_message: "no file was sent with request",
     };
 };
 exports.noFileReceivedError = noFileReceivedError;
 const accountIsUnauthorized = () => {
     return {
-        error_type: 'account unauthorized',
-        error_code: '401',
-        error_message: 'the account requesting this does not have the required authorization',
+        error_type: "account unauthorized",
+        error_code: "401",
+        error_message: "the account requesting this does not have the required authorization",
     };
 };
 exports.accountIsUnauthorized = accountIsUnauthorized;
 const invalidDayJsDate = () => {
     return {
-        error_type: 'invalid dayjs date',
-        error_code: '400',
-        error_message: 'the date given could not be converted to a valid dayjs date',
+        error_type: "invalid dayjs date",
+        error_code: "400",
+        error_message: "the date given could not be converted to a valid dayjs date",
     };
 };
 exports.invalidDayJsDate = invalidDayJsDate;
@@ -108,7 +108,7 @@ const getAccountInfoFromId = async (prisma, id) => {
     try {
         return await prisma.account.findFirstOrThrow({
             where: {
-                account_id: id,
+                id: id,
             },
         });
     }
@@ -120,10 +120,10 @@ exports.getAccountInfoFromId = getAccountInfoFromId;
 const isAccountAdminRole = async (prisma, account) => {
     const role = await prisma.role.findFirstOrThrow({
         where: {
-            role_name: 'admin',
+            name: "admin",
         },
     });
-    if (account.account_roleId === role.role_id) {
+    if (account.roleId === role.id) {
         return true;
     }
     else {
@@ -134,10 +134,10 @@ exports.isAccountAdminRole = isAccountAdminRole;
 const isAccountSecurityRole = async (prisma, account) => {
     const role = await prisma.role.findFirstOrThrow({
         where: {
-            role_name: 'security',
+            name: "security",
         },
     });
-    if (account.account_roleId === role.role_id) {
+    if (account.roleId === role.id) {
         return true;
     }
     else {
@@ -148,10 +148,10 @@ exports.isAccountSecurityRole = isAccountSecurityRole;
 const isAccountVenueManagerRole = async (prisma, account) => {
     const role = await prisma.role.findFirstOrThrow({
         where: {
-            role_name: 'venue manager',
+            name: "venue manager",
         },
     });
-    if (account.account_roleId === role.role_id) {
+    if (account.roleId === role.id) {
         return true;
     }
     else {
@@ -164,27 +164,27 @@ const addJwtCookieToRequest = async (response, jwtService, accountId, accountEma
         sub: accountId,
         email: accountEmail,
     });
-    response.cookie('jwt', jwt, {
+    response.cookie("jwt", jwt, {
         httpOnly: true,
         secure: true,
-        sameSite: 'none',
-        path: '/',
+        sameSite: "none",
+        path: "/",
     });
 };
 exports.addJwtCookieToRequest = addJwtCookieToRequest;
 const capitalizeString = (text) => {
     return text
-        .split(' ')
+        .split(" ")
         .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(' ');
+        .join(" ");
 };
 exports.capitalizeString = capitalizeString;
 const compressImage = async (imageToCompress, directoryToSaveImage) => {
     const compressedImageBuffer = await (0, sharp_1.default)(imageToCompress.path)
-        .toFormat('webp', { quality: 75, effort: 0 })
+        .toFormat("webp", { quality: 75, effort: 0 })
         .resize(800)
         .toBuffer();
-    const fileNameAndExtension = imageToCompress.filename.split('.');
+    const fileNameAndExtension = imageToCompress.filename.split(".");
     const filePath = path.join(directoryToSaveImage, `${fileNameAndExtension[0]}.webp`);
     fs.promises.writeFile(filePath, compressedImageBuffer);
     return filePath;

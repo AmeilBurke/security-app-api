@@ -1,5 +1,9 @@
-import { BannedPerson } from '@prisma/client';
-import { Request } from 'express';
+import type { Account, BannedPerson } from '@prisma/client';
+import type { Request } from 'express';
+export type Role = {
+    id: number;
+    name: string;
+};
 export type RequestWithAccount = Request & {
     account: {
         sub: number;
@@ -8,6 +12,9 @@ export type RequestWithAccount = Request & {
         exp: number;
     };
 };
+export type AccountWithRoleNoPassword = Omit<Account & {
+    role: Role;
+}, "password" | 'roleId'>;
 export type BannedPersonWithSomeBanDetails = BannedPerson & {
     banDetails_reason: string;
     banDetails_banEndDate: string;

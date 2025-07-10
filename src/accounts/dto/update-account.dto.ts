@@ -1,30 +1,23 @@
-import { IsNumber, IsString, IsNotEmpty, IsOptional } from 'class-validator';
+import { IsString, IsOptional, IsEmail, IsInt } from 'class-validator';
 
 export class UpdateAccountDto {
   @IsOptional()
-  @IsString()
-  @IsNotEmpty()
-  account_email: string;
+  @IsEmail()
+  email: string;
 
   @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  account_password: string;
+  password: string;
 
   @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  account_name: string;
+  name: string;
 
   @IsOptional()
-  @IsNumber()
-  account_roleId: number;
-  
-  @IsOptional()
-  @IsNumber({}, { each: true })
-  account_venueAccessIds?: number[];
+  @IsInt()
+  roleId: number;
 
   @IsOptional()
-  @IsNumber({}, { each: true })
-  account_venueManagerIds?: number[];
+  @IsInt({ each: true })
+  managesVenueIds: number[];
 }

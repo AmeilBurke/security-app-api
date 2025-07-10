@@ -16,35 +16,27 @@ class UpdateAccountDto {
 exports.UpdateAccountDto = UpdateAccountDto;
 __decorate([
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsEmail)(),
     __metadata("design:type", String)
-], UpdateAccountDto.prototype, "account_email", void 0);
+], UpdateAccountDto.prototype, "email", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
-    (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
-], UpdateAccountDto.prototype, "account_password", void 0);
+], UpdateAccountDto.prototype, "password", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
-    (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
-], UpdateAccountDto.prototype, "account_name", void 0);
+], UpdateAccountDto.prototype, "name", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsInt)(),
     __metadata("design:type", Number)
-], UpdateAccountDto.prototype, "account_roleId", void 0);
+], UpdateAccountDto.prototype, "roleId", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsNumber)({}, { each: true }),
+    (0, class_validator_1.IsInt)({ each: true }),
     __metadata("design:type", Array)
-], UpdateAccountDto.prototype, "account_venueAccessIds", void 0);
-__decorate([
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsNumber)({}, { each: true }),
-    __metadata("design:type", Array)
-], UpdateAccountDto.prototype, "account_venueManagerIds", void 0);
+], UpdateAccountDto.prototype, "managesVenueIds", void 0);
 //# sourceMappingURL=update-account.dto.js.map

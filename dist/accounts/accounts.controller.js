@@ -15,18 +15,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AccountsController = void 0;
 const common_1 = require("@nestjs/common");
 const accounts_service_1 = require("./accounts.service");
-const create_account_dto_1 = require("./dto/create-account.dto");
-const update_account_dto_1 = require("./dto/update-account.dto");
-const public_guard_1 = require("../authentication/public.guard");
 let AccountsController = class AccountsController {
     constructor(accountsService) {
         this.accountsService = accountsService;
     }
     create(request, createAccountDto) {
         return this.accountsService.create(request, createAccountDto);
-    }
-    createSecret(createAccountDto) {
-        return this.accountsService.createSecret(createAccountDto);
     }
     findAll(request) {
         return this.accountsService.findAll(request);
@@ -47,17 +41,9 @@ __decorate([
     __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, create_account_dto_1.CreateAccountDto]),
+    __metadata("design:paramtypes", [Object, Function]),
     __metadata("design:returntype", void 0)
 ], AccountsController.prototype, "create", null);
-__decorate([
-    (0, public_guard_1.Public)(),
-    (0, common_1.Post)('/secret'),
-    __param(0, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [create_account_dto_1.CreateAccountDto]),
-    __metadata("design:returntype", void 0)
-], AccountsController.prototype, "createSecret", null);
 __decorate([
     (0, common_1.Get)(),
     __param(0, (0, common_1.Req)()),
@@ -66,32 +52,32 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], AccountsController.prototype, "findAll", null);
 __decorate([
-    (0, common_1.Get)(':id'),
+    (0, common_1.Get)(":id"),
     __param(0, (0, common_1.Req)()),
-    __param(1, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Param)("id")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", void 0)
 ], AccountsController.prototype, "findOne", null);
 __decorate([
-    (0, common_1.Patch)(':id'),
+    (0, common_1.Patch)(":id"),
     __param(0, (0, common_1.Req)()),
-    __param(1, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Param)("id")),
     __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, String, update_account_dto_1.UpdateAccountDto]),
+    __metadata("design:paramtypes", [Object, String, Function]),
     __metadata("design:returntype", void 0)
 ], AccountsController.prototype, "update", null);
 __decorate([
-    (0, common_1.Delete)(':id'),
+    (0, common_1.Delete)(":id"),
     __param(0, (0, common_1.Req)()),
-    __param(1, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Param)("id")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", void 0)
 ], AccountsController.prototype, "remove", null);
 exports.AccountsController = AccountsController = __decorate([
-    (0, common_1.Controller)('accounts'),
+    (0, common_1.Controller)("accounts"),
     __metadata("design:paramtypes", [accounts_service_1.AccountsService])
 ], AccountsController);
 //# sourceMappingURL=accounts.controller.js.map

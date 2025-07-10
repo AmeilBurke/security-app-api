@@ -15,7 +15,7 @@ const jwt_1 = require("@nestjs/jwt");
 const accounts_service_1 = require("../accounts/accounts.service");
 const prisma_service_1 = require("../prisma.service");
 const utils_1 = require("../utils");
-const bcrypt = require('bcrypt');
+const bcrypt = require("bcrypt");
 let AuthenticationService = class AuthenticationService {
     constructor(accountsService, jwtService, prisma) {
         this.accountsService = accountsService;
@@ -27,9 +27,9 @@ let AuthenticationService = class AuthenticationService {
         if ((0, utils_1.isPrismaResultError)(account)) {
             return account;
         }
-        if (await bcrypt.compare(password, account.account_password)) {
-            await (0, utils_1.addJwtCookieToRequest)(response, this.jwtService, account.account_id, account.account_email);
-            const { account_password, ...result } = account;
+        if (await bcrypt.compare(password, account.password)) {
+            await (0, utils_1.addJwtCookieToRequest)(response, this.jwtService, account.id, account.email);
+            const { password: _password, roleId: _roleId, ...result } = account;
             return result;
         }
         else {
@@ -40,14 +40,14 @@ let AuthenticationService = class AuthenticationService {
         try {
             const account = await this.prisma.account.findFirst({
                 where: {
-                    account_id: accountId,
+                    id: accountId,
                 },
                 include: {
-                    Role: true,
+                    role: true,
                 },
             });
-            const { account_password, ...result } = account;
-            await (0, utils_1.addJwtCookieToRequest)(response, this.jwtService, account.account_id, account.account_email);
+            const { password: _password, roleId: _roleId, ...result } = account;
+            await (0, utils_1.addJwtCookieToRequest)(response, this.jwtService, account.id, account.email);
             return result;
         }
         catch (error) {

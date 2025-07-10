@@ -30,21 +30,21 @@ let AuthenticationGuard = class AuthenticationGuard {
         const request = context.switchToHttp().getRequest();
         const token = this.extractTokenFromCookie(request);
         if (token === undefined) {
-            throw new common_1.UnauthorizedException('invalid token');
+            throw new common_1.UnauthorizedException("invalid token");
         }
         try {
             const payload = await this.jwtService.verifyAsync(token, {
                 secret: process.env.JWT_SECRET,
             });
-            request['account'] = payload;
+            request["account"] = payload;
         }
         catch {
-            throw new common_1.UnauthorizedException('invalid token');
+            throw new common_1.UnauthorizedException("invalid token");
         }
         return true;
     }
     extractTokenFromCookie(request) {
-        return request.cookies['jwt'];
+        return request.cookies["jwt"];
     }
 };
 exports.AuthenticationGuard = AuthenticationGuard;

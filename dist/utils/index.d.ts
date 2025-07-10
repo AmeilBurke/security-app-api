@@ -1,8 +1,8 @@
-import { Account } from '@prisma/client';
-import { PrismaService } from 'src/prisma.service';
-import { PrismaResultError } from 'src/types';
-import { Response } from 'express';
-import { JwtService } from '@nestjs/jwt';
+import type { JwtService } from "@nestjs/jwt";
+import type { Account } from "@prisma/client";
+import type { Response } from "express";
+import type { PrismaService } from "src/prisma.service";
+import type { PrismaResultError } from "src/types";
 export declare const handleError: (error: unknown) => PrismaResultError;
 export declare const isPrismaResultError: (object: any) => object is PrismaResultError;
 export declare const noRequestAccountError: () => PrismaResultError;

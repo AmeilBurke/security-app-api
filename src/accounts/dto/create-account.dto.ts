@@ -1,26 +1,19 @@
-import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsEmail, IsInt, IsOptional, IsString } from 'class-validator';
 
 export class CreateAccountDto {
-  @IsString()
-  @IsNotEmpty()
-  account_email: string;
+  @IsEmail()
+  email: string;
 
   @IsString()
-  @IsNotEmpty()
-  account_password: string;
+  password: string;
 
   @IsString()
-  @IsNotEmpty()
-  account_name: string;
+  name: string;
 
-  @IsNumber()
-  account_roleId: number;
+  @IsInt()
+  roleId: number;
 
   @IsOptional()
-  @IsNumber({}, { each: true })
-  account_venueAccessIds?: number[];
-
-  @IsOptional()
-  @IsNumber({}, { each: true })
-  account_venueManagerIds?: number[];
+  @IsInt({ each: true })
+  managesVenueIds: number[];
 }
