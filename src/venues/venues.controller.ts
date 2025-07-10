@@ -25,81 +25,81 @@ import { isPrismaResultError } from 'src/utils';
 export class VenuesController {
   constructor(private readonly venuesService: VenuesService) {}
 
-  @Post()
-  @UseInterceptors(
-    FileInterceptor('file', {
-      storage: diskStorage({
-        destination: path.join(__dirname, '..', '..', 'images', 'venues'),
-        filename: (req, file, cb) => {
-          const fileType = file.mimetype.split('/')[1];
-          cb(null, `${uuidv4()}.${fileType}`);
-        },
-      }),
-    }),
-  )
-  async create(
-    @Req() request: RequestWithAccount,
-    @UploadedFile() file: Express.Multer.File,
-    @Body() createVenueDto: CreateVenueDto,
-  ) {
-    const result = await this.venuesService.create(
-      request,
-      file,
-      createVenueDto,
-    );
+  // @Post()
+  // @UseInterceptors(
+  //   FileInterceptor('file', {
+  //     storage: diskStorage({
+  //       destination: path.join(__dirname, '..', '..', 'images', 'venues'),
+  //       filename: (req, file, cb) => {
+  //         const fileType = file.mimetype.split('/')[1];
+  //         cb(null, `${uuidv4()}.${fileType}`);
+  //       },
+  //     }),
+  //   }),
+  // )
+  // async create(
+  //   @Req() request: RequestWithAccount,
+  //   @UploadedFile() file: Express.Multer.File,
+  //   @Body() createVenueDto: CreateVenueDto,
+  // ) {
+  //   const result = await this.venuesService.create(
+  //     request,
+  //     file,
+  //     createVenueDto,
+  //   );
 
-    if (isPrismaResultError(result) && file) {
-      try {
-        await fs.promises.unlink(file.path);
-      } catch (error) {
-        console.log(`error removing file at: ${file.path}`);
-      }
-    }
-    return result;
-  }
+  //   if (isPrismaResultError(result) && file) {
+  //     try {
+  //       await fs.promises.unlink(file.path);
+  //     } catch (error) {
+  //       console.log(`error removing file at: ${file.path}`);
+  //     }
+  //   }
+  //   return result;
+  // }
 
-  @Get()
-  findAllVenues(@Req() request: RequestWithAccount) {
-    return this.venuesService.findAllvenues(request);
-  }
+  // @Get()
+  // findAllVenues(@Req() request: RequestWithAccount) {
+  //   return this.venuesService.findAllvenues(request);
+  // }
 
-  @Patch(':id')
-  @UseInterceptors(
-    FileInterceptor('file', {
-      storage: diskStorage({
-        destination: path.join(__dirname, '..', '..', 'images', 'venues'),
-        filename: (req, file, cb) => {
-          const fileType = file.mimetype.split('/')[1];
-          cb(null, `${uuidv4()}.${fileType}`);
-        },
-      }),
-    }),
-  )
-  async update(
-    @Req() request: RequestWithAccount,
-    @UploadedFile() file: Express.Multer.File,
-    @Param('id') venueId: string,
-    @Body() updateVenueDto: UpdateVenueDto,
-  ) {
-    const result = await this.venuesService.updateOneVenue(
-      request,
-      file,
-      Number(venueId),
-      updateVenueDto,
-    );
+  // @Patch(':id')
+  // @UseInterceptors(
+  //   FileInterceptor('file', {
+  //     storage: diskStorage({
+  //       destination: path.join(__dirname, '..', '..', 'images', 'venues'),
+  //       filename: (req, file, cb) => {
+  //         const fileType = file.mimetype.split('/')[1];
+  //         cb(null, `${uuidv4()}.${fileType}`);
+  //       },
+  //     }),
+  //   }),
+  // )
+  // async update(
+  //   @Req() request: RequestWithAccount,
+  //   @UploadedFile() file: Express.Multer.File,
+  //   @Param('id') venueId: string,
+  //   @Body() updateVenueDto: UpdateVenueDto,
+  // ) {
+  //   const result = await this.venuesService.updateOneVenue(
+  //     request,
+  //     file,
+  //     Number(venueId),
+  //     updateVenueDto,
+  //   );
 
-    if (isPrismaResultError(result) && file) {
-      try {
-        await fs.promises.unlink(file.path);
-      } catch (error) {
-        console.log(`error removing file at: ${file.path}`);
-      }
-    }
-    return result;
-  }
+  //   if (isPrismaResultError(result) && file) {
+  //     try {
+  //       await fs.promises.unlink(file.path);
+  //     } catch (error) {
+  //       console.log(`error removing file at: ${file.path}`);
+  //     }
+  //   }
+  //   return result;
+  // }
 
-  @Delete(':id')
-  remove(@Req() request: RequestWithAccount, @Param('id') venueId: string) {
-    return this.venuesService.deleteOneVenue(request, Number(venueId));
-  }
+  // @Delete(':id')
+  // remove(@Req() request: RequestWithAccount, @Param('id') venueId: string) {
+  //   return this.venuesService.deleteOneVenue(request, Number(venueId));
+  // }
 }

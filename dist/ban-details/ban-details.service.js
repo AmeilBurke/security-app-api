@@ -38,14 +38,12 @@ let BanDetailsService = class BanDetailsService {
                 isBanPending = true;
             }
             const currentDateTimeIso = (0, dayjs_1.default)().toISOString();
-            const banDetailData = createBanDetailDto.banDetails_venueBanIds.map((venueId) => {
+            const banDetailData = createBanDetailDto.venuesToBeBannedFrom.map((venueId) => {
                 return {
-                    banDetail_bannedPersonId: createBanDetailDto.banDetails_bannedPersonId,
-                    banDetail_reason: createBanDetailDto.banDetails_reason
-                        .toLocaleLowerCase()
-                        .trim(),
+                    banDetail_bannedPersonId: createBanDetailDto.bannedPersonId,
+                    banDetail_reason: createBanDetailDto.banReason.toLocaleLowerCase().trim(),
                     banDetail_banStartDate: currentDateTimeIso,
-                    banDetail_banEndDate: createBanDetailDto.banDetails_banEndDate,
+                    banDetail_banEndDate: createBanDetailDto.banEndDate,
                     banDetail_venueBanId: venueId,
                     banDetail_isBanPending: isBanPending,
                     banDetail_banUploadedBy: requestAccount.account_id,
@@ -89,7 +87,7 @@ let BanDetailsService = class BanDetailsService {
             }
             return await this.prisma.banDetail.update({
                 where: {
-                    banDetails_id: id,
+                    banDetail_id: id,
                 },
                 data: {
                     banDetail_reason: updateBanDetailDto.banDetails_reason
@@ -119,7 +117,7 @@ let BanDetailsService = class BanDetailsService {
             if (await (0, utils_1.isAccountAdminRole)(this.prisma, requestAccount)) {
                 return await this.prisma.banDetail.delete({
                     where: {
-                        banDetails_id: id,
+                        banDetail_id: id,
                     },
                 });
             }

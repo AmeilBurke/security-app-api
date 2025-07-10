@@ -51,7 +51,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.BannedPeopleController = void 0;
 const common_1 = require("@nestjs/common");
 const banned_people_service_1 = require("./banned-people.service");
-const update_banned_person_dto_1 = require("./dto/update-banned-person.dto");
 const platform_express_1 = require("@nestjs/platform-express");
 const multer_1 = require("multer");
 const uuid_1 = require("uuid");
@@ -71,39 +70,6 @@ let BannedPeopleController = class BannedPeopleController {
             }
             catch (error) {
                 console.log(error);
-            }
-        }
-        return result;
-    }
-    async findAllBlanketBanned(request) {
-        return await this.bannedPeopleService.findAllBlanketBanned(request);
-    }
-    async findAllByVenueId(request, venueId) {
-        return await this.bannedPeopleService.findAllByVenueId(request, Number(venueId));
-    }
-    async findAllExpired(request) {
-        return await this.bannedPeopleService.findAllExpired(request);
-    }
-    async findAllWithActiveAlert(request) {
-        return await this.bannedPeopleService.findAllWithActiveAlert(request);
-    }
-    async findAllWithPendingBans(request) {
-        return await this.bannedPeopleService.findAllWithPendingBans(request);
-    }
-    async findAllWithoutPendingBans(request) {
-        return await this.bannedPeopleService.findAllWithoutPendingBans(request);
-    }
-    async findAll(request) {
-        return await this.bannedPeopleService.findAll(request);
-    }
-    async update(request, file, id, updateBannedPersonDto) {
-        const result = await this.bannedPeopleService.updateOneBannedPerson(request, file, Number(id), updateBannedPersonDto);
-        if ((0, utils_1.isPrismaResultError)(result) && file) {
-            try {
-                fs.promises.unlink(file.path);
-            }
-            catch (error) {
-                console.log(`error removing file at: ${file.path}`);
             }
         }
         return result;
@@ -131,78 +97,6 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object, Object]),
     __metadata("design:returntype", Promise)
 ], BannedPeopleController.prototype, "create", null);
-__decorate([
-    (0, common_1.Get)('/blanket-banned'),
-    __param(0, (0, common_1.Req)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", Promise)
-], BannedPeopleController.prototype, "findAllBlanketBanned", null);
-__decorate([
-    (0, common_1.Get)('/venue/:venueId'),
-    __param(0, (0, common_1.Req)()),
-    __param(1, (0, common_1.Param)('venueId')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, String]),
-    __metadata("design:returntype", Promise)
-], BannedPeopleController.prototype, "findAllByVenueId", null);
-__decorate([
-    (0, common_1.Get)('/expired'),
-    __param(0, (0, common_1.Req)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", Promise)
-], BannedPeopleController.prototype, "findAllExpired", null);
-__decorate([
-    (0, common_1.Get)('/active-alert'),
-    __param(0, (0, common_1.Req)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", Promise)
-], BannedPeopleController.prototype, "findAllWithActiveAlert", null);
-__decorate([
-    (0, common_1.Get)('/pending'),
-    __param(0, (0, common_1.Req)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", Promise)
-], BannedPeopleController.prototype, "findAllWithPendingBans", null);
-__decorate([
-    (0, common_1.Get)('/not-pending'),
-    __param(0, (0, common_1.Req)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", Promise)
-], BannedPeopleController.prototype, "findAllWithoutPendingBans", null);
-__decorate([
-    (0, common_1.Get)('/all'),
-    __param(0, (0, common_1.Req)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", Promise)
-], BannedPeopleController.prototype, "findAll", null);
-__decorate([
-    (0, common_1.Patch)(':id'),
-    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file', {
-        limits: {
-            files: 1,
-        },
-        storage: (0, multer_1.diskStorage)({
-            destination: path_1.default.join(__dirname, '..', '..', 'images', 'people'),
-            filename: (req, file, cb) => {
-                const fileType = file.mimetype.split('/')[1];
-                cb(null, `${(0, uuid_1.v4)()}.${fileType}`);
-            },
-        }),
-    })),
-    __param(0, (0, common_1.Req)()),
-    __param(1, (0, common_1.UploadedFile)()),
-    __param(2, (0, common_1.Param)('id')),
-    __param(3, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object, String, update_banned_person_dto_1.UpdateBannedPersonDto]),
-    __metadata("design:returntype", Promise)
-], BannedPeopleController.prototype, "update", null);
 exports.BannedPeopleController = BannedPeopleController = __decorate([
     (0, common_1.Controller)('banned-people'),
     __metadata("design:paramtypes", [banned_people_service_1.BannedPeopleService])

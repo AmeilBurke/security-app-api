@@ -3,14 +3,10 @@ import {
   SubscribeMessage,
   MessageBody,
   WebSocketServer,
-  ConnectedSocket,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import dayjs from 'dayjs';
 import { JwtService } from '@nestjs/jwt';
-import { AuthenticationService } from 'src/authentication/authentication.service';
-import { Request } from '@nestjs/common';
-import { PrismaService } from 'src/prisma.service';
 import { capitalizeString } from 'src/utils';
 
 @WebSocketGateway({
@@ -27,8 +23,6 @@ import { capitalizeString } from 'src/utils';
 export class AlertDetailsGateway {
   constructor(
     private jwtService: JwtService,
-    private authenticationService: AuthenticationService,
-    private prisma: PrismaService,
   ) {}
 
   @WebSocketServer()
@@ -80,7 +74,7 @@ export class AlertDetailsGateway {
     @MessageBody() message: { account_name: string },
   ): void {
     this.server.emit('alertCreated', {
-      message: `${capitalizeString(message.account_name)} has uploaded a new ban`,
+      message: `${capitalizeString(message.account_name)} has uploaded a new alert`,
     });
   }
 }

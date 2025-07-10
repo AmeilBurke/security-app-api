@@ -74,6 +74,7 @@ let AlertDetailsService = class AlertDetailsService {
                 !isNaN(Number(createAlertDetail.alertDetail_bannedPersonId))) {
                 isValidNumber = true;
             }
+            const compressedImagePath = await (0, utils_1.compressImage)(file, path_1.default.join(__dirname, '..', '..', 'images', 'alerts'));
             const newAlertDetail = await this.prisma.alertDetail.create({
                 data: {
                     alertDetail_bannedPersonId: isValidNumber
@@ -82,7 +83,7 @@ let AlertDetailsService = class AlertDetailsService {
                     alertDetail_name: createAlertDetail.alertDetail_name
                         .toLocaleLowerCase()
                         .trim(),
-                    alertDetail_imagePath: file.path,
+                    alertDetail_imagePath: compressedImagePath,
                     alertDetail_alertReason: createAlertDetail.alertDetail_alertReason
                         .toLocaleLowerCase()
                         .trim(),
@@ -90,6 +91,12 @@ let AlertDetailsService = class AlertDetailsService {
                     alertDetail_alertUploadedBy: requestAccount.account_id,
                 },
             });
+            try {
+                fs.promises.unlink(path_1.default.join(file.destination, file.filename));
+            }
+            catch (error) {
+                console.log(error);
+            }
             newAlertDetail.alertDetail_imagePath = `${process.env.API_URL}/images/alerts/${path_1.default.basename(newAlertDetail.alertDetail_imagePath)}`;
             return newAlertDetail;
         }
@@ -106,7 +113,7 @@ let AlertDetailsService = class AlertDetailsService {
             if ((0, utils_1.isPrismaResultError)(requestAccount)) {
                 return requestAccount;
             }
-            return await this.prisma.alertDetail.findMany({
+            const activeBans = await this.prisma.alertDetail.findMany({
                 include: {
                     Account: {
                         select: {
@@ -115,6 +122,38 @@ let AlertDetailsService = class AlertDetailsService {
                     },
                 },
             });
+            return activeBans.map((person) => {
+                person.alertDetail_imagePath = `${process.env.API_URL}/images/alerts/${path_1.default.basename(person.alertDetail_imagePath)}`;
+                return person;
+            });
+        }
+        catch (error) {
+            return (0, utils_1.handleError)(error);
+        }
+    }
+    async findIndividualActiveBan(request, alertDetailId) {
+        try {
+            if (!request.account) {
+                return (0, utils_1.noRequestAccountError)();
+            }
+            const requestAccount = await (0, utils_1.getAccountInfoFromId)(this.prisma, request.account.sub);
+            if ((0, utils_1.isPrismaResultError)(requestAccount)) {
+                return requestAccount;
+            }
+            const ban = await this.prisma.alertDetail.findFirstOrThrow({
+                where: {
+                    alertDetail_id: alertDetailId,
+                },
+                include: {
+                    Account: {
+                        select: {
+                            account_name: true,
+                        },
+                    },
+                },
+            });
+            ban.alertDetail_imagePath = `${process.env.API_URL}/images/alerts/${path_1.default.basename(ban.alertDetail_imagePath)}`;
+            return ban;
         }
         catch (error) {
             return (0, utils_1.handleError)(error);

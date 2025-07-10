@@ -20,14 +20,10 @@ const websockets_1 = require("@nestjs/websockets");
 const socket_io_1 = require("socket.io");
 const dayjs_1 = __importDefault(require("dayjs"));
 const jwt_1 = require("@nestjs/jwt");
-const authentication_service_1 = require("../authentication/authentication.service");
-const prisma_service_1 = require("../prisma.service");
 const utils_1 = require("../utils");
 let AlertDetailsGateway = class AlertDetailsGateway {
-    constructor(jwtService, authenticationService, prisma) {
+    constructor(jwtService) {
         this.jwtService = jwtService;
-        this.authenticationService = authenticationService;
-        this.prisma = prisma;
     }
     onModuleInit() {
         this.server.on('connection', async (socket) => {
@@ -57,7 +53,7 @@ let AlertDetailsGateway = class AlertDetailsGateway {
     }
     createAlert(message) {
         this.server.emit('alertCreated', {
-            message: `${(0, utils_1.capitalizeString)(message.account_name)} has uploaded a new ban`,
+            message: `${(0, utils_1.capitalizeString)(message.account_name)} has uploaded a new alert`,
         });
     }
 };
@@ -85,8 +81,6 @@ exports.AlertDetailsGateway = AlertDetailsGateway = __decorate([
             skipMiddleWares: false,
         },
     }),
-    __metadata("design:paramtypes", [jwt_1.JwtService,
-        authentication_service_1.AuthenticationService,
-        prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [jwt_1.JwtService])
 ], AlertDetailsGateway);
 //# sourceMappingURL=alert-details.gateway.js.map

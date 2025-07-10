@@ -3,6 +3,7 @@ import { CreateAlertDetailDto } from './dto/create-alert-detail.dto';
 import { UpdateAlertDetailDto } from './dto/update-alert-detail.dto';
 import { PrismaService } from 'src/prisma.service';
 import {
+  compressImage,
   getAccountInfoFromId,
   handleError,
   isPrismaResultError,
@@ -53,6 +54,11 @@ export class AlertDetailsService {
         isValidNumber = true;
       }
 
+      const compressedImagePath = await compressImage(
+        file,
+        path.join(__dirname, '..', '..', 'images', 'alerts'),
+      );
+
       const newAlertDetail = await this.prisma.alertDetail.create({
         data: {
           alertDetail_bannedPersonId: isValidNumber
@@ -61,7 +67,7 @@ export class AlertDetailsService {
           alertDetail_name: createAlertDetail.alertDetail_name
             .toLocaleLowerCase()
             .trim(),
-          alertDetail_imagePath: file.path,
+          alertDetail_imagePath: compressedImagePath,
           alertDetail_alertReason: createAlertDetail.alertDetail_alertReason
             .toLocaleLowerCase()
             .trim(),
@@ -69,6 +75,13 @@ export class AlertDetailsService {
           alertDetail_alertUploadedBy: requestAccount.account_id,
         },
       });
+
+      try {
+        fs.promises.unlink(path.join(file.destination, file.filename));
+      } catch (error: unknown) {
+        console.log(error);
+      }
+
       newAlertDetail.alertDetail_imagePath = `${process.env.API_URL}/images/alerts/${path.basename(newAlertDetail.alertDetail_imagePath)}`;
       return newAlertDetail;
     } catch (error: unknown) {
@@ -96,7 +109,7 @@ export class AlertDetailsService {
         return requestAccount;
       }
 
-      return await this.prisma.alertDetail.findMany({
+      const activeBans = await this.prisma.alertDetail.findMany({
         include: {
           Account: {
             select: {
@@ -105,6 +118,49 @@ export class AlertDetailsService {
           },
         },
       });
+
+      return activeBans.map((person) => {
+        person.alertDetail_imagePath = `${process.env.API_URL}/images/alerts/${path.basename(person.alertDetail_imagePath)}`;
+        return person;
+      });
+    } catch (error: unknown) {
+      return handleError(error);
+    }
+  }
+
+  async findIndividualActiveBan(
+    request: RequestWithAccount,
+    alertDetailId: number,
+  ) {
+    try {
+      if (!request.account) {
+        return noRequestAccountError();
+      }
+
+      const requestAccount = await getAccountInfoFromId(
+        this.prisma,
+        request.account.sub,
+      );
+
+      if (isPrismaResultError(requestAccount)) {
+        return requestAccount;
+      }
+
+      const ban = await this.prisma.alertDetail.findFirstOrThrow({
+        where: {
+          alertDetail_id: alertDetailId,
+        },
+        include: {
+          Account: {
+            select: {
+              account_name: true,
+            },
+          },
+        },
+      });
+
+      ban.alertDetail_imagePath = `${process.env.API_URL}/images/alerts/${path.basename(ban.alertDetail_imagePath)}`;
+      return ban;
     } catch (error: unknown) {
       return handleError(error);
     }

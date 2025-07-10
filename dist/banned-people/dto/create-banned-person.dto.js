@@ -18,5 +18,5 @@ __decorate([
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
-], CreateBannedPersonDto.prototype, "bannedPerson_name", void 0);
+], CreateBannedPersonDto.prototype, "bannedPersonName", void 0);
 //# sourceMappingURL=create-banned-person.dto.js.map

@@ -66,7 +66,7 @@ export class BannedPeopleService {
 
       const newBanProfile = await this.prisma.bannedPerson.create({
         data: {
-          bannedPerson_name: createBannedPersonDto.bannedPerson_name
+          bannedPerson_name: createBannedPersonDto.name
             .toLocaleLowerCase()
             .trim(),
           bannedPerson_imagePath: file.path,
@@ -80,7 +80,7 @@ export class BannedPeopleService {
 
       const createBanDetails = await Promise.all(
         venueBanIds.map(async (venueId) => {
-          await this.prisma.banDetail.create({
+          const banDetail = await this.prisma.banDetail.create({
             data: {
               banDetail_bannedPersonId: newBanProfile.bannedPerson_id,
               banDetail_reason: createBannedPersonDto.banDetails_reason
@@ -90,7 +90,13 @@ export class BannedPeopleService {
               banDetail_banEndDate: createBannedPersonDto.banDetails_banEndDate,
               banDetail_isBanPending: !isAccountAdmin,
               banDetail_banUploadedBy: requestAccount.account_id,
-              banDetail_venueBanId: venueId,
+            },
+          });
+
+          await this.prisma.banDetailVenue.create({
+            data: {
+              banDetail_id: banDetail.banDetail_id,
+              venue_id: venueId,
             },
           });
         }),
@@ -102,10 +108,19 @@ export class BannedPeopleService {
         return createBanDetails;
       }
 
+      const copyDestination = path.resolve(
+        __dirname,
+        '..',
+        '..',
+        'images',
+        'alerts',
+        file.filename,
+      );
+
       await this.prisma.alertDetail.create({
         data: {
           alertDetail_bannedPersonId: newBanProfile.bannedPerson_id,
-          alertDetail_imagePath: newBanProfile.bannedPerson_imagePath,
+          alertDetail_imagePath: copyDestination,
           alertDetail_name: newBanProfile.bannedPerson_name,
           alertDetail_alertReason: createBannedPersonDto.banDetails_reason
             .toLocaleLowerCase()
@@ -121,23 +136,6 @@ export class BannedPeopleService {
           },
         },
       });
-
-      const copyDestination = path.resolve(
-        __dirname,
-        '..',
-        '..',
-        'images',
-        'alerts',
-        file.filename,
-      );
-
-      try {
-        await fs.promises.copyFile(file.path, copyDestination);
-        console.log(`file copied to ${copyDestination}`);
-      } catch (error: unknown) {
-        console.log(`error copying file`);
-        console.log(error);
-      }
 
       const newBannedPerson = await this.prisma.bannedPerson.findFirst({
         where: {
@@ -161,399 +159,468 @@ export class BannedPeopleService {
     }
   }
 
-  async findAllBlanketBanned(
-    request: RequestWithAccount,
-  ): Promise<
-    | Prisma.BannedPersonGetPayload<{ include: { BanDetail: true } }>[]
-    | PrismaResultError
-  > {
-    try {
-      if (!request.account) {
-        return noRequestAccountError();
-      }
+  // async findAllBlanketBanned(
+  //   request: RequestWithAccount,
+  // ): Promise<
+  //   | Prisma.BannedPersonGetPayload<{ include: { BanDetail: true } }>[]
+  //   | PrismaResultError
+  // > {
+  //   try {
+  //     if (!request.account) {
+  //       return noRequestAccountError();
+  //     }
 
-      const requestAccount = await getAccountInfoFromId(
-        this.prisma,
-        request.account.sub,
-      );
+  //     const requestAccount = await getAccountInfoFromId(
+  //       this.prisma,
+  //       request.account.sub,
+  //     );
 
-      if (isPrismaResultError(requestAccount)) {
-        return requestAccount;
-      }
+  //     if (isPrismaResultError(requestAccount)) {
+  //       return requestAccount;
+  //     }
 
-      const allVenueIds = new Set(
-        (
-          await this.prisma.venue.findMany({
-            select: {
-              venue_id: true,
-            },
-          })
-        ).map((venueId) => venueId.venue_id),
-      );
-      const peopleWithActiveBans = await this.prisma.bannedPerson.findMany({
-        where: {
-          BanDetail: {
-            some: {
-              banDetail_banEndDate: { gt: dayjs().toISOString() },
-              banDetail_isBanPending: false,
-            },
-          },
-        },
-        include: {
-          BanDetail: true,
-        },
-        orderBy: {
-          bannedPerson_name: 'asc',
-        },
-      });
+  //     const allVenueIds = new Set(
+  //       (
+  //         await this.prisma.venue.findMany({
+  //           select: {
+  //             venue_id: true,
+  //           },
+  //         })
+  //       ).map((venueId) => venueId.venue_id),
+  //     );
+  //     const peopleWithActiveBans = await this.prisma.bannedPerson.findMany({
+  //       where: {
+  //         BanDetail: {
+  //           some: {
+  //             banDetail_banEndDate: { gt: dayjs().toISOString() },
+  //             banDetail_isBanPending: false,
+  //           },
+  //         },
+  //       },
+  //       include: {
+  //         BanDetail: true,
+  //       },
+  //       orderBy: {
+  //         bannedPerson_name: 'asc',
+  //       },
+  //     });
 
-      const filteredBannedPeople = peopleWithActiveBans.filter(
-        (bannedPerson: BannedPerson & { BanDetail: BanDetail[] }) => {
-          let bannedFromVenueIds = new Set<number>();
+  //     const filteredBannedPeople = peopleWithActiveBans.filter(
+  //       (bannedPerson: BannedPerson & { BanDetail: BanDetail[] }) => {
+  //         let bannedFromVenueIds = new Set<number>();
 
-          bannedPerson.BanDetail.some((banDetail: BanDetail) => {
-            bannedFromVenueIds.add(banDetail.banDetail_venueBanId);
-          });
+  //         bannedPerson.BanDetail.some((banDetail: BanDetail) => {
+  //           bannedFromVenueIds.add(banDetail.banDetail_venueBanId);
+  //         });
 
-          if (bannedFromVenueIds.size === allVenueIds.size) {
-            return bannedPerson;
-          }
-        },
-      );
+  //         if (bannedFromVenueIds.size === allVenueIds.size) {
+  //           return bannedPerson;
+  //         }
+  //       },
+  //     );
 
-      return filteredBannedPeople.map(
-        (bannedPerson: BannedPerson & { BanDetail: BanDetail[] }) => {
-          bannedPerson.bannedPerson_imagePath = `${process.env.API_URL}/images/people/${path.basename(bannedPerson.bannedPerson_imagePath)}`;
-          return bannedPerson;
-        },
-      );
-    } catch (error: unknown) {
-      return handleError(error);
-    }
-  }
+  //     return filteredBannedPeople.map(
+  //       (bannedPerson: BannedPerson & { BanDetail: BanDetail[] }) => {
+  //         bannedPerson.bannedPerson_imagePath = `${process.env.API_URL}/images/people/${path.basename(bannedPerson.bannedPerson_imagePath)}`;
+  //         return bannedPerson;
+  //       },
+  //     );
+  //   } catch (error: unknown) {
+  //     return handleError(error);
+  //   }
+  // }
 
-  async findAllByVenueId(
-    request: RequestWithAccount,
-    venueId: number,
-  ): Promise<
-    | Prisma.BannedPersonGetPayload<{ include: { BanDetail: true } }>[]
-    | PrismaResultError
-  > {
-    try {
-      if (!request.account) {
-        return noRequestAccountError();
-      }
+  // async findAllByVenueId(
+  //   request: RequestWithAccount,
+  //   venueId: number,
+  // ): Promise<
+  //   | Prisma.BannedPersonGetPayload<{ include: { BanDetail: true } }>[]
+  //   | PrismaResultError
+  // > {
+  //   try {
+  //     if (!request.account) {
+  //       return noRequestAccountError();
+  //     }
 
-      const requestAccount = await getAccountInfoFromId(
-        this.prisma,
-        request.account.sub,
-      );
+  //     const requestAccount = await getAccountInfoFromId(
+  //       this.prisma,
+  //       request.account.sub,
+  //     );
 
-      if (isPrismaResultError(requestAccount)) {
-        return requestAccount;
-      }
+  //     if (isPrismaResultError(requestAccount)) {
+  //       return requestAccount;
+  //     }
 
-      return await this.prisma.bannedPerson.findMany({
-        where: {
-          BanDetail: {
-            some: {
-              banDetail_venueBanId: venueId,
-              banDetail_banEndDate: { gt: dayjs().toISOString() },
-              banDetail_isBanPending: false,
-            },
-          },
-        },
-        include: {
-          BanDetail: true,
-        },
-      });
-    } catch (error: unknown) {
-      return handleError(error);
-    }
-  }
+  //     const result = await this.prisma.bannedPerson.findMany({
+  //       where: {
+  //         BanDetail: {
+  //           some: {
+  //             banDetail_venueBanId: venueId,
+  //             // banDetail_banEndDate: { gt: dayjs().toISOString() },
+  //             banDetail_isBanPending: false,
+  //           },
+  //         },
+  //       },
+  //       include: {
+  //         BanDetail: true,
+  //       },
+  //     });
 
-  async findAllExpired(
-    request: RequestWithAccount,
-  ): Promise<
-    | Prisma.BannedPersonGetPayload<{ include: { BanDetail: true } }>[]
-    | PrismaResultError
-  > {
-    try {
-      if (!request.account) {
-        return noRequestAccountError();
-      }
+  //     return result.map((bannedPerson) => {
+  //       bannedPerson.bannedPerson_imagePath = `${process.env.API_URL}/images/people/${path.basename(bannedPerson.bannedPerson_imagePath)}`;
+  //       return bannedPerson;
+  //     });
+  //   } catch (error: unknown) {
+  //     return handleError(error);
+  //   }
+  // }
 
-      const requestAccount = await getAccountInfoFromId(
-        this.prisma,
-        request.account.sub,
-      );
+  // async findOneById(request: RequestWithAccount, bannedPersonId: number) {
+  //   try {
+  //     if (!request.account) {
+  //       return noRequestAccountError();
+  //     }
 
-      if (isPrismaResultError(requestAccount)) {
-        return requestAccount;
-      }
+  //     const requestAccount = await getAccountInfoFromId(
+  //       this.prisma,
+  //       request.account.sub,
+  //     );
 
-      return await this.prisma.bannedPerson.findMany({
-        where: {
-          BanDetail: {
-            every: {
-              banDetail_banEndDate: { lt: dayjs().toISOString() },
-            },
-          },
-        },
-        include: {
-          BanDetail: true,
-        },
-      });
-    } catch (error: unknown) {
-      return handleError(error);
-    }
-  }
+  //     if (isPrismaResultError(requestAccount)) {
+  //       return requestAccount;
+  //     }
 
-  async findAllWithActiveAlert(request: RequestWithAccount): Promise<
-    | Prisma.BannedPersonGetPayload<{
-        include: { AlertDetail: true; BanDetail: true };
-      }>[]
-    | PrismaResultError
-  > {
-    try {
-      if (!request.account) {
-        return noRequestAccountError();
-      }
+  //     // need to check if account exists and handle error if not
+  //     const result = await this.prisma.bannedPerson.findFirstOrThrow({
+  //       where: {
+  //         bannedPerson_id: bannedPersonId,
+  //       },
+  //       include: {
+  //         BanDetail: {
+  //           include: {
+  //             Account: {
+  //               select: {
+  //                 account_name: true,
+  //               },
+  //             },
+  //             Venue: {
+  //               select: {
+  //                 venue_name: true,
+  //               },
+  //             },
+  //           },
+  //         },
+  //       },
+  //     });
 
-      const requestAccount = await getAccountInfoFromId(
-        this.prisma,
-        request.account.sub,
-      );
+  //     result.bannedPerson_imagePath = `${process.env.API_URL}/images/people/${path.basename(result.bannedPerson_imagePath)}`;
+  //     return result;
+  //   } catch (error: unknown) {
+  //     return handleError(error);
+  //   }
+  // }
 
-      if (isPrismaResultError(requestAccount)) {
-        return requestAccount;
-      }
+  // async findAllExpired(
+  //   request: RequestWithAccount,
+  // ): Promise<
+  //   | Prisma.BannedPersonGetPayload<{ include: { BanDetail: true } }>[]
+  //   | PrismaResultError
+  // > {
+  //   try {
+  //     if (!request.account) {
+  //       return noRequestAccountError();
+  //     }
 
-      const peopleWithActiveBans = await this.prisma.bannedPerson.findMany({
-        where: {
-          AlertDetail: {
-            some: {},
-          },
-        },
-        include: {
-          AlertDetail: {
-            include: {
-              Account: {
-                select: {
-                  account_name: true,
-                },
-              },
-            },
-          },
+  //     const requestAccount = await getAccountInfoFromId(
+  //       this.prisma,
+  //       request.account.sub,
+  //     );
 
-          BanDetail: {
-            include: {
-              Account: {
-                select: {
-                  account_name: true,
-                },
-              },
-            },
-          },
-        },
-      });
+  //     if (isPrismaResultError(requestAccount)) {
+  //       return requestAccount;
+  //     }
 
-      return peopleWithActiveBans.map((person) => {
-        person.bannedPerson_imagePath = `${process.env.API_URL}/images/people/${path.basename(person.bannedPerson_imagePath)}`;
-        person.AlertDetail.map((alert) => {
-          alert.alertDetail_imagePath = `${process.env.API_URL}/images/alerts/${path.basename(person.bannedPerson_imagePath)}`;
-        });
-        return person;
-      });
-    } catch (error: unknown) {
-      return handleError(error);
-    }
-  }
+  //     return await this.prisma.bannedPerson.findMany({
+  //       where: {
+  //         BanDetail: {
+  //           every: {
+  //             banDetail_banEndDate: { lt: dayjs().toISOString() },
+  //           },
+  //         },
+  //       },
+  //       include: {
+  //         BanDetail: true,
+  //       },
+  //     });
+  //   } catch (error: unknown) {
+  //     return handleError(error);
+  //   }
+  // }
 
-  async findAllWithPendingBans(request: RequestWithAccount): Promise<
-    | Prisma.BannedPersonGetPayload<{
-        include: {
-          BanDetail: { include: { Account: { select: { account_name } } } };
-        };
-      }>[]
-    | PrismaResultError
-  > {
-    try {
-      if (!request.account) {
-        return noRequestAccountError();
-      }
+  // async findAllWithActiveAlert(request: RequestWithAccount): Promise<
+  //   | Prisma.BannedPersonGetPayload<{
+  //       include: { AlertDetail: true; BanDetail: true };
+  //     }>[]
+  //   | PrismaResultError
+  // > {
+  //   try {
+  //     if (!request.account) {
+  //       return noRequestAccountError();
+  //     }
 
-      const requestAccount = await getAccountInfoFromId(
-        this.prisma,
-        request.account.sub,
-      );
+  //     const requestAccount = await getAccountInfoFromId(
+  //       this.prisma,
+  //       request.account.sub,
+  //     );
 
-      if (isPrismaResultError(requestAccount)) {
-        return requestAccount;
-      }
+  //     if (isPrismaResultError(requestAccount)) {
+  //       return requestAccount;
+  //     }
 
-      return await this.prisma.bannedPerson.findMany({
-        where: {
-          BanDetail: {
-            some: {
-              banDetail_isBanPending: true,
-            },
-          },
-        },
-        include: {
-          BanDetail: {
-            where: {
-              banDetail_isBanPending: true,
-            },
-            include: {
-              Account: {
-                select: {
-                  account_name: true,
-                },
-              },
-            },
-          },
-        },
-        orderBy: {
-          bannedPerson_name: 'asc',
-        },
-      });
-    } catch (error: unknown) {
-      return handleError(error);
-    }
-  }
+  //     const peopleWithActiveBans = await this.prisma.bannedPerson.findMany({
+  //       where: {
+  //         AlertDetail: {
+  //           some: {},
+  //         },
+  //       },
+  //       include: {
+  //         AlertDetail: {
+  //           include: {
+  //             Account: {
+  //               select: {
+  //                 account_name: true,
+  //               },
+  //             },
+  //           },
+  //         },
 
-  async findAllWithoutPendingBans(
-    request: RequestWithAccount,
-  ): Promise<any | PrismaResultError> {
-    try {
-      if (!request.account) {
-        return noRequestAccountError();
-      }
+  //         BanDetail: {
+  //           include: {
+  //             Account: {
+  //               select: {
+  //                 account_name: true,
+  //               },
+  //             },
+  //           },
+  //         },
+  //       },
+  //     });
 
-      const requestAccount = await getAccountInfoFromId(
-        this.prisma,
-        request.account.sub,
-      );
+  //     return peopleWithActiveBans.map((person) => {
+  //       person.bannedPerson_imagePath = `${process.env.API_URL}/images/people/${path.basename(person.bannedPerson_imagePath)}`;
+  //       person.AlertDetail.map((alert) => {
+  //         alert.alertDetail_imagePath = `${process.env.API_URL}/images/alerts/${path.basename(person.bannedPerson_imagePath)}`;
+  //       });
+  //       return person;
+  //     });
+  //   } catch (error: unknown) {
+  //     return handleError(error);
+  //   }
+  // }
 
-      if (isPrismaResultError(requestAccount)) {
-        return requestAccount;
-      }
+  // async findAllWithPendingBans(request: RequestWithAccount): Promise<
+  //   | Prisma.BannedPersonGetPayload<{
+  //       include: {
+  //         BanDetail: { include: { Account: { select: { account_name } } } };
+  //       };
+  //     }>[]
+  //   | PrismaResultError
+  // > {
+  //   try {
+  //     if (!request.account) {
+  //       return noRequestAccountError();
+  //     }
 
-      const activeBannedPeople = await this.prisma.bannedPerson.findMany({
-        where: {
-          BanDetail: {
-            every: {
-              banDetail_isBanPending: false,
-            },
-          },
-        },
-        orderBy: {
-          bannedPerson_name: 'asc',
-        },
-      });
+  //     const requestAccount = await getAccountInfoFromId(
+  //       this.prisma,
+  //       request.account.sub,
+  //     );
 
-      return activeBannedPeople.map((bannedPerson) => {
-        bannedPerson.bannedPerson_imagePath = `${process.env.API_URL}/images/people/${path.basename(bannedPerson.bannedPerson_imagePath)}`;
-        return bannedPerson;
-      });
-    } catch (error: unknown) {
-      return handleError(error);
-    }
-  }
+  //     if (isPrismaResultError(requestAccount)) {
+  //       return requestAccount;
+  //     }
 
-  async findAll(request: RequestWithAccount) {
-    try {
-      if (!request.account) {
-        return noRequestAccountError();
-      }
+  //     const allBannedPeopleWithPendingBans =
+  //       await this.prisma.bannedPerson.findMany({
+  //         where: {
+  //           BanDetail: {
+  //             some: {
+  //               banDetail_isBanPending: true,
+  //             },
+  //           },
+  //         },
+  //         include: {
+  //           BanDetail: {
+  //             where: {
+  //               banDetail_isBanPending: true,
+  //             },
+  //             include: {
+  //               Account: {
+  //                 select: {
+  //                   account_name: true,
+  //                 },
+  //               },
+  //             },
+  //           },
+  //         },
+  //         orderBy: {
+  //           bannedPerson_name: 'asc',
+  //         },
+  //       });
 
-      const requestAccount = await getAccountInfoFromId(
-        this.prisma,
-        request.account.sub,
-      );
+  //     allBannedPeopleWithPendingBans.map((bannedPerson) => {
+  //       bannedPerson.bannedPerson_imagePath = `${process.env.API_URL}/images/people/${path.basename(bannedPerson.bannedPerson_imagePath)}`;
+  //     });
 
-      if (isPrismaResultError(requestAccount)) {
-        return requestAccount;
-      }
+  //     return allBannedPeopleWithPendingBans;
+  //   } catch (error: unknown) {
+  //     return handleError(error);
+  //   }
+  // }
 
-      const activeBannedPeople = await this.prisma.bannedPerson.findMany({
-        orderBy: {
-          bannedPerson_name: 'asc',
-        },
-      });
+  // async findAllWithoutPendingBans(
+  //   request: RequestWithAccount,
+  // ): Promise<any | PrismaResultError> {
+  //   try {
+  //     if (!request.account) {
+  //       return noRequestAccountError();
+  //     }
 
-      return activeBannedPeople.map((bannedPerson) => {
-        bannedPerson.bannedPerson_imagePath = `${process.env.API_URL}/images/people/${path.basename(bannedPerson.bannedPerson_imagePath)}`;
-        return bannedPerson;
-      });
-    } catch (error: unknown) {
-      return handleError(error);
-    }
-  }
+  //     const requestAccount = await getAccountInfoFromId(
+  //       this.prisma,
+  //       request.account.sub,
+  //     );
 
-  async updateOneBannedPerson(
-    request: RequestWithAccount,
-    file: Express.Multer.File,
-    bannedPersonId: number,
-    updateBannedPersonDto: UpdateBannedPersonDto,
-  ) {
-    try {
-      if (!request.account) {
-        return noRequestAccountError();
-      }
+  //     if (isPrismaResultError(requestAccount)) {
+  //       return requestAccount;
+  //     }
 
-      const requestAccount = await getAccountInfoFromId(
-        this.prisma,
-        request.account.sub,
-      );
+  //     const activeBannedPeople = await this.prisma.bannedPerson.findMany({
+  //       where: {
+  //         BanDetail: {
+  //           every: {
+  //             banDetail_isBanPending: false,
+  //           },
+  //         },
+  //       },
+  //       orderBy: {
+  //         bannedPerson_name: 'asc',
+  //       },
+  //     });
 
-      if (isPrismaResultError(requestAccount)) {
-        return requestAccount;
-      }
+  //     return activeBannedPeople.map((bannedPerson) => {
+  //       bannedPerson.bannedPerson_imagePath = `${process.env.API_URL}/images/people/${path.basename(bannedPerson.bannedPerson_imagePath)}`;
+  //       return bannedPerson;
+  //     });
+  //   } catch (error: unknown) {
+  //     return handleError(error);
+  //   }
+  // }
 
-      if (
-        !(await isAccountAdminRole(this.prisma, requestAccount)) &&
-        !(await isAccountSecurityRole(this.prisma, requestAccount))
-      ) {
-        return accountIsUnauthorized();
-      }
+  // async findAll(request: RequestWithAccount) {
+  //   try {
+  //     if (!request.account) {
+  //       return noRequestAccountError();
+  //     }
 
-      const bannedPersonToUpdate = await this.prisma.bannedPerson.findFirst({
-        where: {
-          bannedPerson_id: bannedPersonId,
-        },
-      });
+  //     const requestAccount = await getAccountInfoFromId(
+  //       this.prisma,
+  //       request.account.sub,
+  //     );
 
-      if (isPrismaResultError(bannedPersonToUpdate)) {
-        return bannedPersonToUpdate;
-      }
+  //     if (isPrismaResultError(requestAccount)) {
+  //       return requestAccount;
+  //     }
 
-      const updatedBannedPerson = await this.prisma.bannedPerson.update({
-        where: {
-          bannedPerson_id: bannedPersonId,
-        },
-        data: {
-          bannedPerson_name: updateBannedPersonDto.bannedPerson_name,
-          bannedPerson_imagePath: file
-            ? file.path
-            : updateBannedPersonDto.bannedPerson_imagePath,
-        },
-      });
+  //     const activeBannedPeople = await this.prisma.bannedPerson.findMany({
+  //       orderBy: {
+  //         bannedPerson_name: 'asc',
+  //       },
+  //     });
 
-      updatedBannedPerson.bannedPerson_imagePath = `${process.env.API_URL}/images/people/${path.basename(updatedBannedPerson.bannedPerson_imagePath)}`;
+  //     return activeBannedPeople.map((bannedPerson) => {
+  //       bannedPerson.bannedPerson_imagePath = `${process.env.API_URL}/images/people/${path.basename(bannedPerson.bannedPerson_imagePath)}`;
+  //       return bannedPerson;
+  //     });
+  //   } catch (error: unknown) {
+  //     return handleError(error);
+  //   }
+  // }
 
-      if (file) {
-        try {
-          await fs.promises.unlink(bannedPersonToUpdate.bannedPerson_imagePath);
-        } catch (error) {
-          console.log(`error removing file at: ${file.path}`);
-        }
-      } else {
-      }
-      return updatedBannedPerson;
-    } catch (error: unknown) {
-      return handleError(error);
-    }
-  }
+  // async updateOneBannedPerson(
+  //   request: RequestWithAccount,
+  //   file: Express.Multer.File,
+  //   bannedPersonId: number,
+  //   updateBannedPersonDto: UpdateBannedPersonDto,
+  // ) {
+  //   try {
+  //     if (!request.account) {
+  //       return noRequestAccountError();
+  //     }
+
+  //     const requestAccount = await getAccountInfoFromId(
+  //       this.prisma,
+  //       request.account.sub,
+  //     );
+
+  //     if (isPrismaResultError(requestAccount)) {
+  //       return requestAccount;
+  //     }
+
+  //     if (
+  //       !(await isAccountAdminRole(this.prisma, requestAccount)) &&
+  //       !(await isAccountSecurityRole(this.prisma, requestAccount))
+  //     ) {
+  //       return accountIsUnauthorized();
+  //     }
+
+  //     const bannedPersonToUpdate = await this.prisma.bannedPerson.findFirst({
+  //       where: {
+  //         bannedPerson_id: bannedPersonId,
+  //       },
+  //     });
+
+  //     if (isPrismaResultError(bannedPersonToUpdate)) {
+  //       return bannedPersonToUpdate;
+  //     }
+
+  //     const copyDestination = path.resolve(
+  //       __dirname,
+  //       '..',
+  //       '..',
+  //       'images',
+  //       'alerts',
+  //       file.filename,
+  //     );
+
+  //     if (bannedPersonToUpdate.bannedPerson_imagePath) {
+  //       try {
+  //         await fs.promises.copyFile(file.path, copyDestination);
+  //         await fs.promises.unlink(bannedPersonToUpdate.bannedPerson_imagePath);
+
+  //         console.log('new file copied, and old file removed');
+  //       } catch (error: unknown) {
+  //         console.log(`error copying or deleting file`);
+  //         console.log(error);
+  //       }
+  //     }
+
+  //     const updatedBannedPerson = await this.prisma.bannedPerson.update({
+  //       where: {
+  //         bannedPerson_id: bannedPersonId,
+  //       },
+  //       data: {
+  //         bannedPerson_name: updateBannedPersonDto.bannedPerson_name,
+  //         bannedPerson_imagePath: file
+  //           ? copyDestination
+  //           : updateBannedPersonDto.bannedPerson_imagePath,
+  //       },
+  //     });
+
+  //     updatedBannedPerson.bannedPerson_imagePath = `${process.env.API_URL}/images/people/${path.basename(updatedBannedPerson.bannedPerson_imagePath)}`;
+  //     return updatedBannedPerson;
+  //   } catch (error: unknown) {
+  //     return handleError(error);
+  //   }
+  // }
 }

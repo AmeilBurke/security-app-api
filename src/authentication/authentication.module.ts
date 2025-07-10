@@ -6,7 +6,6 @@ import { APP_GUARD } from '@nestjs/core';
 import { AuthenticationGuard } from './authentication.guard';
 import { AccountsService } from 'src/accounts/accounts.service';
 import { PrismaService } from 'src/prisma.service';
-import { BannedPeopleService } from 'src/banned-people/banned-people.service';
 
 @Module({
   controllers: [AuthenticationController],
@@ -23,7 +22,7 @@ import { BannedPeopleService } from 'src/banned-people/banned-people.service';
     JwtModule.register({
       global: true,
       secret: process.env.JWT_SECRET,
-      signOptions: { expiresIn: '7 days' },
+      signOptions: { expiresIn: '5s' },
     }),
   ],
 })

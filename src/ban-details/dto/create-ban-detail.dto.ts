@@ -2,14 +2,14 @@ import { IsNumber, IsString } from 'class-validator';
 
 export class CreateBanDetailDto {
   @IsNumber()
-  banDetails_bannedPersonId: number;
+  bannedPersonId: number;
 
   @IsString()
-  banDetails_reason: string;
+  banReason: string;
 
   @IsString()
-  banDetails_banEndDate: string;
+  banEndDate: string;
 
   @IsNumber({}, { each: true })
-  banDetails_venueBanIds: number[];
+  venuesToBeBannedFrom: number[];
 }

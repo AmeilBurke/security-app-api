@@ -15,3 +15,4 @@ export declare const isAccountSecurityRole: (prisma: PrismaService, account: Acc
 export declare const isAccountVenueManagerRole: (prisma: PrismaService, account: Account) => Promise<boolean>;
 export declare const addJwtCookieToRequest: (response: Response, jwtService: JwtService, accountId: number, accountEmail: string) => Promise<void>;
 export declare const capitalizeString: (text: string) => string;
+export declare const compressImage: (imageToCompress: Express.Multer.File, directoryToSaveImage: string) => Promise<string>;

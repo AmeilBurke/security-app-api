@@ -16,6 +16,19 @@ export declare class AlertDetailsService {
             };
         };
     }>[] | PrismaResultError>;
+    findIndividualActiveBan(request: RequestWithAccount, alertDetailId: number): Promise<PrismaResultError | ({
+        Account: {
+            account_name: string;
+        };
+    } & {
+        alertDetail_id: number;
+        alertDetail_bannedPersonId: number | null;
+        alertDetail_name: string;
+        alertDetail_imagePath: string;
+        alertDetail_alertReason: string;
+        alertDetail_startTime: string;
+        alertDetail_alertUploadedBy: number;
+    })>;
     update(request: RequestWithAccount, updateAlertDetailDto: UpdateAlertDetailDto, alertDetailId: number, file: Express.Multer.File): Promise<PrismaResultError | {
         alertDetail_id: number;
         alertDetail_bannedPersonId: number | null;

@@ -29,7 +29,7 @@ export class AlertDetailsController {
         files: 1,
       },
       storage: diskStorage({
-        destination: path.join(__dirname, '..', '..', 'images', 'alerts'),
+        destination: path.join(__dirname, '..', '..', 'images', 'uncompressed'),
         filename: (req, file, cb) => {
           const fileType = file.mimetype.split('/')[1];
           cb(null, `${uuidv4()}.${fileType}`);
@@ -52,6 +52,17 @@ export class AlertDetailsController {
   @Get()
   async findAll(@Req() request: RequestWithAccount) {
     return await this.alertDetailService.findAll(request);
+  }
+
+  @Get(':alertDetailId')
+  async findOne(
+    @Req() request: RequestWithAccount,
+    @Param('alertDetailId') alertDetailId: string,
+  ) {
+    return await this.alertDetailService.findIndividualActiveBan(
+      request,
+      Number(alertDetailId),
+    );
   }
 
   @Patch(':alertDetailId')

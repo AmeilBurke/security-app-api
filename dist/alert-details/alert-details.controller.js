@@ -34,6 +34,9 @@ let AlertDetailsController = class AlertDetailsController {
     async findAll(request) {
         return await this.alertDetailService.findAll(request);
     }
+    async findOne(request, alertDetailId) {
+        return await this.alertDetailService.findIndividualActiveBan(request, Number(alertDetailId));
+    }
     async update(request, updateAlertDetailDto, alertDetailId, file) {
         return await this.alertDetailService.update(request, updateAlertDetailDto, Number(alertDetailId), file);
     }
@@ -52,7 +55,7 @@ __decorate([
             files: 1,
         },
         storage: (0, multer_1.diskStorage)({
-            destination: path_1.default.join(__dirname, '..', '..', 'images', 'alerts'),
+            destination: path_1.default.join(__dirname, '..', '..', 'images', 'uncompressed'),
             filename: (req, file, cb) => {
                 const fileType = file.mimetype.split('/')[1];
                 cb(null, `${(0, uuid_1.v4)()}.${fileType}`);
@@ -73,6 +76,14 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AlertDetailsController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)(':alertDetailId'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)('alertDetailId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], AlertDetailsController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Patch)(':alertDetailId'),
     (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file', {

@@ -55,16 +55,14 @@ export class BanDetailsService {
       //   },
       // );
 
-      const banDetailData = createBanDetailDto.banDetails_venueBanIds.map(
+      // need to be done
+      const banDetailData = createBanDetailDto.venuesToBeBannedFrom.map(
         (venueId: number) => {
           return {
-            banDetail_bannedPersonId:
-              createBanDetailDto.banDetails_bannedPersonId,
-            banDetail_reason: createBanDetailDto.banDetails_reason
-              .toLocaleLowerCase()
-              .trim(),
+            banDetail_bannedPersonId: createBanDetailDto.bannedPersonId,
+            banDetail_reason: createBanDetailDto.banReason.toLocaleLowerCase().trim(),
             banDetail_banStartDate: currentDateTimeIso,
-            banDetail_banEndDate: createBanDetailDto.banDetails_banEndDate,
+            banDetail_banEndDate: createBanDetailDto.banEndDate,
             banDetail_venueBanId: venueId,
             banDetail_isBanPending: isBanPending,
             banDetail_banUploadedBy: requestAccount.account_id,
@@ -133,7 +131,7 @@ export class BanDetailsService {
 
       return await this.prisma.banDetail.update({
         where: {
-          banDetails_id: id,
+          banDetail_id: id,
         },
         data: {
           banDetail_reason: updateBanDetailDto.banDetails_reason
@@ -175,7 +173,7 @@ export class BanDetailsService {
       if (await isAccountAdminRole(this.prisma, requestAccount)) {
         return await this.prisma.banDetail.delete({
           where: {
-            banDetails_id: id,
+            banDetail_id: id,
           },
         });
       } else {

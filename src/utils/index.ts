@@ -8,6 +8,9 @@ import { PrismaResultError } from 'src/types';
 import { Response } from 'express';
 import { AuthenticationService } from 'src/authentication/authentication.service';
 import { JwtService } from '@nestjs/jwt';
+import * as fs from 'fs';
+import * as path from 'path';
+import sharp from 'sharp';
 
 export const handleError = (error: unknown): PrismaResultError => {
   if (error instanceof PrismaClientKnownRequestError) {
@@ -162,10 +165,32 @@ export const addJwtCookieToRequest = async (
     httpOnly: true,
     secure: true,
     sameSite: 'none',
-    path: '/'
+    path: '/',
   });
 };
 
 export const capitalizeString = (text: string) => {
-  return text.split(' ').map((word) => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+  return text
+    .split(' ')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+};
+
+export const compressImage = async (
+  imageToCompress: Express.Multer.File,
+  directoryToSaveImage: string,
+): Promise<string> => {
+  const compressedImageBuffer = await sharp(imageToCompress.path)
+    .toFormat('webp', { quality: 75, effort: 0 })
+    .resize(800)
+    .toBuffer();
+
+  const fileNameAndExtension = imageToCompress.filename.split('.');
+
+  const filePath = path.join(
+    directoryToSaveImage,
+    `${fileNameAndExtension[0]}.webp`,
+  );
+  fs.promises.writeFile(filePath, compressedImageBuffer);
+  return filePath;
 };
